@@ -1,0 +1,143 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
+import { getFeatureAccess, type PlanType } from '@/lib/utils/feature-access'
+import {
+  LayoutDashboard,
+  QrCode,
+  Menu,
+  BarChart3,
+  Users,
+  UserCircle,
+  Printer,
+  Sparkles,
+  Settings,
+  Palette,
+  LogOut,
+} from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { signOut } from 'next-auth/react'
+
+interface DashboardNavProps {
+  user: {
+    name?: string | null
+    email?: string | null
+    image?: string | null
+    organization?: {
+      plan?: string
+      isWhiteLabel?: boolean
+    }
+  }
+}
+
+const navigation = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'QR Codes', href: '/dashboard/qr-codes', icon: QrCode },
+  { name: 'Landing Pages', href: '/dashboard/landing-pages', icon: Sparkles },
+  { name: 'Menus', href: '/dashboard/menus', icon: Menu },
+  { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+  { name: 'Clients', href: '/dashboard/clients', icon: Users },
+  { name: 'CRM', href: '/dashboard/crm', icon: UserCircle },
+  { name: 'Print Orders', href: '/dashboard/print', icon: Printer },
+  { name: 'AI Tools', href: '/dashboard/ai', icon: Sparkles },
+  { name: 'White-Label', href: '/dashboard/white-label', icon: Palette, requiresWhiteLabel: true },
+  { name: 'Billing', href: '/dashboard/billing', icon: Settings },
+]
+
+export function DashboardNav({ user }: DashboardNavProps) {
+  const pathname = usePathname()
+  
+  // Get feature access based on organization plan
+  const plan = (user.organization?.plan as PlanType) || 'FREE'
+  const features = getFeatureAccess(plan)
+  
+  // Filter navigation based on feature access
+  const visibleNavigation = navigation.filter((item) => {
+    if ('requiresWhiteLabel' in item && item.requiresWhiteLabel) {
+      return features.canAccessWhiteLabel
+    }
+    return true
+  })
+
+  const getInitials = (name?: string | null) => {
+    if (!name) return 'U'
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
+
+  return (
+    <nav
+      className="flex h-full w-64 flex-col border-r bg-muted/40"
+      aria-label="Main navigation"
+    >
+      <div className="flex h-16 items-center border-b px-6">
+        <Link
+          href="/dashboard"
+          className="flex items-center space-x-2 font-bold text-xl focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded"
+        >
+          <QrCode className="h-6 w-6" aria-hidden="true" />
+          <span>Qreate Studios</span>
+        </Link>
+      </div>
+
+      <div className="flex-1 overflow-y-auto py-4">
+        <ul className="space-y-1 px-3" role="list">
+          {visibleNavigation.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+            const Icon = item.icon
+            
+            return (
+              <li key={item.name}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    'flex items-center space-x-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                    'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+                    'min-h-[44px]', // Minimum touch target size
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  )}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                  <span>{item.name}</span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+
+      <div className="border-t p-4">
+        <div className="flex items-center space-x-3 mb-3">
+          <Avatar>
+            <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
+            <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{user.name || 'User'}</p>
+            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+          </div>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full justify-start min-h-[44px]"
+          onClick={() => signOut({ callbackUrl: '/' })}
+          aria-label="Sign out"
+        >
+          <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+          Sign Out
+        </Button>
+      </div>
+    </nav>
+  )
+}

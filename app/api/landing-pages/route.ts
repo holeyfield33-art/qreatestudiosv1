@@ -1,0 +1,73 @@
+import { NextResponse } from 'next/server';
+import { auth } from '@/auth';
+import { prisma } from '@/lib/prisma';
+
+export async function POST(req: Request) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const body = await req.json();
+  const { title, slug, content, theme, qrCodeId, clientId } = body;
+
+  if (!title || !slug) {
+    return NextResponse.json(
+      { error: 'Title and slug required' },
+      { status: 400 }
+    );
+  }
+
+  try {
+    // Check slug uniqueness
+    const existing = await prisma.landingPage.findUnique({ where: { slug } });
+    if (existing) {
+      return NextResponse.json({ error: 'Slug already in use' }, { status: 400 });
+    }
+
+    const landingPage = await prisma.landingPage.create({
+      data: {
+        userId: session.user.id,
+        qrCodeId: qrCodeId || null,
+        title,
+        slug,
+        content: content || {},
+        theme: theme || {},
+        published: false,
+      },
+    });
+
+    return NextResponse.json({ success: true, landingPage });
+  } catch (error) {
+    console.error('Landing page creation error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to create landing page' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: Request) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const landingPages = await prisma.landingPage.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        qrCode: { select: { name: true, shortCode: true } },
+      },
+    });
+
+    return NextResponse.json({ success: true, landingPages });
+  } catch (error) {
+    console.error('Landing pages fetch error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch landing pages' },
+      { status: 500 }
+    );
+  }
+}
