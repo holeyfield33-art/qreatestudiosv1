@@ -32,7 +32,9 @@ export async function GET(req: Request) {
       plan,
     });
   } catch (error) {
-    console.error('Usage fetch error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Usage fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch usage' },
       { status: 500 }

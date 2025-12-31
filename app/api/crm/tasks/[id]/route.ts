@@ -27,7 +27,9 @@ export async function GET(
 
     return NextResponse.json({ task });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Task fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch task' },
       { status: 500 }
@@ -67,7 +69,9 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, task: updated });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Task update error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to update task' },
       { status: 500 }
@@ -97,7 +101,9 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Task delete error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to delete task' },
       { status: 500 }

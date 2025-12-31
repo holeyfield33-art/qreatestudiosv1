@@ -38,7 +38,9 @@ export async function POST(req: Request) {
       targetLanguage: target,
     });
   } catch (error) {
-    console.error('Translation error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Translation error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to translate content' },
       { status: 500 }

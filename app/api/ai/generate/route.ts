@@ -228,7 +228,9 @@ Write in markdown format with clear sections.`;
       },
     });
   } catch (error: any) {
-    console.error('AI generation error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('AI generation error:', error);
+    }
     return NextResponse.json(
       { error: error.message || 'Failed to generate content' },
       { status: 500 }

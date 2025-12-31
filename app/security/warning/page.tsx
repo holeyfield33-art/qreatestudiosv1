@@ -30,7 +30,7 @@ export default function SecurityWarningPage() {
       const result = await scanUrl(url);
       setScanResult(result);
     } catch (error) {
-      console.error('URL scan error:', error);
+      if (process.env.NODE_ENV === 'development') console.error('URL scan error:', error);
     } finally {
       setLoading(false);
     }

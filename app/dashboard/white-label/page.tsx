@@ -70,7 +70,9 @@ export default function WhiteLabelPage() {
         setBranding(data.branding);
       }
     } catch (error) {
-      console.error('Error fetching branding:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Error fetching branding:', error);
+      }
     }
   };
 
@@ -83,7 +85,9 @@ export default function WhiteLabelPage() {
         setDnsRecords(data.dnsRecords || []);
       }
     } catch (error) {
-      console.error('Error fetching domain:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Error fetching domain:', error);
+      }
     }
   };
 
@@ -95,7 +99,9 @@ export default function WhiteLabelPage() {
         setSubAccounts(data.subAccounts);
       }
     } catch (error) {
-      console.error('Error fetching sub-accounts:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Error fetching sub-accounts:', error);
+      }
     }
   };
 
@@ -107,7 +113,9 @@ export default function WhiteLabelPage() {
         setStats(data.stats);
       }
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Error fetching stats:', error);
+      }
     }
   };
 

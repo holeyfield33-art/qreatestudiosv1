@@ -112,7 +112,9 @@ export default function CreatePaymentQRPage() {
         toast.error(result.error || 'Failed to create payment QR');
       }
     } catch (error) {
-      console.error('Payment QR creation error:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Payment QR creation error:', error);
+      }
       toast.error('An error occurred');
     } finally {
       setLoading(false);

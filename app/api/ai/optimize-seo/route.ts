@@ -22,7 +22,9 @@ export async function POST(req: Request) {
       ...seoData,
     });
   } catch (error) {
-    console.error('SEO optimization error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('SEO optimization error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to generate SEO optimizations' },
       { status: 500 }

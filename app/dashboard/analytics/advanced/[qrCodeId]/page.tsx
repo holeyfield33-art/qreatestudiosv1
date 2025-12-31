@@ -65,7 +65,9 @@ export default function AdvancedAnalyticsPage() {
       setAnalytics(data.analytics);
       setQrCodeName(data.qrCode?.name || 'QR Code');
     } catch (error) {
-      console.error('Failed to fetch analytics:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Failed to fetch analytics:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -91,7 +93,9 @@ export default function AdvancedAnalyticsPage() {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
-      console.error('Export failed:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Export failed:', error);
+      }
       alert('Failed to export data. Please try again.');
     }
   }

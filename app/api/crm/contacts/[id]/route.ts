@@ -28,7 +28,9 @@ export async function GET(
 
     return NextResponse.json({ contact });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Contact fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch contact' },
       { status: 500 }
@@ -63,7 +65,9 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, contact: updated });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Contact update error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to update contact' },
       { status: 500 }
@@ -93,7 +97,9 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Contact delete error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to delete contact' },
       { status: 500 }

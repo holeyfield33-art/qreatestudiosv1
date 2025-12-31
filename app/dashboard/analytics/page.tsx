@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyAnalytics } from '@/components/empty-states/empty-analytics';
+import { motion } from 'framer-motion';
 import { 
   LineChart, 
   Line, 
@@ -21,6 +24,29 @@ import {
 import { BarChart3, TrendingUp, Users, Activity, Download } from 'lucide-react';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+
+function AnalyticsChartSkeleton() {
+  return (
+    <Card className="p-6">
+      <Skeleton className="h-6 w-48 mb-4" />
+      <Skeleton className="h-64 w-full" />
+    </Card>
+  );
+}
+
+function AnalyticsStatSkeleton() {
+  return (
+    <Card className="p-6">
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-8 w-8 rounded-full" />
+        <div className="space-y-2 flex-1">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-8 w-16" />
+        </div>
+      </div>
+    </Card>
+  );
+}
 
 export default function AnalyticsPage() {
   const searchParams = useSearchParams();
@@ -43,10 +69,18 @@ export default function AnalyticsPage() {
   async function fetchOverviewAnalytics() {
     try {
       const res = await fetch('/api/analytics/overview');
+      if (!res.ok) {
+        throw new Error('Failed to fetch analytics');
+      }
       const result = await res.json();
       setOverviewData(result);
     } catch (error) {
-      console.error('Failed to load analytics:', error);
+      if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development') console.error('Failed to load analytics:', error);
+        }
+      }
+      toast.error('Failed to load analytics data');
     } finally {
       setLoading(false);
     }
@@ -55,10 +89,18 @@ export default function AnalyticsPage() {
   async function fetchQRAnalytics(id: string) {
     try {
       const res = await fetch(`/api/analytics/${id}`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch QR analytics');
+      }
       const result = await res.json();
       setQrData(result);
     } catch (error) {
-      console.error('Failed to load QR analytics:', error);
+      if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development') console.error('Failed to load QR analytics:', error);
+        }
+      }
+      toast.error('Failed to load QR analytics');
     } finally {
       setLoading(false);
     }
@@ -66,9 +108,38 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">Loading analytics...</div>
-      </div>
+      <motion.div 
+        className="space-y-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        <div>
+          <h1 className="text-3xl font-bold">Analytics</h1>
+          <p className="text-muted-foreground">Loading analytics data...</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          <AnalyticsStatSkeleton />
+          <AnalyticsStatSkeleton />
+          <AnalyticsStatSkeleton />
+          <AnalyticsStatSkeleton />
+        </div>
+        <AnalyticsChartSkeleton />
+        <AnalyticsChartSkeleton />
+      </motion.div>
+    );
+  }
+
+  // Show empty state if no data
+  if (!qrData && !overviewData) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <EmptyAnalytics />
+      </motion.div>
     );
   }
 

@@ -18,7 +18,9 @@ export async function GET(req: Request) {
       subscription,
     });
   } catch (error) {
-    console.error('Subscription fetch error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Subscription fetch error:', error);
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to fetch subscription' },
       { status: 500 }

@@ -50,7 +50,11 @@ export async function GET(
     ipAddress,
     userAgent,
     referrer,
-  }).catch((err) => console.error('Scan tracking failed:', err));
+  }).catch((err) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Scan tracking failed:', err);
+    }
+  });
 
   // Perform security scan on redirect URL
   const securityScan = await scanUrl(qrCode.redirectUrl);
@@ -73,7 +77,9 @@ export async function GET(
   try {
     redirectUrl = await getSmartRedirect(qrCode.id, userAgent);
   } catch (error) {
-    console.error('Smart redirect failed, using default:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Smart redirect failed, using default:', error);
+    }
   }
 
   // Redirect to destination

@@ -22,7 +22,9 @@ export async function POST(req: Request) {
       ...optimization,
     });
   } catch (error) {
-    console.error('Optimization error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Optimization error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to optimize QR code' },
       { status: 500 }

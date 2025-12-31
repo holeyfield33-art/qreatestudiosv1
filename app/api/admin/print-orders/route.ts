@@ -34,7 +34,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ orders });
   } catch (error) {
-    console.error('Admin print orders fetch error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Admin print orders fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch orders' },
       { status: 500 }

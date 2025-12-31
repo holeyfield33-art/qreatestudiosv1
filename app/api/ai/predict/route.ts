@@ -48,7 +48,9 @@ export async function POST(req: Request) {
       ...prediction,
     });
   } catch (error) {
-    console.error('Prediction error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Prediction error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to predict scan rate' },
       { status: 500 }

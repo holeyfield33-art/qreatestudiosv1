@@ -34,7 +34,9 @@ export async function GET(
 
     return NextResponse.json({ order });
   } catch (error) {
-    console.error('Print order fetch error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Print order fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch order' },
       { status: 500 }
@@ -83,14 +85,18 @@ export async function PATCH(
       try {
         await sendOrderShippedEmail(updated, trackingNumber);
       } catch (emailError) {
-        console.error('Failed to send shipped email:', emailError);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to send shipped email:', emailError);
+    }
         // Continue even if email fails
       }
     }
 
     return NextResponse.json({ success: true, order: updated });
   } catch (error) {
-    console.error('Print order update error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Print order update error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to update order' },
       { status: 500 }

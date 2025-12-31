@@ -28,7 +28,9 @@ export async function GET(req: Request) {
       customDomain: userOrg.organization.customDomain,
     });
   } catch (error) {
-    console.error('Error fetching branding:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching branding:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch branding' },
       { status: 500 }
@@ -109,7 +111,9 @@ export async function PATCH(req: Request) {
       branding: updatedBranding,
     });
   } catch (error) {
-    console.error('Branding update error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Branding update error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to update branding' },
       { status: 500 }
@@ -145,7 +149,9 @@ export async function DELETE(req: Request) {
       branding: getDefaultBranding(),
     });
   } catch (error) {
-    console.error('Error resetting branding:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error resetting branding:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to reset branding' },
       { status: 500 }

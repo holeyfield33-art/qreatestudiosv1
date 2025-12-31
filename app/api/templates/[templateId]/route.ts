@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getTemplateById } from '@/lib/templates/qr-templates';
+import { getFeatureAccess, type PlanType } from '@/lib/utils/feature-access';
 
 export async function GET(
   req: Request,
@@ -22,11 +23,17 @@ export async function GET(
 
     // Check if user has access to premium templates
     if (template.isPremium) {
-      // TODO: Add subscription check here
-      // const hasAccess = await checkPremiumAccess(session.user.id);
-      // if (!hasAccess) {
-      //   return NextResponse.json({ error: 'Premium template requires subscription' }, { status: 403 });
-      // }
+      const userPlan = (session.user.organization?.plan as PlanType) || 'FREE';
+      const features = getFeatureAccess(userPlan);
+      
+      if (!features.canAccessPremiumTemplates) {
+        return NextResponse.json({ 
+          error: 'Premium template access requires BUSINESS or AGENCY plan',
+          requiredPlan: 'BUSINESS',
+          currentPlan: userPlan,
+          upgradeUrl: '/pricing',
+        }, { status: 403 });
+      }
     }
 
     return NextResponse.json({
@@ -34,7 +41,9 @@ export async function GET(
       template,
     });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Error fetching template:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch template' },
       { status: 500 }

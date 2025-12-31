@@ -100,7 +100,9 @@ export async function POST(req: Request) {
       message: 'Sub-account created successfully. Share the temporary password securely.',
     });
   } catch (error) {
-    console.error('Sub-account creation error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Sub-account creation error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to create sub-account' },
       { status: 500 }
@@ -173,7 +175,9 @@ export async function GET(req: Request) {
       })),
     });
   } catch (error) {
-    console.error('Error fetching sub-accounts:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching sub-accounts:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch sub-accounts' },
       { status: 500 }
@@ -239,7 +243,9 @@ export async function DELETE(req: Request) {
       message: 'Sub-account deleted successfully',
     });
   } catch (error) {
-    console.error('Error deleting sub-account:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error deleting sub-account:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to delete sub-account' },
       { status: 500 }

@@ -46,7 +46,9 @@ export async function GET(
       analytics,
     });
   } catch (error) {
-    console.error('Error fetching advanced analytics:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching advanced analytics:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch analytics' },
       { status: 500 }

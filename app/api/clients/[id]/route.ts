@@ -34,7 +34,9 @@ export async function GET(
 
     return NextResponse.json({ client });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Client fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch client' },
       { status: 500 }
@@ -69,7 +71,9 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, client: updated });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Client update error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to update client' },
       { status: 500 }
@@ -99,7 +103,9 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Client delete error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to delete client' },
       { status: 500 }

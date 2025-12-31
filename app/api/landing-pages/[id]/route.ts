@@ -26,7 +26,9 @@ export async function GET(req: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true, landingPage });
   } catch (error) {
-    console.error('Landing page fetch error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Landing page fetch error:', error);
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to fetch landing page' },
       { status: 500 }
@@ -58,7 +60,9 @@ export async function PATCH(req: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true, landingPage: updated });
   } catch (error) {
-    console.error('Landing page update error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Landing page update error:', error);
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to update landing page' },
       { status: 500 }
@@ -85,7 +89,9 @@ export async function DELETE(req: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Landing page delete error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Landing page delete error:', error);
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to delete landing page' },
       { status: 500 }

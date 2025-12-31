@@ -23,7 +23,9 @@ export default function LandingPagesPage() {
         setLandingPages(data.landingPages);
       }
     } catch (error) {
-      console.error('Failed to load landing pages:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Failed to load landing pages:', error);
+      }
     } finally {
       setLoading(false);
     }

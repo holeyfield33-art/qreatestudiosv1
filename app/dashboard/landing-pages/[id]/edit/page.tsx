@@ -37,7 +37,9 @@ export default function EditLandingPagePage() {
         setPublished(data.landingPage.published);
       }
     } catch (error) {
-      console.error('Failed to load landing page:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Failed to load landing page:', error);
+      }
       toast.error('Failed to load landing page');
     } finally {
       setLoading(false);

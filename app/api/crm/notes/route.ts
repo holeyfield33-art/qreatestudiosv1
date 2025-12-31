@@ -29,7 +29,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, note });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Note creation error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to create note' },
       { status: 500 }
@@ -64,7 +66,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ notes });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Note fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch notes' },
       { status: 500 }

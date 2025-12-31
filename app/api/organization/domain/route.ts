@@ -83,7 +83,9 @@ export async function POST(req: Request) {
       ],
     });
   } catch (error) {
-    console.error('Domain configuration error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Domain configuration error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to configure domain' },
       { status: 500 }
@@ -114,7 +116,9 @@ export async function DELETE(req: Request) {
       message: 'Custom domain removed successfully',
     });
   } catch (error) {
-    console.error('Error removing domain:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error removing domain:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to remove domain' },
       { status: 500 }
@@ -144,7 +148,9 @@ export async function GET(req: Request) {
       isWhiteLabel: userOrg.organization.isWhiteLabel,
     });
   } catch (error) {
-    console.error('Error fetching domain:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching domain:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch domain' },
       { status: 500 }

@@ -86,7 +86,9 @@ export default function OptimizeQRPage() {
         loadABTest(qrData),
       ]);
     } catch (error) {
-      console.error('Failed to load data:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Failed to load data:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -102,7 +104,9 @@ export default function OptimizeQRPage() {
       const optData = await optRes.json();
       setOptimization(optData);
     } catch (error) {
-      console.error('Optimization failed:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Optimization failed:', error);
+      }
     }
   }
 
@@ -116,7 +120,9 @@ export default function OptimizeQRPage() {
       const healthData = await healthRes.json();
       setLinkHealth(healthData);
     } catch (error) {
-      console.error('Link check failed:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Link check failed:', error);
+      }
     }
   }
 
@@ -130,7 +136,9 @@ export default function OptimizeQRPage() {
       const predData = await predRes.json();
       setPrediction(predData);
     } catch (error) {
-      console.error('Prediction failed:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Prediction failed:', error);
+      }
     }
   }
 
@@ -144,7 +152,9 @@ export default function OptimizeQRPage() {
       const abData = await abRes.json();
       setAbTest(abData);
     } catch (error) {
-      console.error('A/B test suggestions failed:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('A/B test suggestions failed:', error);
+      }
     }
   }
 

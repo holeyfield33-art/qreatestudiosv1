@@ -21,7 +21,9 @@ export async function POST(req: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (error: any) {
-    console.error('Webhook signature verification failed:', error.message);
+    if (process.env.NODE_ENV === 'development') {
+        console.error('Webhook signature verification failed:', error.message);
+    }
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
@@ -32,7 +34,9 @@ export async function POST(req: Request) {
         const userId = session.client_reference_id || session.metadata?.userId;
 
         if (!userId) {
-          console.error('No userId in checkout session');
+          if (process.env.NODE_ENV === 'development') {
+              console.error('No userId in checkout session');
+    }
           break;
         }
 
@@ -112,7 +116,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook handler error:', error);
+    if (process.env.NODE_ENV === 'development') {
+        console.error('Webhook handler error:', error);
+    }
     return NextResponse.json({ error: 'Webhook error' }, { status: 500 });
   }
 }

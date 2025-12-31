@@ -24,7 +24,9 @@ export default function SecurityReportsPage() {
         setReports(data.reports);
       }
     } catch (error) {
-      console.error('Failed to load reports:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Failed to load reports:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -47,7 +49,9 @@ export default function SecurityReportsPage() {
         toast.error(data.error || 'Failed to update report');
       }
     } catch (error) {
-      console.error('Report action error:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Report action error:', error);
+      }
       toast.error('An error occurred');
     }
   }

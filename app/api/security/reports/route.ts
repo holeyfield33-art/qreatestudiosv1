@@ -33,7 +33,9 @@ export async function POST(req: Request) {
       report,
     });
   } catch (error) {
-    console.error('Report creation error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Report creation error:', error);
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to create report' },
       { status: 500 }
@@ -71,7 +73,9 @@ export async function GET(req: Request) {
       reports,
     });
   } catch (error) {
-    console.error('Reports fetch error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Reports fetch error:', error);
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to fetch reports' },
       { status: 500 }

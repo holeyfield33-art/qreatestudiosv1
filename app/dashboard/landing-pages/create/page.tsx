@@ -54,7 +54,9 @@ export default function CreateLandingPagePage() {
         toast.error(result.error || 'Failed to create');
       }
     } catch (error) {
-      console.error('Template creation error:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Template creation error:', error);
+      }
       toast.error('An error occurred');
     } finally {
       setLoading(false);

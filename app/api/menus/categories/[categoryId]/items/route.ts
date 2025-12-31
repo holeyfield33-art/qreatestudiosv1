@@ -49,7 +49,9 @@ export async function POST(
 
     return NextResponse.json({ success: true, item });
   } catch (error) {
-    console.error('Menu item creation error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Menu item creation error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to create menu item' },
       { status: 500 }

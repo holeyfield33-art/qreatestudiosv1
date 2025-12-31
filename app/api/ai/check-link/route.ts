@@ -52,7 +52,9 @@ export async function POST(req: Request) {
       ...health,
     });
   } catch (error) {
-    console.error('Link check error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Link check error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to check link health' },
       { status: 500 }

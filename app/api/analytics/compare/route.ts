@@ -35,7 +35,9 @@ export async function POST(req: Request) {
       comparisons: filteredComparisons,
     });
   } catch (error) {
-    console.error('Error comparing QR codes:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error comparing QR codes:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to compare QR codes' },
       { status: 500 }

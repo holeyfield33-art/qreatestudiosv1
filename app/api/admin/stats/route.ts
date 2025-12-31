@@ -77,7 +77,9 @@ export async function GET(req: Request) {
       pendingReports,
     });
   } catch (error) {
-    console.error('Admin stats error:', error);
+    if (process.env.NODE_ENV === 'development') {
+        console.error('Admin stats error:', error);
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to fetch stats' },
       { status: 500 }

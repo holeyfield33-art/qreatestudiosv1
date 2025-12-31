@@ -30,7 +30,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, task });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Task creation error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to create task' },
       { status: 500 }
@@ -63,7 +65,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ tasks });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Task fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch tasks' },
       { status: 500 }

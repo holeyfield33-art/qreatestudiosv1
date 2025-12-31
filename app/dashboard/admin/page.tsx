@@ -22,7 +22,9 @@ export default function AdminDashboardPage() {
         setStats(data);
       }
     } catch (error) {
-      console.error('Failed to load stats:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Failed to load stats:', error);
+      }
     } finally {
       setLoading(false);
     }

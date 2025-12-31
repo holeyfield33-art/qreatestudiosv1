@@ -160,7 +160,9 @@ export default function AIToolPageClient({ params }: AIToolPageProps) {
         toast.error(data.error || 'Failed to generate content');
       }
     } catch (error) {
-      console.error('Generation error:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Generation error:', error);
+      }
       toast.error('An error occurred');
     } finally {
       setLoading(false);

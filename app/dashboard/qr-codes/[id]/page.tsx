@@ -7,7 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useFeatureAccess } from '@/lib/hooks/use-feature-access';
 import { 
@@ -22,6 +31,29 @@ import {
   Eye,
   QrCode as QrCodeIcon
 } from 'lucide-react';
+import Link from 'next/link';
+
+function QRDetailSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <Skeleton className="h-8 w-48" />
+      </div>
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card className="p-6">
+          <Skeleton className="h-64 w-full" />
+        </Card>
+        <Card className="p-6 space-y-4">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-10 w-full" />
+        </Card>
+      </div>
+    </div>
+  );
+}
 
 export default function QRDetailPage() {
   const router = useRouter();
@@ -71,7 +103,12 @@ export default function QRDetailPage() {
       });
       setQrDataUrl(dataUrl);
     } catch (error) {
-      console.error('Failed to generate QR preview:', error);
+      // Silently fail - QR preview is non-critical
+      if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development') console.error('Failed to generate QR preview:', error);
+        }
+      }
     }
   }
 
@@ -118,18 +155,43 @@ export default function QRDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        <QRDetailSkeleton />
+      </motion.div>
     );
   }
 
   if (!qrCode) {
-    return null;
+    return (
+      <motion.div 
+        className="text-center py-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <QrCodeIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        <p className="text-lg font-medium">QR Code not found</p>
+        <Link href="/dashboard/qr-codes">
+          <Button className="mt-4">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to QR Codes
+          </Button>
+        </Link>
+      </motion.div>
+    );
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <motion.div 
+      className="max-w-5xl mx-auto space-y-6"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -384,6 +446,6 @@ export default function QRDetailPage() {
           </div>
         </Dialog>
       )}
-    </div>
+    </motion.div>
   );
 }

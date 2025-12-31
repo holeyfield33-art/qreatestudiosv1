@@ -66,7 +66,9 @@ export async function PATCH(req: Request, context: RouteContext) {
       report,
     });
   } catch (error) {
-    console.error('Report update error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Report update error:', error);
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to update report' },
       { status: 500 }

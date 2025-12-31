@@ -35,7 +35,9 @@ export async function GET(
     const analytics = await getQRAnalytics(qrCodeId, startDate, endDate);
     return NextResponse.json(analytics);
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Analytics error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch analytics' },
       { status: 500 }

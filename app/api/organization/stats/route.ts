@@ -39,7 +39,9 @@ export async function GET(req: Request) {
       },
     });
   } catch (error) {
-    console.error('Error fetching white-label stats:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching white-label stats:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch stats' },
       { status: 500 }

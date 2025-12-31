@@ -267,7 +267,7 @@ export async function getWhiteLabelStats(organizationId: string): Promise<{
 
   const userIds = members.map(m => m.userId);
 
-  const [qrCodesCount, analytics] = await Promise.all([
+  const [qrCodesCount, analytics, subscriptions, organization] = await Promise.all([
     prisma.qRCode.count({
       where: { userId: { in: userIds } },
     }),
@@ -278,12 +278,44 @@ export async function getWhiteLabelStats(organizationId: string): Promise<{
         },
       },
     }),
+    prisma.subscription.findMany({
+      where: {
+        userId: { in: userIds },
+        status: 'active',
+      },
+      select: {
+        plan: true,
+        currentPeriodStart: true,
+        currentPeriodEnd: true,
+      },
+    }),
+    prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { revenueShare: true },
+    }),
   ]);
+
+  // Calculate revenue based on active subscriptions and revenue share
+  // Plan pricing: PRO = $29/month, BUSINESS = $99/month, AGENCY = $299/month
+  const planPrices: Record<string, number> = {
+    PRO: 29,
+    BUSINESS: 99,
+    AGENCY: 299,
+  };
+
+  const monthlyRevenue = subscriptions.reduce((total, sub) => {
+    const price = planPrices[sub.plan] || 0;
+    return total + price;
+  }, 0);
+
+  // Apply revenue share percentage (default 70%)
+  const revenueShare = (organization?.revenueShare || 70) / 100;
+  const revenue = monthlyRevenue * revenueShare;
 
   return {
     subAccountsCount,
     qrCodesCount,
     totalScans: analytics,
-    revenue: 0, // TODO: Calculate from billing records
+    revenue: Math.round(revenue * 100) / 100, // Round to 2 decimal places
   };
 }

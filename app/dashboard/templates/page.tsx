@@ -1,12 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { QR_TEMPLATES, TEMPLATE_CATEGORIES, type QRTemplate } from '@/lib/templates/qr-templates';
+import dynamic from 'next/dynamic';
+
+// Dynamically import QRPreview for better performance
+const QRPreview = dynamic(() => import('@/components/qr-preview'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 animate-pulse">
+      <span className="text-4xl">⏳</span>
+    </div>
+  ),
+});
 
 export default function TemplatesPage() {
   const router = useRouter();
@@ -116,7 +127,7 @@ export default function TemplatesPage() {
         {filteredTemplates.map((template) => (
           <Card
             key={template.id}
-            className="group relative p-4 hover:shadow-lg transition-all cursor-pointer focus-within:ring-2 focus-within:ring-blue-500"
+            className="group relative p-4 transition-all duration-300 cursor-pointer hover:shadow-xl hover:scale-[1.02] focus-within:ring-2 focus-within:ring-blue-500 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950"
             tabIndex={0}
             role="button"
             aria-label={`Use ${template.name} template. ${template.description}. ${template.isPremium ? 'Premium template' : 'Free template'}`}
@@ -130,7 +141,7 @@ export default function TemplatesPage() {
           >
             {/* Favorite Button */}
             <button
-              className="absolute top-2 right-2 z-10 p-2 rounded-full bg-white/90 hover:bg-white shadow-sm transition-all"
+              className="absolute top-2 right-2 z-10 p-2 rounded-full bg-white/90 hover:bg-white shadow-sm transition-all hover:scale-110"
               onClick={(e) => {
                 e.stopPropagation();
                 toggleFavorite(template.id);
@@ -141,44 +152,28 @@ export default function TemplatesPage() {
               {favorites.includes(template.id) ? '❤️' : '🤍'}
             </button>
 
-            {/* Template Preview */}
+            {/* Template Preview with Hover Effect */}
             <div 
-              className="aspect-square rounded-lg mb-3 flex items-center justify-center text-6xl relative overflow-hidden"
+              className="aspect-square rounded-lg mb-3 flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 group-hover:shadow-inner transition-all duration-300"
               style={{
                 backgroundColor: template.style.backgroundColor,
-                background: template.style.gradientType && template.style.gradientColors
-                  ? `${template.style.gradientType}-gradient(${template.style.gradientColors.join(', ')})`
-                  : template.style.backgroundColor
               }}
             >
-              {/* Simulated QR Code Pattern */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-80">
-                <div 
-                  className="w-3/4 h-3/4 grid grid-cols-8 gap-1"
-                  aria-hidden="true"
-                >
-                  {Array.from({ length: 64 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`rounded-sm ${Math.random() > 0.5 ? 'opacity-100' : 'opacity-0'}`}
-                      style={{ backgroundColor: template.style.foregroundColor }}
-                    />
-                  ))}
+              {/* Actual QR Code Preview */}
+              <Suspense fallback={
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-4xl animate-pulse">📱</span>
                 </div>
-              </div>
+              }>
+                <QRPreview 
+                  template={template} 
+                  size={200}
+                  value={`https://qreatestudios.com/template/${template.id}`}
+                />
+              </Suspense>
 
-              {/* Frame Preview */}
-              {template.frame && template.frame.type !== 'none' && template.frame.text && (
-                <div 
-                  className="absolute bottom-0 inset-x-0 p-2 text-center text-xs font-bold"
-                  style={{ 
-                    backgroundColor: template.frame.color,
-                    color: '#FFFFFF'
-                  }}
-                >
-                  {template.frame.text}
-                </div>
-              )}
+              {/* Hover Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-blue-600/0 to-blue-600/0 group-hover:from-blue-600/10 group-hover:to-transparent transition-all duration-300 pointer-events-none" />
             </div>
 
             {/* Template Info */}
@@ -203,9 +198,6 @@ export default function TemplatesPage() {
                 {template.style.dotStyle}
               </span>
             </div>
-
-            {/* Hover Overlay */}
-            <div className="absolute inset-0 bg-blue-600 bg-opacity-0 group-hover:bg-opacity-10 transition-all rounded-lg pointer-events-none" />
           </Card>
         ))}
       </div>

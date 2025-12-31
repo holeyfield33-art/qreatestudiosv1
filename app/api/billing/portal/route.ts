@@ -5,23 +5,23 @@ import { createBillingPortalSession } from '@/lib/services/stripe-service';
 import { getBaseUrl } from '@/lib/utils/urls';
 
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const subscription = await prisma.subscription.findUnique({
-    where: { userId: session.user.id },
-  });
-
-  if (!subscription?.stripeCustomerId) {
-    return NextResponse.json(
-      { success: false, error: 'No subscription found' },
-      { status: 404 }
-    );
-  }
-
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const subscription = await prisma.subscription.findUnique({
+      where: { userId: session.user.id },
+    });
+
+    if (!subscription?.stripeCustomerId) {
+      return NextResponse.json(
+        { success: false, error: 'No subscription found' },
+        { status: 404 }
+      );
+    }
+
     const baseUrl = getBaseUrl();
     const portalSession = await createBillingPortalSession(
       subscription.stripeCustomerId,
@@ -30,7 +30,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, url: portalSession.url });
   } catch (error: any) {
-    console.error('Portal error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Portal error:', error);
+    }
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to create portal session' },
       { status: 500 }

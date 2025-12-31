@@ -39,7 +39,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, landingPage });
   } catch (error) {
-    console.error('Landing page creation error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Landing page creation error:', error);
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to create landing page' },
       { status: 500 }
@@ -64,7 +66,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ success: true, landingPages });
   } catch (error) {
-    console.error('Landing pages fetch error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Landing pages fetch error:', error);
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to fetch landing pages' },
       { status: 500 }

@@ -16,7 +16,9 @@ export async function GET(req: Request) {
       ...limits,
     });
   } catch (error) {
-    console.error('Limits fetch error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Limits fetch error:', error);
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to fetch limits' },
       { status: 500 }

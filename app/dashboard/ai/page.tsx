@@ -72,7 +72,9 @@ export default function AIToolsPage() {
       const data = await res.json();
       setUsage(data);
     } catch (error) {
-      console.error('Failed to load usage:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Failed to load usage:', error);
+      }
     } finally {
       setLoading(false);
     }

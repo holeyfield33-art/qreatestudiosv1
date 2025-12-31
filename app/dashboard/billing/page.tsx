@@ -56,7 +56,9 @@ export default function BillingPage() {
         setLimits(limitsData);
       }
     } catch (error) {
-      console.error('Failed to load billing info:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Failed to load billing info:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -80,7 +82,9 @@ export default function BillingPage() {
         setActionLoading(false);
       }
     } catch (error) {
-      console.error('Checkout error:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Checkout error:', error);
+      }
       toast.error('An error occurred');
       setActionLoading(false);
     }
@@ -102,7 +106,9 @@ export default function BillingPage() {
         setActionLoading(false);
       }
     } catch (error) {
-      console.error('Portal error:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Portal error:', error);
+      }
       toast.error('An error occurred');
       setActionLoading(false);
     }

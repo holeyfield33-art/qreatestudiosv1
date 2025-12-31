@@ -80,7 +80,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
       <div className="flex h-16 items-center border-b px-6">
         <Link
           href="/dashboard"
-          className="flex items-center space-x-2 font-bold text-xl focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded"
+          className="flex items-center space-x-2 font-bold text-xl transition-all duration-200 hover:text-primary hover:scale-[1.02] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded"
         >
           <QrCode className="h-6 w-6" aria-hidden="true" />
           <span>Qreate Studios</span>
@@ -98,12 +98,12 @@ export function DashboardNav({ user }: DashboardNavProps) {
                 <Link
                   href={item.href}
                   className={cn(
-                    'flex items-center space-x-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                    'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+                    'flex items-center space-x-3 rounded-md px-3 py-2 text-sm transition-all duration-200 cursor-pointer',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
                     'min-h-[44px]', // Minimum touch target size
                     isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                      ? 'bg-blue-500 text-white font-bold shadow-md'
+                      : 'text-muted-foreground font-medium hover:bg-accent hover:text-accent-foreground hover:scale-[1.02] hover:shadow-sm active:scale-[0.98]'
                   )}
                   aria-current={isActive ? 'page' : undefined}
                 >
@@ -117,8 +117,8 @@ export function DashboardNav({ user }: DashboardNavProps) {
       </div>
 
       <div className="border-t p-4">
-        <div className="flex items-center space-x-3 mb-3">
-          <Avatar>
+        <div className="flex items-center space-x-3 mb-3 cursor-default">
+          <Avatar className="ring-2 ring-offset-2 ring-transparent hover:ring-blue-500 transition-all duration-200">
             <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
             <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
           </Avatar>

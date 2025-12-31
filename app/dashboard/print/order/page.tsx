@@ -75,7 +75,9 @@ export default function PrintOrderPage() {
         toast.error(result.error || 'Failed to place order');
       }
     } catch (error) {
-      console.error('Order submission error:', error);
+      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development') console.error('Order submission error:', error);
+      }
       toast.error('An error occurred');
     } finally {
       setLoading(false);

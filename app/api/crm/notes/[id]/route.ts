@@ -27,7 +27,9 @@ export async function GET(
 
     return NextResponse.json({ note });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Note fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch note' },
       { status: 500 }
@@ -62,7 +64,9 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, note: updated });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Note update error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to update note' },
       { status: 500 }
@@ -92,7 +96,9 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Note delete error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to delete note' },
       { status: 500 }

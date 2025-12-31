@@ -65,7 +65,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, menu });
   } catch (error) {
-    console.error('Menu creation error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Menu creation error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to create menu' },
       { status: 500 }
@@ -114,7 +116,9 @@ export async function GET(req: Request) {
       },
     });
   } catch (error) {
-    console.error('Menu fetch error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Menu fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch menus' },
       { status: 500 }

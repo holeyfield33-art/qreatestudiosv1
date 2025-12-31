@@ -89,13 +89,17 @@ export async function POST(req: Request) {
         },
       });
     } catch (emailError) {
-      console.error('Email notification error:', emailError);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Email notification error:', emailError);
+    }
       // Continue even if emails fail
     }
 
     return NextResponse.json({ success: true, order });
   } catch (error) {
-    console.error('Print order error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Print order error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to create order' },
       { status: 500 }
@@ -126,7 +130,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ orders });
   } catch (error) {
-    console.error('Print orders fetch error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Print orders fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch orders' },
       { status: 500 }

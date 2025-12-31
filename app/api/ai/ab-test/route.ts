@@ -18,7 +18,9 @@ export async function POST(req: Request) {
       ...suggestions,
     });
   } catch (error) {
-    console.error('A/B test suggestions error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('A/B test suggestions error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to generate A/B test suggestions' },
       { status: 500 }

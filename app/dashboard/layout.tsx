@@ -4,6 +4,7 @@ import { DashboardNav } from '@/components/layout/dashboard-nav'
 import { DashboardHeader } from '@/components/layout/dashboard-header'
 import { SkipLink } from '@/components/ui/skip-link'
 import { Toaster } from '@/components/ui/sonner'
+import { PageTransition } from '@/components/page-transition'
 
 export default async function DashboardLayout({
   children,
@@ -23,10 +24,12 @@ export default async function DashboardLayout({
       <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardHeader title="Dashboard" user={session.user} />
         <main className="flex-1 overflow-y-auto p-6" id="main-content">
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </main>
       </div>
-      <Toaster />
+      <Toaster position="top-right" />
     </div>
   )
 }

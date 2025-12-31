@@ -7,6 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { QrCode, Plus, Search } from 'lucide-react';
+import { QRCardSkeleton } from '@/components/loading/qr-card-skeleton';
+import { EmptyQRCodes } from '@/components/empty-states/empty-qr-codes';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function QRCodesPage() {
   const router = useRouter();
@@ -63,21 +66,26 @@ export default function QRCodesPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-muted-foreground">Loading...</div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <QRCardSkeleton />
+          <QRCardSkeleton />
+          <QRCardSkeleton />
         </div>
       ) : qrCodes.length === 0 ? (
-        <div className="text-center py-12 border rounded-lg bg-card">
-          <QrCode className="mx-auto h-12 w-12 text-muted-foreground mb-4" aria-hidden="true" />
-          <p className="text-lg font-medium mb-2">No QR codes yet</p>
-          <p className="text-muted-foreground mb-4">Create your first QR code to get started</p>
-          <Button onClick={() => router.push('/dashboard/qr-codes/create')}>
-            <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-            Create Your First QR Code
-          </Button>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <EmptyQRCodes />
+        </motion.div>
       ) : (
-        <div className="border rounded-lg overflow-hidden">
+        <motion.div 
+          className="border rounded-lg overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        >
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-muted/50">
@@ -93,34 +101,43 @@ export default function QRCodesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {qrCodes.map((qr) => (
-                  <tr key={qr.id} className="hover:bg-muted/50">
-                    <td className="px-4 py-3 font-medium">{qr.name}</td>
-                    <td className="px-4 py-3 text-sm">{qr.type}</td>
-                    <td className="px-4 py-3 text-sm">{qr.scanCount}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant={qr.isActive ? 'default' : 'secondary'}>
-                        {qr.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      {new Date(qr.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(`/dashboard/qr-codes/${qr.id}`)}
-                      >
-                        View
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                <AnimatePresence mode="popLayout">
+                  {qrCodes.map((qr, index) => (
+                    <motion.tr
+                      key={qr.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ delay: index * 0.05, duration: 0.2 }}
+                      className="hover:bg-muted/50 transition-colors duration-150"
+                    >
+                      <td className="px-4 py-3 font-medium">{qr.name}</td>
+                      <td className="px-4 py-3 text-sm">{qr.type}</td>
+                      <td className="px-4 py-3 text-sm">{qr.scanCount}</td>
+                      <td className="px-4 py-3">
+                        <Badge variant={qr.isActive ? 'default' : 'secondary'}>
+                          {qr.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        {new Date(qr.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => router.push(`/dashboard/qr-codes/${qr.id}`)}
+                        >
+                          View
+                        </Button>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
               </tbody>
             </table>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );

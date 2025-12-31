@@ -56,7 +56,10 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
-    console.error('Signup error:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Signup error:', error)
+    }
+    }
     return NextResponse.json(
       { error: 'Something went wrong' },
       { status: 500 }

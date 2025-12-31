@@ -34,7 +34,9 @@ export async function GET(
 
     return NextResponse.json({ menu });
   } catch (error) {
-    console.error('Menu fetch error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Menu fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch menu' },
       { status: 500 }
@@ -69,7 +71,9 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, menu: updated });
   } catch (error) {
-    console.error('Menu update error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Menu update error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to update menu' },
       { status: 500 }
@@ -99,7 +103,9 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Menu delete error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Menu delete error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to delete menu' },
       { status: 500 }

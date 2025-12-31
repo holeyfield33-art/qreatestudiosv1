@@ -78,7 +78,9 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
-    console.error('QR creation error:', error);
+    if (process.env.NODE_ENV === 'development') {
+        console.error('QR creation error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to create QR code' },
       { status: 500 }
@@ -87,51 +89,61 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  const { searchParams } = new URL(req.url);
-  const page = parseInt(searchParams.get('page') || '1');
-  const limit = parseInt(searchParams.get('limit') || '10');
-  const type = searchParams.get('type');
-  const status = searchParams.get('status');
-  const search = searchParams.get('search');
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const type = searchParams.get('type');
+    const status = searchParams.get('status');
+    const search = searchParams.get('search');
 
-  const where: any = { userId: session.user.id };
-  if (type) where.type = type;
-  if (status) where.status = status;
-  if (search) {
-    where.OR = [
-      { name: { contains: search, mode: 'insensitive' } },
-      { description: { contains: search, mode: 'insensitive' } },
-    ];
-  }
+    const where: any = { userId: session.user.id };
+    if (type) where.type = type;
+    if (status) where.status = status;
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
 
-  const [qrCodes, total] = await Promise.all([
-    prisma.qRCode.findMany({
-      where,
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        client: { select: { name: true } },
+    const [qrCodes, total] = await Promise.all([
+      prisma.qRCode.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          client: { select: { name: true } },
+        },
+      }),
+      prisma.qRCode.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      qrCodes: qrCodes.map((qr: any) => ({
+        ...qr,
+        shortUrl: `${getBaseUrl()}/${qr.shortCode}`,
+      })),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-    }),
-    prisma.qRCode.count({ where }),
-  ]);
-
-  return NextResponse.json({
-    qrCodes: qrCodes.map((qr: any) => ({
-      ...qr,
-      shortUrl: `${getBaseUrl()}/${qr.shortCode}`,
-    })),
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
-  });
+    });
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+        console.error('QR list fetch error:', error);
+    }
+    return NextResponse.json(
+      { error: 'Failed to fetch QR codes' },
+      { status: 500 }
+    );
+  }
 }

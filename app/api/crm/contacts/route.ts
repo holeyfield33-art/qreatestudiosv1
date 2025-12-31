@@ -30,7 +30,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, contact });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Contact creation error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to create contact' },
       { status: 500 }
@@ -78,7 +80,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ contacts });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Contact fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch contacts' },
       { status: 500 }

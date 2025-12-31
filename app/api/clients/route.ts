@@ -29,7 +29,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, client });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Client creation error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to create client' },
       { status: 500 }
@@ -70,7 +72,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ clients });
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
     console.error('Client fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch clients' },
       { status: 500 }

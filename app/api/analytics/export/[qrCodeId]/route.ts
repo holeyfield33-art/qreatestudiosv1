@@ -85,7 +85,9 @@ export async function GET(
 
     return NextResponse.json({ error: 'Invalid format. Use: pdf, csv, or csv-timeseries' }, { status: 400 });
   } catch (error) {
-    console.error('Error exporting analytics:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error exporting analytics:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to export analytics' },
       { status: 500 }

@@ -12,7 +12,9 @@ export async function GET(req: Request) {
     const analytics = await getUserAnalytics(session.user.id);
     return NextResponse.json(analytics);
   } catch (error) {
-    console.error('Analytics error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Analytics error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch analytics' },
       { status: 500 }

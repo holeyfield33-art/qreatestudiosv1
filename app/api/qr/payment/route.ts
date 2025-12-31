@@ -85,7 +85,9 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
-    console.error('Payment QR creation error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Payment QR creation error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to create payment QR' },
       { status: 500 }
@@ -135,7 +137,9 @@ export async function GET(req: Request) {
       },
     });
   } catch (error) {
-    console.error('Payment QR fetch error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Payment QR fetch error:', error);
+    }
     return NextResponse.json(
       { error: 'Failed to fetch payment QR codes' },
       { status: 500 }
