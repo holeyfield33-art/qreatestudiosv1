@@ -27,8 +27,8 @@ export async function GET(req: Request) {
       where,
       orderBy: { createdAt: 'desc' },
       include: {
-        qrCode: { select: { name: true, data: true } },
-        user: { select: { name: true, email: true } },
+        QRCode: { select: { name: true, data: true } },
+        User: { select: { name: true, email: true } },
       },
     });
 

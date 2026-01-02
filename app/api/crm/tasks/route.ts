@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { randomUUID } from 'crypto';
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -18,6 +19,7 @@ export async function POST(req: Request) {
 
     const task = await prisma.task.create({
       data: {
+        id: randomUUID(),
         userId: session.user.id,
         contactId: contactId || null,
         title,
@@ -25,6 +27,7 @@ export async function POST(req: Request) {
         dueDate: dueDate ? new Date(dueDate) : null,
         priority: priority || 'medium',
         status: 'pending',
+        updatedAt: new Date(),
       },
     });
 
@@ -59,7 +62,7 @@ export async function GET(req: Request) {
       where,
       orderBy: { dueDate: 'asc' },
       include: {
-        contact: { select: { name: true } },
+        Contact: { select: { name: true } },
       },
     });
 

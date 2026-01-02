@@ -17,9 +17,9 @@ export async function GET(
     const menu = await prisma.menu.findUnique({
       where: { id },
       include: {
-        categories: {
+        MenuCategory: {
           include: {
-            items: {
+            MenuItem: {
               orderBy: { displayOrder: 'asc' },
             },
           },

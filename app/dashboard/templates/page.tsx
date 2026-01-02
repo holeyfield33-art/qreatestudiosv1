@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { QR_TEMPLATES, TEMPLATE_CATEGORIES, type QRTemplate } from '@/lib/templates/qr-templates';
 import dynamic from 'next/dynamic';
+import { ArrowLeft } from 'lucide-react';
 
 // Dynamically import QRPreview for better performance
 const QRPreview = dynamic(() => import('@/components/qr-preview'), {
@@ -51,11 +52,22 @@ export default function TemplatesPage() {
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">QR Code Templates</h1>
-        <p className="text-muted-foreground mt-1">
-          Choose from {QR_TEMPLATES.length}+ professional templates
-        </p>
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/dashboard')}
+          className="min-h-[44px] min-w-[44px]"
+          aria-label="Back to dashboard"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold">QR Code Templates</h1>
+          <p className="text-muted-foreground mt-1">
+            Choose from {QR_TEMPLATES.length}+ professional templates
+          </p>
+        </div>
       </div>
 
       {/* Search Bar */}

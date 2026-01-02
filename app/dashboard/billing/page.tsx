@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { ArrowLeft } from 'lucide-react';
 import { PLAN_LIMITS } from '@/lib/services/stripe-service';
 
 const PLAN_PRICES: Record<string, number> = {
@@ -57,7 +58,7 @@ export default function BillingPage() {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-      if (process.env.NODE_ENV === 'development') console.error('Failed to load billing info:', error);
+        console.error('Failed to load billing info:', error);
       }
     } finally {
       setLoading(false);
@@ -83,7 +84,7 @@ export default function BillingPage() {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-      if (process.env.NODE_ENV === 'development') console.error('Checkout error:', error);
+        console.error('Checkout error:', error);
       }
       toast.error('An error occurred');
       setActionLoading(false);
@@ -107,7 +108,7 @@ export default function BillingPage() {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-      if (process.env.NODE_ENV === 'development') console.error('Portal error:', error);
+        console.error('Portal error:', error);
       }
       toast.error('An error occurred');
       setActionLoading(false);
@@ -130,11 +131,22 @@ export default function BillingPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Billing & Subscription</h1>
-        <p className="text-muted-foreground">
-          Manage your subscription and usage limits
-        </p>
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/dashboard')}
+          className="min-h-[44px] min-w-[44px]"
+          aria-label="Back to dashboard"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Billing & Subscription</h1>
+          <p className="text-muted-foreground">
+            Manage your subscription and usage limits
+          </p>
+        </div>
       </div>
 
       {/* Current Plan */}

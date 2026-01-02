@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { randomUUID } from 'crypto';
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -12,17 +13,18 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { content, contactId } = body;
 
-    if (!content) {
+    if (!content || !contactId) {
       return NextResponse.json(
-        { error: 'Content is required' },
+        { error: 'Content and contactId are required' },
         { status: 400 }
       );
     }
 
     const note = await prisma.note.create({
       data: {
+        id: randomUUID(),
         userId: session.user.id,
-        contactId: contactId || null,
+        contactId,
         content,
       },
     });
@@ -60,7 +62,7 @@ export async function GET(req: Request) {
       where,
       orderBy: { createdAt: 'desc' },
       include: {
-        contact: { select: { name: true } },
+        Contact: { select: { name: true } },
       },
     });
 

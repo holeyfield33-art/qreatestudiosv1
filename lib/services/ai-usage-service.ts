@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { randomUUID } from 'crypto';
 
 /**
  * Track AI usage for billing and analytics
@@ -12,6 +13,7 @@ export async function trackAIUsage(
   try {
     await prisma.aIUsage.create({
       data: {
+        id: randomUUID(),
         userId,
         feature,
         model: 'gpt-4o',

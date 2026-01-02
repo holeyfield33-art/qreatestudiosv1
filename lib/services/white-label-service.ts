@@ -273,7 +273,7 @@ export async function getWhiteLabelStats(organizationId: string): Promise<{
     }),
     prisma.analytics.count({
       where: {
-        qrCode: {
+        QRCode: {
           userId: { in: userIds },
         },
       },

@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     const userOrg = await prisma.organizationMember.findFirst({
       where: { userId: session.user.id },
       include: { 
-        organization: {
+        Organization: {
           select: {
             id: true,
             name: true,
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No organization found' }, { status: 404 });
     }
 
-    if (!userOrg.organization.isWhiteLabel) {
+    if (!userOrg.Organization.isWhiteLabel) {
       return NextResponse.json(
         { error: 'White-label feature not enabled for your organization' },
         { status: 403 }
@@ -102,7 +102,7 @@ export async function DELETE(req: Request) {
 
     const userOrg = await prisma.organizationMember.findFirst({
       where: { userId: session.user.id },
-      include: { organization: true },
+      include: { Organization: true },
     });
 
     if (!userOrg) {
@@ -135,7 +135,7 @@ export async function GET(req: Request) {
 
     const userOrg = await prisma.organizationMember.findFirst({
       where: { userId: session.user.id },
-      include: { organization: true },
+      include: { Organization: true },
     });
 
     if (!userOrg) {
@@ -144,8 +144,8 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       success: true,
-      customDomain: userOrg.organization.customDomain,
-      isWhiteLabel: userOrg.organization.isWhiteLabel,
+      customDomain: userOrg.Organization.customDomain,
+      isWhiteLabel: userOrg.Organization.isWhiteLabel,
     });
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {

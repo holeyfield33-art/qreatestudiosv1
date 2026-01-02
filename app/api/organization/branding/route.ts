@@ -12,20 +12,20 @@ export async function GET(req: Request) {
 
     const userOrg = await prisma.organizationMember.findFirst({
       where: { userId: session.user.id },
-      include: { organization: true },
+      include: { Organization: true },
     });
 
     if (!userOrg) {
       return NextResponse.json({ error: 'No organization found' }, { status: 404 });
     }
 
-    const branding = userOrg.organization.branding || getDefaultBranding();
+    const branding = userOrg.Organization.branding || getDefaultBranding();
 
     return NextResponse.json({
       success: true,
       branding,
-      isWhiteLabel: userOrg.organization.isWhiteLabel,
-      customDomain: userOrg.organization.customDomain,
+      isWhiteLabel: userOrg.Organization.isWhiteLabel,
+      customDomain: userOrg.Organization.customDomain,
     });
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
@@ -48,7 +48,7 @@ export async function PATCH(req: Request) {
     const userOrg = await prisma.organizationMember.findFirst({
       where: { userId: session.user.id },
       include: { 
-        organization: {
+        Organization: {
           select: {
             id: true,
             name: true,
@@ -66,7 +66,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'No organization found' }, { status: 404 });
     }
 
-    if (!userOrg.organization.isWhiteLabel) {
+    if (!userOrg.Organization.isWhiteLabel) {
       return NextResponse.json(
         { error: 'White-label feature not enabled for your organization' },
         { status: 403 }
@@ -85,7 +85,7 @@ export async function PATCH(req: Request) {
     }
 
     // Merge with existing branding
-    const existingBranding = (userOrg.organization.branding as any) || getDefaultBranding();
+    const existingBranding = (userOrg.Organization.branding as any) || getDefaultBranding();
     const updatedBranding = {
       ...existingBranding,
       ...body,
@@ -130,7 +130,7 @@ export async function DELETE(req: Request) {
 
     const userOrg = await prisma.organizationMember.findFirst({
       where: { userId: session.user.id },
-      include: { organization: true },
+      include: { Organization: true },
     });
 
     if (!userOrg) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { randomUUID } from 'crypto';
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -42,6 +43,7 @@ export async function POST(req: Request) {
     // Create security report
     const report = await prisma.securityReport.create({
       data: {
+        id: randomUUID(),
         qrCodeId,
         reportType,
         description: description || null,
@@ -54,11 +56,12 @@ export async function POST(req: Request) {
     // Log audit trail
     await prisma.auditLog.create({
       data: {
+        id: randomUUID(),
         userId: session.user.id,
         action: 'SECURITY_REPORT_SUBMITTED',
-        resourceType: 'SecurityReport',
-        resourceId: report.id,
-        metadata: {
+        targetType: 'SecurityReport',
+        targetId: report.id,
+        details: {
           qrCodeId,
           reportType,
           reporterIp,

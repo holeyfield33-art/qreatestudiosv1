@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { generateOrderNumber, calculatePrintPrice } from '@/lib/services/print-service';
 import { sendPrintOrderAdminEmail, sendPrintOrderCustomerEmail } from '@/lib/services/email-service';
+import { randomUUID } from 'crypto';
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -54,6 +55,7 @@ export async function POST(req: Request) {
 
     const order = await prisma.printOrder.create({
       data: {
+        id: randomUUID(),
         userId: session.user.id,
         qrCodeId,
         orderNumber,
@@ -66,18 +68,19 @@ export async function POST(req: Request) {
         customerEmail: customerEmail || session.user.email,
         customerPhone,
         status: 'pending',
+        updatedAt: new Date(),
       },
       include: {
-        qrCode: true,
-        user: true,
+        QRCode: true,
+        User: true,
       },
     });
 
     // Send notification emails
     try {
       await Promise.all([
-        sendPrintOrderAdminEmail(order, qrCode, order.user),
-        sendPrintOrderCustomerEmail(order, order.user),
+        sendPrintOrderAdminEmail(order, qrCode, order.User),
+        sendPrintOrderCustomerEmail(order, order.User),
       ]);
       
       // Update notification flags
@@ -124,7 +127,7 @@ export async function GET(req: Request) {
       where,
       orderBy: { createdAt: 'desc' },
       include: {
-        qrCode: { select: { name: true } },
+        QRCode: { select: { name: true } },
       },
     });
 

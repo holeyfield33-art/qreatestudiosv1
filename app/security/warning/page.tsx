@@ -1,12 +1,12 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { scanUrl, type UrlScanResult } from '@/lib/services/anti-quishing-service';
 
-export default function SecurityWarningPage() {
+function SecurityWarningContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const url = searchParams.get('url');
@@ -199,5 +199,13 @@ export default function SecurityWarningPage() {
         )}
       </Card>
     </div>
+  );
+}
+
+export default function SecurityWarningPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <SecurityWarningContent />
+    </Suspense>
   );
 }

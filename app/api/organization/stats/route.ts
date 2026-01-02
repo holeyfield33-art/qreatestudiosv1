@@ -12,14 +12,14 @@ export async function GET(req: Request) {
 
     const userOrg = await prisma.organizationMember.findFirst({
       where: { userId: session.user.id },
-      include: { organization: true },
+      include: { Organization: true },
     });
 
     if (!userOrg) {
       return NextResponse.json({ error: 'No organization found' }, { status: 404 });
     }
 
-    if (!userOrg.organization.isWhiteLabel) {
+    if (!userOrg.Organization.isWhiteLabel) {
       return NextResponse.json(
         { error: 'White-label feature not enabled' },
         { status: 403 }
@@ -27,7 +27,7 @@ export async function GET(req: Request) {
     }
 
     const stats = await getWhiteLabelStats(userOrg.organizationId);
-    const revenueShare = userOrg.organization.revenueShare || 70;
+    const revenueShare = userOrg.Organization.revenueShare || 70;
 
     return NextResponse.json({
       success: true,

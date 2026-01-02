@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
 
 export async function POST(req: Request) {
   try {
@@ -14,7 +15,7 @@ export async function POST(req: Request) {
     const userOrg = await prisma.organizationMember.findFirst({
       where: { userId: session.user.id },
       include: { 
-        organization: {
+        Organization: {
           select: {
             id: true,
             name: true,
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No organization found' }, { status: 404 });
     }
 
-    if (!userOrg.organization.isWhiteLabel) {
+    if (!userOrg.Organization.isWhiteLabel) {
       return NextResponse.json(
         { error: 'White-label feature not enabled for your organization' },
         { status: 403 }
@@ -72,17 +73,20 @@ export async function POST(req: Request) {
     // Create sub-account
     const subAccount = await prisma.user.create({
       data: {
+        id: randomUUID(),
         name,
         email,
         password: hashedPassword,
         isSubAccount: true,
         parentOrganizationId: userOrg.organizationId,
+        updatedAt: new Date(),
       },
     });
 
     // Add to organization
     await prisma.organizationMember.create({
       data: {
+        id: randomUUID(),
         userId: subAccount.id,
         organizationId: userOrg.organizationId,
         role: role || 'MEMBER',
@@ -121,7 +125,7 @@ export async function GET(req: Request) {
     const userOrg = await prisma.organizationMember.findFirst({
       where: { userId: session.user.id },
       include: { 
-        organization: {
+        Organization: {
           select: {
             id: true,
             name: true,
@@ -138,7 +142,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'No organization found' }, { status: 404 });
     }
 
-    if (!userOrg.organization.isWhiteLabel) {
+    if (!userOrg.Organization.isWhiteLabel) {
       return NextResponse.json(
         { error: 'White-label feature not enabled' },
         { status: 403 }
@@ -156,7 +160,7 @@ export async function GET(req: Request) {
         name: true,
         email: true,
         createdAt: true,
-        organizations: {
+        OrganizationMember: {
           where: { organizationId: userOrg.organizationId },
           select: { role: true },
         },
@@ -171,7 +175,7 @@ export async function GET(req: Request) {
         name: account.name,
         email: account.email,
         createdAt: account.createdAt,
-        role: account.organizations?.[0]?.role || 'MEMBER',
+        role: account.OrganizationMember?.[0]?.role || 'MEMBER',
       })),
     });
   } catch (error) {
@@ -203,7 +207,7 @@ export async function DELETE(req: Request) {
     const userOrg = await prisma.organizationMember.findFirst({
       where: { userId: session.user.id },
       include: { 
-        organization: {
+        Organization: {
           select: {
             id: true,
             name: true,
@@ -216,7 +220,7 @@ export async function DELETE(req: Request) {
       },
     });
 
-    if (!userOrg?.organization.isWhiteLabel) {
+    if (!userOrg?.Organization.isWhiteLabel) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
 

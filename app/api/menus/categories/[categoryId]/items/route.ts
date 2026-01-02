@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { randomUUID } from 'crypto';
 
 export async function POST(
   req: Request,
@@ -27,15 +28,16 @@ export async function POST(
     // Verify ownership through category -> menu
     const category = await prisma.menuCategory.findUnique({
       where: { id: categoryId },
-      include: { menu: true },
+      include: { Menu: true },
     });
 
-    if (!category || category.menu.userId !== session.user.id) {
+    if (!category || category.Menu.userId !== session.user.id) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
     const item = await prisma.menuItem.create({
       data: {
+        id: randomUUID(),
         categoryId,
         name,
         description,
@@ -44,6 +46,7 @@ export async function POST(
         isAvailable: isAvailable !== false,
         dietaryTags,
         displayOrder: displayOrder || 0,
+        updatedAt: new Date(),
       },
     });
 

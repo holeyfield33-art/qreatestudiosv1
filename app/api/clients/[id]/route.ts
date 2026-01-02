@@ -17,12 +17,12 @@ export async function GET(
     const client = await prisma.client.findUnique({
       where: { id },
       include: {
-        qrCodes: { orderBy: { createdAt: 'desc' }, take: 5 },
-        menus: { orderBy: { createdAt: 'desc' }, take: 5 },
+        QRCode: { orderBy: { createdAt: 'desc' }, take: 5 },
+        Menu: { orderBy: { createdAt: 'desc' }, take: 5 },
         _count: {
           select: {
-            qrCodes: true,
-            menus: true,
+            QRCode: true,
+            Menu: true,
           },
         },
       },

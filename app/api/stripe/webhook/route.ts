@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/services/stripe-service';
 import { prisma } from '@/lib/prisma';
+import { randomUUID } from 'crypto';
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -57,6 +58,7 @@ export async function POST(req: Request) {
             currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
           },
           create: {
+            id: randomUUID(),
             userId,
             plan,
             status: 'ACTIVE' as const,
@@ -64,6 +66,7 @@ export async function POST(req: Request) {
             stripeSubscriptionId: session.subscription as string,
             currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
             currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+            updatedAt: new Date(),
           },
         });
 

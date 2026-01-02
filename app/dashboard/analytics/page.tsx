@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyAnalytics } from '@/components/empty-states/empty-analytics';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { 
   LineChart, 
   Line, 
@@ -21,7 +22,7 @@ import {
   Bar,
   Legend
 } from 'recharts';
-import { BarChart3, TrendingUp, Users, Activity, Download } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, Activity, Download, ArrowLeft } from 'lucide-react';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -76,9 +77,7 @@ export default function AnalyticsPage() {
       setOverviewData(result);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        if (process.env.NODE_ENV === 'development') {
-        if (process.env.NODE_ENV === 'development') console.error('Failed to load analytics:', error);
-        }
+        console.error('Failed to load analytics:', error);
       }
       toast.error('Failed to load analytics data');
     } finally {
@@ -96,9 +95,7 @@ export default function AnalyticsPage() {
       setQrData(result);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        if (process.env.NODE_ENV === 'development') {
-        if (process.env.NODE_ENV === 'development') console.error('Failed to load QR analytics:', error);
-        }
+        console.error('Failed to load QR analytics:', error);
       }
       toast.error('Failed to load QR analytics');
     } finally {
@@ -146,9 +143,20 @@ export default function AnalyticsPage() {
   if (selectedView === 'qr' && qrData) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">QR Code Analytics</h1>
-          <p className="text-muted-foreground">Detailed performance metrics</p>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.history.back()}
+            className="min-h-[44px] min-w-[44px]"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">QR Code Analytics</h1>
+            <p className="text-muted-foreground">Detailed performance metrics</p>
+          </div>
         </div>
 
         {/* QR-specific stats */}
@@ -294,9 +302,20 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Analytics Overview</h1>
-        <p className="text-muted-foreground">Track your QR code performance</p>
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => window.history.back()}
+          className="min-h-[44px] min-w-[44px]"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Analytics Overview</h1>
+          <p className="text-muted-foreground">Track your QR code performance</p>
+        </div>
       </div>
 
       {/* Overview stats */}

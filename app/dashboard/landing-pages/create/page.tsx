@@ -1,18 +1,27 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { LANDING_PAGE_TEMPLATES } from '@/lib/templates/landing-page-templates';
+import Image from 'next/image';
 
 export default function CreateLandingPagePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const templateParam = searchParams.get('template');
+    if (templateParam) {
+      setSelectedTemplate(templateParam);
+    }
+  }, [searchParams]);
 
   async function handleTemplateSelect(templateId: string) {
     setSelectedTemplate(templateId);
@@ -40,8 +49,12 @@ export default function CreateLandingPagePage() {
         body: JSON.stringify({
           title: template.name,
           slug,
-          content: { sections: template.sections },
-          theme: {},
+          content: { 
+            html: template.html,
+            templateId: template.id,
+            metadata: template.metadata 
+          },
+          theme: template.metadata?.colorScheme || {},
         }),
       });
 
@@ -55,7 +68,7 @@ export default function CreateLandingPagePage() {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-      if (process.env.NODE_ENV === 'development') console.error('Template creation error:', error);
+        console.error('Template creation error:', error);
       }
       toast.error('An error occurred');
     } finally {
@@ -84,14 +97,14 @@ export default function CreateLandingPagePage() {
       <div>
         <h2 className="text-2xl font-semibold mb-4">Choose a Template</h2>
         
-        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6" role="list" aria-label="Landing page templates">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" role="list" aria-label="Landing page templates">
           {LANDING_PAGE_TEMPLATES.map((template) => (
             <Card
               key={template.id}
-              className={`p-4 cursor-pointer transition focus:outline-none focus:ring-2 focus:ring-ring ${
+              className={`overflow-hidden cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring ${
                 selectedTemplate === template.id
-                  ? 'border-2 border-blue-600 bg-blue-50'
-                  : 'hover:border-gray-400'
+                  ? 'border-2 border-blue-600 shadow-lg'
+                  : 'hover:border-gray-400 hover:shadow-md'
               }`}
               onClick={() => handleTemplateSelect(template.id)}
               role="radio"
@@ -104,18 +117,39 @@ export default function CreateLandingPagePage() {
                 }
               }}
             >
-              <div className="aspect-video bg-gray-200 rounded mb-3 flex items-center justify-center">
-                <span className="text-4xl" role="img" aria-label={template.name}>
-                  {getTemplateIcon(template.id)}
-                </span>
+              <div className="relative aspect-video bg-gray-200">
+                {template.previewImage ? (
+                  <Image
+                    src={template.previewImage}
+                    alt={template.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-4xl" role="img" aria-label={template.name}>
+                      {getTemplateIcon(template.id)}
+                    </span>
+                  </div>
+                )}
+                {selectedTemplate === template.id && (
+                  <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
+                    <div className="bg-blue-600 text-white rounded-full p-2">
+                      ✓
+                    </div>
+                  </div>
+                )}
               </div>
-              <h3 className="font-semibold mb-1">{template.name}</h3>
-              <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                {template.description}
-              </p>
-              <Badge variant="secondary" className="text-xs">
-                {template.category}
-              </Badge>
+              <div className="p-4">
+                <h3 className="font-semibold mb-1">{template.name}</h3>
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                  {template.description}
+                </p>
+                <Badge variant="secondary" className="text-xs">
+                  {template.category}
+                </Badge>
+              </div>
             </Card>
           ))}
         </div>

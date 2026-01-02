@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { randomUUID } from 'crypto';
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -21,6 +22,7 @@ export async function POST(req: Request) {
   try {
     const report = await prisma.securityReport.create({
       data: {
+        id: randomUUID(),
         qrCodeId,
         reportType,
         description: description || null,
@@ -57,7 +59,7 @@ export async function GET(req: Request) {
     const reports = await prisma.securityReport.findMany({
       where: status ? { status: status as any } : undefined,
       include: {
-        qrCode: {
+        QRCode: {
           select: {
             name: true,
             redirectUrl: true,

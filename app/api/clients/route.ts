@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { randomUUID } from 'crypto';
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -18,12 +19,14 @@ export async function POST(req: Request) {
 
     const client = await prisma.client.create({
       data: {
+        id: randomUUID(),
         userId: session.user.id,
         name,
         email,
         phone,
         address,
         notes,
+        updatedAt: new Date(),
       },
     });
 
@@ -63,8 +66,8 @@ export async function GET(req: Request) {
       include: {
         _count: {
           select: {
-            qrCodes: true,
-            menus: true,
+            QRCode: true,
+            Menu: true,
           },
         },
       },

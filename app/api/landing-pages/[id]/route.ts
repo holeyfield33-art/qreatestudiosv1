@@ -17,7 +17,7 @@ export async function GET(req: Request, context: RouteContext) {
   try {
     const landingPage = await prisma.landingPage.findUnique({
       where: { id },
-      include: { qrCode: true },
+      include: { QRCode: true },
     });
 
     if (!landingPage || landingPage.userId !== session.user.id) {

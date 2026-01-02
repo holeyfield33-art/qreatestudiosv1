@@ -1,5 +1,6 @@
 import { UAParser } from 'ua-parser-js';
 import { prisma } from '@/lib/prisma';
+import { randomUUID } from 'crypto';
 
 export interface ScanData {
   deviceType?: string;
@@ -26,6 +27,7 @@ export async function trackScan(
 
     await prisma.analytics.create({
       data: {
+        id: randomUUID(),
         qrCodeId,
         deviceType: device.type || 'desktop',
         browser: browser.name || 'unknown',
@@ -114,17 +116,17 @@ export async function getQRAnalytics(
 export async function getUserAnalytics(userId: string) {
   const [totalScans, qrCodes, recentScans] = await Promise.all([
     prisma.analytics.count({
-      where: { qrCode: { userId } },
+      where: { QRCode: { userId } },
     }),
     prisma.qRCode.count({
       where: { userId, isActive: true },
     }),
     prisma.analytics.findMany({
-      where: { qrCode: { userId } },
+      where: { QRCode: { userId } },
       take: 10,
       orderBy: { scannedAt: 'desc' },
       include: {
-        qrCode: { select: { name: true } },
+        QRCode: { select: { name: true } },
       },
     }),
   ]);

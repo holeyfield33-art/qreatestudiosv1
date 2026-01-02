@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { generateUniqueShortCode } from '@/lib/services/qr-service';
 import { getBaseUrl } from '@/lib/utils/urls';
 import { canCreateQR } from '@/lib/services/usage-enforcement';
+import { randomUUID } from 'crypto';
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -53,6 +54,7 @@ export async function POST(req: Request) {
 
     const qrCode = await prisma.qRCode.create({
       data: {
+        id: randomUUID(),
         userId: session.user.id,
         clientId: clientId || null,
         name,
@@ -67,6 +69,7 @@ export async function POST(req: Request) {
         password: password || null,
         expiresAt: expiresAt ? new Date(expiresAt) : null,
         maxScans: maxScans || null,
+        updatedAt: new Date(),
       },
     });
 
@@ -119,7 +122,7 @@ export async function GET(req: Request) {
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          client: { select: { name: true } },
+          Client: { select: { name: true } },
         },
       }),
       prisma.qRCode.count({ where }),

@@ -17,8 +17,8 @@ export async function GET(
     const qrCode = await prisma.qRCode.findUnique({
       where: { id },
       include: {
-        client: true,
-        analytics: {
+        Client: true,
+        Analytics: {
           take: 10,
           orderBy: { scannedAt: 'desc' },
         },

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { randomUUID } from 'crypto';
 
 export async function POST(
   req: Request,
@@ -32,6 +33,7 @@ export async function POST(
 
     const category = await prisma.menuCategory.create({
       data: {
+        id: randomUUID(),
         menuId: id,
         name,
         description,

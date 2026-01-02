@@ -73,7 +73,7 @@ export default function AIToolsPage() {
       setUsage(data);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-      if (process.env.NODE_ENV === 'development') console.error('Failed to load usage:', error);
+        console.error('Failed to load usage:', error);
       }
     } finally {
       setLoading(false);

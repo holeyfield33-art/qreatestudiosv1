@@ -18,8 +18,8 @@ export async function GET(
     const order = await prisma.printOrder.findUnique({
       where: { id },
       include: {
-        qrCode: true,
-        user: true,
+        QRCode: true,
+        User: true,
       },
     });
 

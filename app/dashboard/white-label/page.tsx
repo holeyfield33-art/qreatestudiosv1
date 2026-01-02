@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Copy, Check, Trash2, UserPlus } from 'lucide-react';
+import { Copy, Check, Trash2, UserPlus, ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface BrandingConfig {
   companyName: string;
@@ -41,6 +42,7 @@ interface Stats {
 }
 
 export default function WhiteLabelPage() {
+  const router = useRouter();
   const [branding, setBranding] = useState<BrandingConfig>({
     companyName: '',
     logo: { url: '' },
@@ -71,7 +73,7 @@ export default function WhiteLabelPage() {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-      if (process.env.NODE_ENV === 'development') console.error('Error fetching branding:', error);
+        console.error('Error fetching branding:', error);
       }
     }
   };
@@ -86,7 +88,7 @@ export default function WhiteLabelPage() {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-      if (process.env.NODE_ENV === 'development') console.error('Error fetching domain:', error);
+        console.error('Error fetching domain:', error);
       }
     }
   };
@@ -100,7 +102,7 @@ export default function WhiteLabelPage() {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-      if (process.env.NODE_ENV === 'development') console.error('Error fetching sub-accounts:', error);
+        console.error('Error fetching sub-accounts:', error);
       }
     }
   };
@@ -114,7 +116,7 @@ export default function WhiteLabelPage() {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-      if (process.env.NODE_ENV === 'development') console.error('Error fetching stats:', error);
+        console.error('Error fetching stats:', error);
       }
     }
   };
@@ -246,11 +248,22 @@ export default function WhiteLabelPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">White-Label Management</h1>
-        <p className="text-muted-foreground">
-          Customize your platform branding, configure custom domains, and manage client sub-accounts
-        </p>
+      <div className="mb-8 flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/dashboard')}
+          className="min-h-[44px] min-w-[44px]"
+          aria-label="Back to dashboard"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold mb-2">White-Label Management</h1>
+          <p className="text-muted-foreground">
+            Customize your platform branding, configure custom domains, and manage client sub-accounts
+          </p>
+        </div>
       </div>
 
       <Tabs defaultValue="branding" className="space-y-6">

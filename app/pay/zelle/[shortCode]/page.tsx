@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { randomUUID } from 'crypto';
 
 interface ZellePaymentPageProps {
   params: Promise<{ shortCode: string }>;
@@ -22,6 +23,7 @@ export default async function ZellePaymentPage({ params }: ZellePaymentPageProps
   // Track page view asynchronously
   prisma.analytics.create({
     data: {
+      id: randomUUID(),
       qrCodeId: qrCode.id,
       deviceType: 'unknown',
     },

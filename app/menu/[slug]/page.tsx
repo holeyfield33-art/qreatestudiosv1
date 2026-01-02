@@ -13,10 +13,10 @@ export default async function PublicMenuPage({ params }: PublicMenuPageProps) {
   const menu = await prisma.menu.findUnique({
     where: { slug },
     include: {
-      categories: {
-        where: { items: { some: {} } }, // Only categories with items
+      MenuCategory: {
+        where: { MenuItem: { some: {} } }, // Only categories with items
         include: {
-          items: {
+          MenuItem: {
             where: { isAvailable: true },
             orderBy: { displayOrder: 'asc' },
           },
@@ -127,13 +127,13 @@ export default async function PublicMenuPage({ params }: PublicMenuPageProps) {
 
       {/* Menu Content */}
       <main id="menu-content" className="max-w-4xl mx-auto px-4 py-8">
-        {menu.categories.length === 0 ? (
+        {menu.MenuCategory.length === 0 ? (
           <div className="bg-white rounded-lg p-12 text-center">
             <p className="text-muted-foreground">No menu items available at this time.</p>
           </div>
         ) : (
           <div className="space-y-8">
-            {menu.categories.map((category) => (
+            {menu.MenuCategory.map((category) => (
               <section key={category.id} className="bg-white rounded-lg p-6 shadow-sm">
                 <h2 className="text-2xl font-bold mb-2">{category.name}</h2>
                 {category.description && (
@@ -141,7 +141,7 @@ export default async function PublicMenuPage({ params }: PublicMenuPageProps) {
                 )}
 
                 <div className="space-y-4">
-                  {category.items.map((item) => (
+                  {category.MenuItem.map((item) => (
                     <article
                       key={item.id}
                       className="flex justify-between items-start gap-4 pb-4 border-b last:border-b-0"
@@ -204,11 +204,11 @@ export default async function PublicMenuPage({ params }: PublicMenuPageProps) {
               '@type': 'Menu',
               name: menu.name,
               description: menu.description,
-              hasMenuSection: menu.categories.map((cat) => ({
+              hasMenuSection: menu.MenuCategory.map((cat) => ({
                 '@type': 'MenuSection',
                 name: cat.name,
                 description: cat.description,
-                hasMenuItem: cat.items.map((item) => ({
+                hasMenuItem: cat.MenuItem.map((item) => ({
                   '@type': 'MenuItem',
                   name: item.name,
                   description: item.description,

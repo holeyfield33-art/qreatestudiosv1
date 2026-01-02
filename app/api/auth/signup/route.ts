@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { hash } from 'bcryptjs'
 import { z } from 'zod'
+import { randomUUID } from 'crypto'
 
 const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -38,9 +39,11 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.create({
       data: {
+        id: randomUUID(),
         name,
         email,
         password: hashedPassword,
+        updatedAt: new Date(),
       },
     })
 
@@ -58,7 +61,6 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error('Signup error:', error)
-    }
     }
     return NextResponse.json(
       { error: 'Something went wrong' },

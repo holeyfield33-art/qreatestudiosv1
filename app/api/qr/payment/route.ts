@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { generateUniqueShortCode } from '@/lib/services/qr-service';
 import { generatePaymentUrl, validatePaymentHandle } from '@/lib/services/payment-service';
 import { getBaseUrl } from '@/lib/utils/urls';
+import { randomUUID } from 'crypto';
 
 /**
  * POST /api/qr/payment - Create a new payment QR code
@@ -58,6 +59,7 @@ export async function POST(req: Request) {
 
     const qrCode = await prisma.qRCode.create({
       data: {
+        id: randomUUID(),
         userId: session.user.id,
         clientId: clientId || null,
         name,
@@ -74,6 +76,7 @@ export async function POST(req: Request) {
         paymentNote: paymentNote || null,
         allowTips: allowTips || false,
         tipAmounts: tipAmounts || null,
+        updatedAt: new Date(),
       },
     });
 

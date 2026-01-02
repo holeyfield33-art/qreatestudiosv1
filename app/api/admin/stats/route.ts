@@ -37,12 +37,12 @@ export async function GET(req: Request) {
       prisma.user.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
-        include: { subscription: true },
+        include: { Subscription: true },
       }),
       prisma.securityReport.findMany({
         where: { status: 'pending' as const },
         take: 5,
-        include: { qrCode: { select: { name: true } } },
+        include: { QRCode: { select: { name: true } } },
         orderBy: { createdAt: 'desc' },
       }),
     ]);

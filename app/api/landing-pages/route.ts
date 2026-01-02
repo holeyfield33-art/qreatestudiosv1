@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { randomUUID } from 'crypto';
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -27,6 +28,7 @@ export async function POST(req: Request) {
 
     const landingPage = await prisma.landingPage.create({
       data: {
+        id: randomUUID(),
         userId: session.user.id,
         qrCodeId: qrCodeId || null,
         title,
@@ -34,6 +36,7 @@ export async function POST(req: Request) {
         content: content || {},
         theme: theme || {},
         published: false,
+        updatedAt: new Date(),
       },
     });
 
@@ -60,7 +63,7 @@ export async function GET(req: Request) {
       where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
       include: {
-        qrCode: { select: { name: true, shortCode: true } },
+        QRCode: { select: { name: true, shortCode: true } },
       },
     });
 

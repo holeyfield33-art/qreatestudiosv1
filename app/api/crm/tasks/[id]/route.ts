@@ -17,7 +17,7 @@ export async function GET(
     const task = await prisma.task.findUnique({
       where: { id },
       include: {
-        contact: true,
+        Contact: true,
       },
     });
 
