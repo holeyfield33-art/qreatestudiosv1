@@ -93,7 +93,7 @@ export default function QRCodeDisplay({
 
   try {
     return (
-      <div className={`qr-code-container bg-white p-4 rounded-lg shadow-sm ${className}`}>
+      <div className={`qr-code-container bg-white p-4 rounded-lg shadow-sm ${className}`} key={value}>
         <QRCodeSVG
           value={value}
           size={size}

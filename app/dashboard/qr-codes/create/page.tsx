@@ -23,7 +23,7 @@ const QR_TYPES = [
   { id: 'SMS', name: 'SMS', icon: '💬', description: 'Text message' },
   { id: 'PHONE', name: 'Phone', icon: '📞', description: 'Phone number' },
   { id: 'TEXT', name: 'Text', icon: '📝', description: 'Plain text' },
-  { id: 'PAYMENT', name: 'Payment', icon: '💳', description: 'Payment link' },
+  { id: 'PAYMENT_LINK', name: 'Payment', icon: '💳', description: 'Payment link' },
   { id: 'MENU', name: 'Menu', icon: '🍽️', description: 'Digital menu' },
   { id: 'LANDING_PAGE', name: 'Landing', icon: '🚀', description: 'Landing page' },
   { id: 'LOCATION', name: 'Location', icon: '📍', description: 'GPS coordinates' },
@@ -156,7 +156,7 @@ export default function CreateQRCodePage() {
       case 'TEXT':
         return data.textContent;
       
-      case 'PAYMENT':
+      case 'PAYMENT_LINK':
         const platform = PAYMENT_PLATFORMS.find(p => p.id === data.paymentPlatform);
         if (!data.paymentHandle) return '';
         if (data.paymentPlatform === 'bitcoin') {
@@ -618,7 +618,7 @@ export default function CreateQRCodePage() {
                 )}
 
                 {/* Payment Type */}
-                {qrType === 'PAYMENT' && (
+                {qrType === 'PAYMENT_LINK' && (
                   <>
                     <div>
                       <Label htmlFor="paymentPlatform">Payment Platform *</Label>
@@ -949,7 +949,7 @@ export default function CreateQRCodePage() {
               <CardDescription>Your QR code will look like this</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
-              <div className="relative">
+              <div className="relative" key={`${qrValue}-${qrStyle.fgColor}-${qrStyle.bgColor}-${qrStyle.dotStyle}`}>
                 <QRCodeDisplay
                   value={qrValue || 'https://qreatestudios.com'}
                   size={qrStyle.size}
