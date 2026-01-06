@@ -8,6 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AIOptimizationDialog } from '@/components/qr/AIOptimizationDialog';
+import QRCodeDisplay from '@/components/qr/QRCodeDisplay';
+import { downloadQRCode } from '@/lib/utils/qr-download';
 import { motion } from 'framer-motion';
 import { 
   Dialog,
@@ -29,7 +32,9 @@ import {
   BarChart3,
   Calendar,
   Eye,
-  QrCode as QrCodeIcon
+  QrCode as QrCodeIcon,
+  CreditCard,
+  Share2
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -65,12 +70,26 @@ export default function QRDetailPage() {
   const [editing, setEditing] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
+  const [aiCredits, setAiCredits] = useState({ remaining: 0, plan: 'free' });
 
   useEffect(() => {
     if (qrId) {
       fetchQRCode();
+      fetchAICredits();
     }
   }, [qrId]);
+
+  async function fetchAICredits() {
+    try {
+      const res = await fetch('/api/ai/credits');
+      if (res.ok) {
+        const data = await res.json();
+        setAiCredits({ remaining: data.remaining, plan: data.plan });
+      }
+    } catch (error) {
+      console.error('Failed to fetch AI credits:', error);
+    }
+  }
 
   async function fetchQRCode() {
     try {
@@ -112,20 +131,13 @@ export default function QRDetailPage() {
     }
   }
 
-  async function handleDownload(format: 'png' | 'svg') {
+  async function handleDownload(format: 'png' | 'svg', size: number = 2048) {
     try {
-      const res = await fetch(`/api/qr/${qrId}/download?format=${format}`);
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${qrCode.name}.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast.success('QR code downloaded');
+      const filename = qrCode.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      await downloadQRCode('.qr-code-container', filename, format, size);
+      toast.success(`QR code downloaded as ${format.toUpperCase()}`);
     } catch (error) {
+      console.error('Download error:', error);
       toast.error('Failed to download QR code');
     }
   }
@@ -217,38 +229,94 @@ export default function QRDetailPage() {
         {/* QR Code Preview */}
         <Card className="p-6">
           <h2 className="text-lg font-semibold mb-4">QR Code Preview</h2>
-          <div className="flex justify-center bg-white p-6 rounded-lg border mb-4">
-            {qrDataUrl ? (
-              <img 
-                src={qrDataUrl} 
-                alt={`QR code for ${qrCode.name}`} 
-                className="w-64 h-64"
+          <div className="flex justify-center mb-4">
+            <QRCodeDisplay
+              value={qrCode.redirectUrl || `${window.location.origin}/${qrCode.shortCode}`}
+              size={300}
+              fgColor={qrCode.style?.fgColor || '#000000'}
+              bgColor={qrCode.style?.bgColor || '#FFFFFF'}
+              level="M"
+              includeMargin={true}
+            />
+          </div>
+          
+          {/* Download Options */}
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => handleDownload('png', 512)} 
+                className="flex-1"
+                size="sm"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                PNG (512px)
+              </Button>
+              <Button 
+                onClick={() => handleDownload('png', 1024)} 
+                variant="outline" 
+                className="flex-1"
+                size="sm"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                PNG (1024px)
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => handleDownload('png', 2048)} 
+                variant="outline" 
+                className="flex-1"
+                size="sm"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                PNG (2048px)
+              </Button>
+              <Button 
+                onClick={() => handleDownload('svg')} 
+                variant="outline" 
+                className="flex-1"
+                size="sm"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                SVG
+              </Button>
+            </div>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={copyShortUrl}
+            >
+              <Share2 className="mr-2 h-4 w-4" />
+              Copy Share Link
+            </Button>
+          </div>
+
+          {/* NFC Product Order CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Button
+              variant="outline"
+              className="w-full mt-4 border-blue-200 hover:border-blue-300 hover:bg-blue-50 relative overflow-hidden group"
+              onClick={() => router.push(`/dashboard/qr-codes/${qrCode.id}/order-nfc`)}
+            >
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-blue-100/50 to-purple-100/50"
+                animate={{
+                  opacity: [0.3, 0.5, 0.3],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
               />
-            ) : (
-              <div className="w-64 h-64 flex items-center justify-center bg-muted rounded">
-                <QrCodeIcon className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
-              </div>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button 
-              onClick={() => handleDownload('png')} 
-              className="flex-1"
-              aria-label="Download as PNG"
-            >
-              <Download className="mr-2 h-4 w-4" aria-hidden="true" />
-              PNG
+              <CreditCard className="mr-2 h-4 w-4 relative z-10" />
+              <span className="relative z-10">Get Physical NFC Card/Sticker</span>
             </Button>
-            <Button 
-              onClick={() => handleDownload('svg')} 
-              variant="outline" 
-              className="flex-1"
-              aria-label="Download as SVG"
-            >
-              <Download className="mr-2 h-4 w-4" aria-hidden="true" />
-              SVG
-            </Button>
-          </div>
+          </motion.div>
         </Card>
 
         {/* Details */}
@@ -355,23 +423,23 @@ export default function QRDetailPage() {
       <Card className="p-6">
         <h2 className="text-lg font-semibold mb-4">Actions</h2>
         <div className="flex flex-wrap gap-3">
-          {/* AI Optimize - Pro+ */}
-          <Button 
-            variant="default"
-            onClick={() => {
-              if (features.canUseAIOptimization) {
-                router.push(`/dashboard/qr-codes/${qrCode.id}/optimize`);
-              } else {
-                router.push('/pricing');
-              }
-            }}
-            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
-            disabled={featuresLoading}
-          >
-            <span className="mr-2" aria-hidden="true">🤖</span>
-            AI Optimize
-            {!features.canUseAIOptimization && <Badge className="ml-2" variant="secondary">Pro</Badge>}
-          </Button>
+          {/* AI Optimize Dialog */}
+          {qrCode && (
+            <AIOptimizationDialog
+              qrCode={{
+                id: qrCode.id,
+                url: qrCode.targetUrl || qrCode.redirectUrl,
+                name: qrCode.name,
+                scans: qrCode.scanCount || 0,
+              }}
+              remainingCredits={aiCredits.remaining}
+              plan={aiCredits.plan}
+              onOptimizationComplete={() => {
+                fetchAICredits();
+                toast.success('Check the suggestions above!');
+              }}
+            />
+          )}
 
           {/* Advanced Analytics - Pro+ */}
           <Button 

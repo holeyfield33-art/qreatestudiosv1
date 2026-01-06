@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyAnalytics } from '@/components/empty-states/empty-analytics';
+import { MapboxHeatmap } from '@/components/analytics/MapboxHeatmap';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { 
@@ -296,6 +297,14 @@ export default function AnalyticsPage() {
             </Card>
           )}
         </div>
+
+        {/* Geographic Distribution Map */}
+        {qrData.locations && (
+          <MapboxHeatmap 
+            data={qrData.locations} 
+            isLoading={loading}
+          />
+        )}
       </div>
     );
   }

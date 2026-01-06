@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Settings, User, LogOut } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
+import { AICreditsWidget } from '@/components/ai/AICreditsWidget'
 
 interface DashboardHeaderProps {
   title: string
@@ -41,7 +42,10 @@ export function DashboardHeader({ title, user }: DashboardHeaderProps) {
           {title}
         </h1>
 
-        <DropdownMenu>
+        <div className="flex items-center gap-4">
+          <AICreditsWidget />
+          
+          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
@@ -84,6 +88,7 @@ export function DashboardHeader({ title, user }: DashboardHeaderProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       </div>
     </header>
   )

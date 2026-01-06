@@ -35,6 +35,7 @@ interface DashboardNavProps {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'AI Studio', href: '/dashboard/ai-studio', icon: Sparkles, badge: 'NEW', badgeColor: 'bg-purple-500 text-white' },
   { name: 'QR Codes', href: '/dashboard/qr-codes', icon: QrCode },
   { name: 'Landing Pages', href: '/dashboard/landing-pages', icon: Sparkles },
   { name: 'Menus', href: '/dashboard/menus', icon: Menu },
@@ -42,7 +43,6 @@ const navigation = [
   { name: 'Clients', href: '/dashboard/clients', icon: Users },
   { name: 'CRM', href: '/dashboard/crm', icon: UserCircle },
   { name: 'Print Orders', href: '/dashboard/print', icon: Printer },
-  { name: 'AI Tools', href: '/dashboard/ai', icon: Sparkles },
   { name: 'White-Label', href: '/dashboard/white-label', icon: Palette, requiresWhiteLabel: true },
   { name: 'Billing', href: '/dashboard/billing', icon: Settings },
 ]
@@ -92,13 +92,14 @@ export function DashboardNav({ user }: DashboardNavProps) {
           {visibleNavigation.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             const Icon = item.icon
+            const showBadge = 'badge' in item && item.badge
             
             return (
               <li key={item.name}>
                 <Link
                   href={item.href}
                   className={cn(
-                    'flex items-center space-x-3 rounded-md px-3 py-2 text-sm transition-all duration-200 cursor-pointer',
+                    'flex items-center justify-between space-x-3 rounded-md px-3 py-2 text-sm transition-all duration-200 cursor-pointer',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
                     'min-h-[44px]', // Minimum touch target size
                     isActive
@@ -107,8 +108,18 @@ export function DashboardNav({ user }: DashboardNavProps) {
                   )}
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
-                  <span>{item.name}</span>
+                  <div className="flex items-center space-x-3">
+                    <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                    <span>{item.name}</span>
+                  </div>
+                  {showBadge && (
+                    <span className={cn(
+                      'text-xs px-2 py-0.5 rounded-full font-bold',
+                      'badgeColor' in item ? item.badgeColor : 'bg-blue-500 text-white'
+                    )}>
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               </li>
             )

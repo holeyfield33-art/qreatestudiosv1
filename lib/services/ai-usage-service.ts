@@ -8,7 +8,9 @@ export async function trackAIUsage(
   userId: string,
   feature: string,
   tokensUsed: { prompt: number; completion: number; total: number },
-  cost: number
+  cost: number,
+  prompt: string = '',
+  response: string = ''
 ): Promise<void> {
   try {
     await prisma.aIUsage.create({
@@ -16,6 +18,9 @@ export async function trackAIUsage(
         id: randomUUID(),
         userId,
         feature,
+        prompt: prompt || 'N/A',
+        response: response || 'N/A',
+        tokensUsed: tokensUsed.total,
         model: 'gpt-4o',
         promptTokens: tokensUsed.prompt,
         completionTokens: tokensUsed.completion,

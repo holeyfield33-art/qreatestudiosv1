@@ -127,7 +127,7 @@ export async function getUserLimits(userId: string): Promise<{
   });
 
   const totalTokensUsed = aiUsageRecords.reduce(
-    (sum, record) => sum + record.totalTokens,
+    (sum, record) => sum + (record.totalTokens || 0),
     0
   );
 

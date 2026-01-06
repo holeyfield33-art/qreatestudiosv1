@@ -5,6 +5,7 @@ import { DashboardHeader } from '@/components/layout/dashboard-header'
 import { SkipLink } from '@/components/ui/skip-link'
 import { Toaster } from '@/components/ui/sonner'
 import { PageTransition } from '@/components/page-transition'
+import { AIChatInterface } from '@/components/ai/AIChatInterface'
 
 export default async function DashboardLayout({
   children,
@@ -30,6 +31,7 @@ export default async function DashboardLayout({
         </main>
       </div>
       <Toaster position="top-right" />
+      <AIChatInterface />
     </div>
   )
 }

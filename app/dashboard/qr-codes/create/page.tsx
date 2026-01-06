@@ -1,836 +1,993 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import QRCodeDisplay from '@/components/qr/QRCodeDisplay';
+import { generateShortCode } from '@/lib/utils/qr-download';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
-import { ArrowLeft, QrCode, Sparkles, X } from 'lucide-react';
-import { getTemplateById, type QRTemplate } from '@/lib/templates/qr-templates';
-import { validateQRCodeColors } from '@/lib/utils/color-contrast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, Upload, Sparkles, Zap } from 'lucide-react';
+import Link from 'next/link';
 
-// Dynamic schema that adapts based on QR type
-const createQRSchema = (type: string) => {
-  const baseSchema = {
-    name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
-    description: z.string().optional(),
-    type: z.enum(['URL', 'VCARD', 'EMAIL', 'SMS', 'WIFI', 'TEXT', 'PHONE', 'MENU', 'PAYMENT', 'LANDING_PAGE', 'LOCATION']),
-    maxScans: z.number().optional(),
-  };
+const QR_TYPES = [
+  { id: 'URL', name: 'URL', icon: '🔗', description: 'Website or link' },
+  { id: 'VCARD', name: 'vCard', icon: '👤', description: 'Contact information' },
+  { id: 'WIFI', name: 'WiFi', icon: '📶', description: 'Network credentials' },
+  { id: 'EMAIL', name: 'Email', icon: '✉️', description: 'Email address' },
+  { id: 'SMS', name: 'SMS', icon: '💬', description: 'Text message' },
+  { id: 'PHONE', name: 'Phone', icon: '📞', description: 'Phone number' },
+  { id: 'TEXT', name: 'Text', icon: '📝', description: 'Plain text' },
+  { id: 'PAYMENT', name: 'Payment', icon: '💳', description: 'Payment link' },
+  { id: 'MENU', name: 'Menu', icon: '🍽️', description: 'Digital menu' },
+  { id: 'LANDING_PAGE', name: 'Landing', icon: '🚀', description: 'Landing page' },
+  { id: 'LOCATION', name: 'Location', icon: '📍', description: 'GPS coordinates' },
+];
 
-  switch (type) {
-    case 'URL':
-    case 'MENU':
-    case 'LANDING_PAGE':
-      return z.object({
-        ...baseSchema,
-        redirectUrl: z.string().url('Must be a valid URL'),
-      });
-    
-    case 'VCARD':
-      return z.object({
-        ...baseSchema,
-        vcardName: z.string().min(1, 'Name is required'),
-        vcardPhone: z.string().optional(),
-        vcardEmail: z.string().email('Invalid email').optional().or(z.literal('')),
-        vcardOrganization: z.string().optional(),
-        vcardWebsite: z.string().url('Invalid URL').optional().or(z.literal('')),
-      });
-    
-    case 'WIFI':
-      return z.object({
-        ...baseSchema,
-        wifiSSID: z.string().min(1, 'Network name is required'),
-        wifiPassword: z.string().optional(),
-        wifiEncryption: z.enum(['WPA', 'WEP', 'nopass']),
-      });
-    
-    case 'EMAIL':
-      return z.object({
-        ...baseSchema,
-        emailAddress: z.string().email('Invalid email address'),
-        emailSubject: z.string().optional(),
-        emailBody: z.string().optional(),
-      });
-    
-    case 'SMS':
-      return z.object({
-        ...baseSchema,
-        smsPhone: z.string().min(1, 'Phone number is required'),
-        smsMessage: z.string().optional(),
-      });
-    
-    case 'PHONE':
-      return z.object({
-        ...baseSchema,
-        phoneNumber: z.string().min(1, 'Phone number is required'),
-      });
-    
-    case 'LOCATION':
-      return z.object({
-        ...baseSchema,
-        locationLat: z.string().min(1, 'Latitude is required'),
-        locationLng: z.string().min(1, 'Longitude is required'),
-        locationAddress: z.string().optional(),
-      });
-    
-    case 'TEXT':
-      return z.object({
-        ...baseSchema,
-        textContent: z.string().min(1, 'Text content is required'),
-      });
-    
-    case 'PAYMENT':
-      return z.object({
-        ...baseSchema,
-        paymentPlatform: z.enum(['cashapp', 'zelle', 'venmo', 'paypal']),
-        paymentHandle: z.string().min(1, 'Username/handle is required'),
-      });
-    
-    default:
-      return z.object({
-        ...baseSchema,
-        redirectUrl: z.string().url('Must be a valid URL'),
-      });
-  }
-};
+const PAYMENT_PLATFORMS = [
+  { id: 'cashapp', name: 'Cash App', prefix: '$' },
+  { id: 'venmo', name: 'Venmo', prefix: '@' },
+  { id: 'paypal', name: 'PayPal', prefix: '' },
+  { id: 'zelle', name: 'Zelle', prefix: '' },
+  { id: 'apple_pay', name: 'Apple Pay', prefix: '' },
+  { id: 'google_pay', name: 'Google Pay', prefix: '' },
+  { id: 'bitcoin', name: 'Bitcoin', prefix: 'bitcoin:' },
+  { id: 'ethereum', name: 'Ethereum', prefix: '0x' },
+];
 
-type QRFormData = z.infer<ReturnType<typeof createQRSchema>>;
+const DOT_STYLES = [
+  { id: 'square', name: 'Square', preview: '■' },
+  { id: 'dots', name: 'Dots', preview: '●' },
+  { id: 'rounded', name: 'Rounded', preview: '◆' },
+  { id: 'classy', name: 'Classy', preview: '◇' },
+  { id: 'extra-rounded', name: 'Extra Rounded', preview: '◉' },
+];
 
-export default function CreateQRPage() {
+const CORNER_STYLES = [
+  { id: 'square', name: 'Square' },
+  { id: 'dot', name: 'Dot' },
+  { id: 'extra-rounded', name: 'Rounded' },
+];
+
+const FRAME_STYLES = [
+  { id: 'none', name: 'None' },
+  { id: 'simple', name: 'Simple Border' },
+  { id: 'box', name: 'Box Frame' },
+  { id: 'circular', name: 'Circular' },
+  { id: 'banner', name: 'Banner' },
+  { id: 'tooltip', name: 'Tooltip' },
+];
+
+export default function CreateQRCodePage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<QRTemplate | null>(null);
-  const [qrStyle, setQrStyle] = useState<any>(null);
-  const [contrastValidation, setContrastValidation] = useState<any>(null);
-  const [selectedType, setSelectedType] = useState<string>('URL');
-  const firstFieldRef = useRef<HTMLInputElement>(null);
-
-  // Load template from URL parameter
-  useEffect(() => {
-    const templateId = searchParams.get('template');
-    if (templateId) {
-      const template = getTemplateById(templateId);
-      if (template) {
-        setSelectedTemplate(template);
-        setQrStyle(template.style);
-        
-        // Validate colors
-        const validation = validateQRCodeColors(
-          template.style.foregroundColor,
-          template.style.backgroundColor
-        );
-        setContrastValidation(validation);
-      }
-    }
-  }, [searchParams]);
+  const [qrType, setQrType] = useState('URL');
+  const [aiOptimizing, setAiOptimizing] = useState(false);
   
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    watch,
-  } = useForm<any>({
-    resolver: zodResolver(createQRSchema(selectedType)),
-    defaultValues: {
-      name: '',
-      description: '',
-      type: 'URL',
-      redirectUrl: '',
-    },
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    url: '',
+    fullName: '',
+    email: '',
+    phone: '',
+    company: '',
+    website: '',
+    address: '',
+    ssid: '',
+    password: '',
+    encryption: 'WPA',
+    emailSubject: '',
+    emailBody: '',
+    smsMessage: '',
+    textContent: '',
+    paymentPlatform: 'cashapp',
+    paymentHandle: '',
+    paymentAmount: '',
+    paymentNote: '',
+    locationLat: '',
+    locationLng: '',
+    locationAddress: '',
+    redirectUrl: '',
+    maxScans: '',
+  });
+  
+  const [qrValue, setQrValue] = useState('');
+  const [qrStyle, setQrStyle] = useState({
+    fgColor: '#000000',
+    bgColor: '#FFFFFF',
+    size: 300,
+    dotStyle: 'square',
+    cornerStyle: 'square',
+    errorCorrectionLevel: 'M' as 'L' | 'M' | 'Q' | 'H',
   });
 
-  // Watch the type field for changes
-  const typeValue = watch('type');
-  
-  // Update selected type and focus first field when type changes
+  const [logo, setLogo] = useState<{
+    url: string;
+    size: number;
+    excavate: boolean;
+  } | null>(null);
+
+  const [frame, setFrame] = useState({
+    style: 'none',
+    color: '#000000',
+    text: '',
+    textColor: '#000000',
+  });
+
   useEffect(() => {
-    if (typeValue && typeValue !== selectedType) {
-      setSelectedType(typeValue);
-      // Announce change to screen readers
-      const announcement = document.createElement('div');
-      announcement.setAttribute('role', 'status');
-      announcement.setAttribute('aria-live', 'polite');
-      announcement.className = 'sr-only';
-      announcement.textContent = `QR code type changed to ${typeValue}. Form fields updated.`;
-      document.body.appendChild(announcement);
-      setTimeout(() => document.body.removeChild(announcement), 1000);
+    const newQrValue = generateQRValueFromData(formData);
+    setQrValue(newQrValue);
+  }, [formData, qrType]);
+
+  function handleInputChange(field: string, value: string) {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  }
+
+  function generateQRValueFromData(data: typeof formData) {
+    switch (qrType) {
+      case 'URL':
+        return data.url;
       
-      // Focus first field after a short delay
-      setTimeout(() => {
-        firstFieldRef.current?.focus();
-      }, 100);
+      case 'VCARD':
+        if (!data.fullName) return '';
+        return `BEGIN:VCARD\nVERSION:3.0\nFN:${data.fullName}\nTEL:${data.phone}\nEMAIL:${data.email}\nORG:${data.company}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`;
+      
+      case 'WIFI':
+        if (!data.ssid) return '';
+        return `WIFI:T:${data.encryption};S:${data.ssid};P:${data.password};;`;
+      
+      case 'EMAIL':
+        if (!data.email) return '';
+        return `mailto:${data.email}?subject=${encodeURIComponent(data.emailSubject)}&body=${encodeURIComponent(data.emailBody)}`;
+      
+      case 'SMS':
+        if (!data.phone) return '';
+        return `sms:${data.phone}?body=${encodeURIComponent(data.smsMessage)}`;
+      
+      case 'PHONE':
+        return `tel:${data.phone}`;
+      
+      case 'TEXT':
+        return data.textContent;
+      
+      case 'PAYMENT':
+        const platform = PAYMENT_PLATFORMS.find(p => p.id === data.paymentPlatform);
+        if (!data.paymentHandle) return '';
+        if (data.paymentPlatform === 'bitcoin') {
+          return `bitcoin:${data.paymentHandle}${data.paymentAmount ? `?amount=${data.paymentAmount}` : ''}`;
+        } else if (data.paymentPlatform === 'ethereum') {
+          return `ethereum:${data.paymentHandle}${data.paymentAmount ? `?value=${data.paymentAmount}` : ''}`;
+        }
+        return `${platform?.prefix || ''}${data.paymentHandle}`;
+      
+      case 'LOCATION':
+        if (!data.locationLat || !data.locationLng) return '';
+        return `geo:${data.locationLat},${data.locationLng}${data.locationAddress ? `?q=${encodeURIComponent(data.locationAddress)}` : ''}`;
+      
+      case 'MENU':
+      case 'LANDING_PAGE':
+        return data.redirectUrl;
+      
+      default:
+        return data.url;
     }
-  }, [typeValue, selectedType]);
+  }
 
-  async function onSubmit(data: any) {
-    setLoading(true);
+  async function handleAIOptimization() {
+    if (!qrValue) {
+      toast.error('Please fill in QR data first');
+      return;
+    }
+
+    setAiOptimizing(true);
     try {
-      // Build the appropriate data structure based on type
-      let qrData: any = {
-        name: data.name,
-        description: data.description,
-        type: data.type,
-        maxScans: data.maxScans,
-      };
-
-      // Add type-specific data
-      switch (data.type) {
-        case 'URL':
-        case 'MENU':
-        case 'LANDING_PAGE':
-          qrData.redirectUrl = data.redirectUrl;
-          break;
-        case 'VCARD':
-          qrData.content = JSON.stringify({
-            name: data.vcardName,
-            phone: data.vcardPhone,
-            email: data.vcardEmail,
-            organization: data.vcardOrganization,
-            website: data.vcardWebsite,
-          });
-          break;
-        case 'WIFI':
-          qrData.content = JSON.stringify({
-            ssid: data.wifiSSID,
-            password: data.wifiPassword,
-            encryption: data.wifiEncryption,
-          });
-          break;
-        case 'EMAIL':
-          qrData.content = JSON.stringify({
-            email: data.emailAddress,
-            subject: data.emailSubject,
-            body: data.emailBody,
-          });
-          break;
-        case 'SMS':
-          qrData.content = JSON.stringify({
-            phone: data.smsPhone,
-            message: data.smsMessage,
-          });
-          break;
-        case 'PHONE':
-          qrData.content = JSON.stringify({
-            phone: data.phoneNumber,
-          });
-          break;
-        case 'LOCATION':
-          qrData.content = JSON.stringify({
-            lat: data.locationLat,
-            lng: data.locationLng,
-            address: data.locationAddress,
-          });
-          break;
-        case 'TEXT':
-          qrData.content = data.textContent;
-          break;
-        case 'PAYMENT':
-          qrData.content = JSON.stringify({
-            platform: data.paymentPlatform,
-            handle: data.paymentHandle,
-          });
-          break;
-      }
-
-      // Include template style if selected
-      const payload = {
-        ...qrData,
-        style: selectedTemplate ? qrStyle : undefined,
-        frame: selectedTemplate?.frame,
-        templateId: selectedTemplate?.id,
-      };
-
-      const res = await fetch('/api/qr', {
+      const response = await fetch('/api/ai/optimize-qr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          qrType,
+          currentData: formData,
+          currentStyle: qrStyle,
+        }),
       });
 
-      const result = await res.json();
+      if (!response.ok) throw new Error('AI optimization failed');
 
-      if (result.success) {
-        toast.success('QR code created successfully!');
-        router.push(`/dashboard/qr-codes/${result.qrCode.id}`);
-      } else {
-        toast.error(result.error || 'Failed to create QR code');
+      const data = await response.json();
+      
+      if (data.suggestions) {
+        if (data.suggestions.colors) {
+          setQrStyle(prev => ({
+            ...prev,
+            fgColor: data.suggestions.colors.foreground || prev.fgColor,
+            bgColor: data.suggestions.colors.background || prev.bgColor,
+          }));
+        }
+        if (data.suggestions.style) {
+          setQrStyle(prev => ({
+            ...prev,
+            dotStyle: data.suggestions.style.dotStyle || prev.dotStyle,
+            cornerStyle: data.suggestions.style.cornerStyle || prev.cornerStyle,
+          }));
+        }
+        toast.success('AI optimization applied!');
       }
     } catch (error) {
-      toast.error('An error occurred');
+      console.error('AI optimization error:', error);
+      toast.error('AI optimization unavailable');
+    } finally {
+      setAiOptimizing(false);
+    }
+  }
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be less than 2MB');
+      return;
+    }
+
+    try {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const url = event.target?.result as string;
+        setLogo({
+          url,
+          size: 60,
+          excavate: true,
+        });
+        toast.success('Logo uploaded successfully');
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Logo upload error:', error);
+      toast.error('Failed to upload logo');
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    
+    if (!qrValue) {
+      toast.error('Please fill in required fields');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const shortCode = generateShortCode(8);
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+      const shortUrl = `${baseUrl}/s/${shortCode}`;
+
+      const styleData = {
+        fgColor: qrStyle.fgColor,
+        bgColor: qrStyle.bgColor,
+        dotStyle: qrStyle.dotStyle,
+        cornerStyle: qrStyle.cornerStyle,
+        errorCorrectionLevel: qrStyle.errorCorrectionLevel,
+        logo: logo,
+        frame: frame.style !== 'none' ? frame : null,
+      };
+
+      const response = await fetch('/api/qr-codes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name || `${qrType} QR Code`,
+          description: formData.description,
+          type: qrType,
+          destinationUrl: qrValue,
+          shortCode,
+          shortUrl,
+          style: styleData,
+          maxScans: formData.maxScans ? parseInt(formData.maxScans) : null,
+          content: JSON.stringify(formData),
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create QR code');
+      }
+
+      const data = await response.json();
+
+      toast.success('QR code created successfully!');
+      router.push(`/dashboard/qr-codes/${data.id}`);
+    } catch (error) {
+      console.error('Error creating QR code:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to create QR code. Please try again.');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.back()}
-          aria-label="Go back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold">Create QR Code</h1>
-          <p className="text-muted-foreground">Generate a new QR code</p>
+    <div className="container max-w-7xl mx-auto py-8 px-4">
+      <div className="mb-8">
+        <Link href="/dashboard/qr-codes">
+          <Button variant="ghost" size="sm" className="mb-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to QR Codes
+          </Button>
+        </Link>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Create Premium QR Code</h1>
+            <p className="text-muted-foreground">Generate a fully customizable QR code with advanced features</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={handleAIOptimization}
+            disabled={!qrValue || aiOptimizing}
+            className="gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            {aiOptimizing ? 'Optimizing...' : 'AI Optimize'}
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => router.push('/dashboard/templates')}
-          aria-label="Browse templates"
-        >
-          <Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
-          Browse Templates
-        </Button>
       </div>
 
-      {/* Template Banner */}
-      {selectedTemplate && (
-        <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-blue-200">
-          <div className="flex justify-between items-start gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="h-5 w-5 text-blue-600" aria-hidden="true" />
-                <h3 className="font-semibold text-lg">Using Template: {selectedTemplate.name}</h3>
-                {selectedTemplate.isPremium && (
-                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                    ⭐ Premium
-                  </Badge>
-                )}
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Left: Form */}
+        <div className="space-y-6">
+          {/* QR Type Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle>1. Select Type</CardTitle>
+              <CardDescription>Choose what your QR code will link to</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {QR_TYPES.map((type) => (
+                  <button
+                    key={type.id}
+                    onClick={() => {
+                      setQrType(type.id);
+                      setQrValue('');
+                    }}
+                    className={`p-4 rounded-lg border-2 transition-all hover:border-blue-500 ${
+                      qrType === type.id
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
+                        : 'border-gray-200'
+                    }`}
+                  >
+                    <div className="text-3xl mb-2">{type.icon}</div>
+                    <div className="font-semibold text-sm">{type.name}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {type.description}
+                    </div>
+                  </button>
+                ))}
               </div>
-              <p className="text-sm text-muted-foreground mb-2">{selectedTemplate.description}</p>
-              <div className="flex gap-2 flex-wrap">
-                <Badge variant="outline">{selectedTemplate.category}</Badge>
-                <Badge variant="outline">{selectedTemplate.style.dotStyle} dots</Badge>
-                <Badge variant="outline">Error correction: {selectedTemplate.style.errorCorrectionLevel}</Badge>
+            </CardContent>
+          </Card>
+
+          {/* Form Fields */}
+          <Card>
+            <CardHeader>
+              <CardTitle>2. Enter Details</CardTitle>
+              <CardDescription>Fill in your QR code information</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="name">QR Code Name (Optional)</Label>
+                  <Input
+                    id="name"
+                    placeholder="My QR Code"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="description">Description (Optional)</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Add a description for internal use"
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    rows={2}
+                  />
+                </div>
+
+                {/* URL Type */}
+                {qrType === 'URL' && (
+                  <div>
+                    <Label htmlFor="url">Destination URL *</Label>
+                    <Input
+                      id="url"
+                      type="url"
+                      placeholder="https://example.com"
+                      value={formData.url}
+                      onChange={(e) => handleInputChange('url', e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* vCard Type */}
+                {qrType === 'VCARD' && (
+                  <>
+                    <div>
+                      <Label htmlFor="fullName">Full Name *</Label>
+                      <Input
+                        id="fullName"
+                        placeholder="John Doe"
+                        value={formData.fullName}
+                        onChange={(e) => handleInputChange('fullName', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Phone</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="+1 234 567 8900"
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="john@example.com"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="company">Company</Label>
+                      <Input
+                        id="company"
+                        placeholder="Acme Inc"
+                        value={formData.company}
+                        onChange={(e) => handleInputChange('company', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="website">Website</Label>
+                      <Input
+                        id="website"
+                        type="url"
+                        placeholder="https://company.com"
+                        value={formData.website}
+                        onChange={(e) => handleInputChange('website', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="address">Address</Label>
+                      <Input
+                        id="address"
+                        placeholder="123 Main St, City, State"
+                        value={formData.address}
+                        onChange={(e) => handleInputChange('address', e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* WiFi Type */}
+                {qrType === 'WIFI' && (
+                  <>
+                    <div>
+                      <Label htmlFor="ssid">Network Name (SSID) *</Label>
+                      <Input
+                        id="ssid"
+                        placeholder="MyWiFi"
+                        value={formData.ssid}
+                        onChange={(e) => handleInputChange('ssid', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="password123"
+                        value={formData.password}
+                        onChange={(e) => handleInputChange('password', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="encryption">Encryption</Label>
+                      <Select value={formData.encryption} onValueChange={(value) => handleInputChange('encryption', value)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="WPA">WPA/WPA2</SelectItem>
+                          <SelectItem value="WEP">WEP</SelectItem>
+                          <SelectItem value="nopass">No Password</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+
+                {/* Email Type */}
+                {qrType === 'EMAIL' && (
+                  <>
+                    <div>
+                      <Label htmlFor="email">Email Address *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="contact@example.com"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="emailSubject">Subject</Label>
+                      <Input
+                        id="emailSubject"
+                        placeholder="Email subject"
+                        value={formData.emailSubject}
+                        onChange={(e) => handleInputChange('emailSubject', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="emailBody">Message</Label>
+                      <Textarea
+                        id="emailBody"
+                        placeholder="Pre-filled email message"
+                        value={formData.emailBody}
+                        onChange={(e) => handleInputChange('emailBody', e.target.value)}
+                        rows={4}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* SMS Type */}
+                {qrType === 'SMS' && (
+                  <>
+                    <div>
+                      <Label htmlFor="phone">Phone Number *</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="+1 234 567 8900"
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="smsMessage">Message</Label>
+                      <Textarea
+                        id="smsMessage"
+                        placeholder="Pre-filled SMS message"
+                        value={formData.smsMessage}
+                        onChange={(e) => handleInputChange('smsMessage', e.target.value)}
+                        rows={4}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Phone Type */}
+                {qrType === 'PHONE' && (
+                  <div>
+                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+1 234 567 8900"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* Text Type */}
+                {qrType === 'TEXT' && (
+                  <div>
+                    <Label htmlFor="textContent">Text Content *</Label>
+                    <Textarea
+                      id="textContent"
+                      placeholder="Enter any text content"
+                      value={formData.textContent}
+                      onChange={(e) => handleInputChange('textContent', e.target.value)}
+                      rows={6}
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* Payment Type */}
+                {qrType === 'PAYMENT' && (
+                  <>
+                    <div>
+                      <Label htmlFor="paymentPlatform">Payment Platform *</Label>
+                      <Select value={formData.paymentPlatform} onValueChange={(value) => handleInputChange('paymentPlatform', value)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PAYMENT_PLATFORMS.map(platform => (
+                            <SelectItem key={platform.id} value={platform.id}>
+                              {platform.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="paymentHandle">
+                        {PAYMENT_PLATFORMS.find(p => p.id === formData.paymentPlatform)?.name} Handle *
+                      </Label>
+                      <Input
+                        id="paymentHandle"
+                        placeholder={`${PAYMENT_PLATFORMS.find(p => p.id === formData.paymentPlatform)?.prefix}username`}
+                        value={formData.paymentHandle}
+                        onChange={(e) => handleInputChange('paymentHandle', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="paymentAmount">Amount (Optional)</Label>
+                      <Input
+                        id="paymentAmount"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={formData.paymentAmount}
+                        onChange={(e) => handleInputChange('paymentAmount', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="paymentNote">Note (Optional)</Label>
+                      <Input
+                        id="paymentNote"
+                        placeholder="Payment note"
+                        value={formData.paymentNote}
+                        onChange={(e) => handleInputChange('paymentNote', e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Location Type */}
+                {qrType === 'LOCATION' && (
+                  <>
+                    <div>
+                      <Label htmlFor="locationLat">Latitude *</Label>
+                      <Input
+                        id="locationLat"
+                        placeholder="37.7749"
+                        value={formData.locationLat}
+                        onChange={(e) => handleInputChange('locationLat', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="locationLng">Longitude *</Label>
+                      <Input
+                        id="locationLng"
+                        placeholder="-122.4194"
+                        value={formData.locationLng}
+                        onChange={(e) => handleInputChange('locationLng', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="locationAddress">Address (Optional)</Label>
+                      <Input
+                        id="locationAddress"
+                        placeholder="123 Main St, City, State"
+                        value={formData.locationAddress}
+                        onChange={(e) => handleInputChange('locationAddress', e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Menu/Landing Page Type */}
+                {(qrType === 'MENU' || qrType === 'LANDING_PAGE') && (
+                  <div>
+                    <Label htmlFor="redirectUrl">Destination URL *</Label>
+                    <Input
+                      id="redirectUrl"
+                      type="url"
+                      placeholder="https://example.com"
+                      value={formData.redirectUrl}
+                      onChange={(e) => handleInputChange('redirectUrl', e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <Label htmlFor="maxScans">Max Scans (Optional)</Label>
+                  <Input
+                    id="maxScans"
+                    type="number"
+                    placeholder="Unlimited"
+                    value={formData.maxScans}
+                    onChange={(e) => handleInputChange('maxScans', e.target.value)}
+                  />
+                </div>
+
+                <Button type="submit" className="w-full" disabled={loading || !qrValue}>
+                  {loading ? 'Creating...' : 'Create QR Code'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Customization Options */}
+          <Card>
+            <CardHeader>
+              <CardTitle>3. Customize Design</CardTitle>
+              <CardDescription>Make your QR code unique</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="colors">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="colors">Colors</TabsTrigger>
+                  <TabsTrigger value="style">Style</TabsTrigger>
+                  <TabsTrigger value="logo">Logo</TabsTrigger>
+                  <TabsTrigger value="frame">Frame</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="colors" className="space-y-4 mt-4">
+                  <div>
+                    <Label>Foreground Color</Label>
+                    <div className="flex gap-2 mt-2">
+                      <Input
+                        type="color"
+                        value={qrStyle.fgColor}
+                        onChange={(e) => setQrStyle({ ...qrStyle, fgColor: e.target.value })}
+                        className="w-20 h-10"
+                      />
+                      <Input
+                        type="text"
+                        value={qrStyle.fgColor}
+                        onChange={(e) => setQrStyle({ ...qrStyle, fgColor: e.target.value })}
+                        placeholder="#000000"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Background Color</Label>
+                    <div className="flex gap-2 mt-2">
+                      <Input
+                        type="color"
+                        value={qrStyle.bgColor}
+                        onChange={(e) => setQrStyle({ ...qrStyle, bgColor: e.target.value })}
+                        className="w-20 h-10"
+                      />
+                      <Input
+                        type="text"
+                        value={qrStyle.bgColor}
+                        onChange={(e) => setQrStyle({ ...qrStyle, bgColor: e.target.value })}
+                        placeholder="#FFFFFF"
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="style" className="space-y-4 mt-4">
+                  <div>
+                    <Label>Dot Style</Label>
+                    <Select value={qrStyle.dotStyle} onValueChange={(value) => setQrStyle({ ...qrStyle, dotStyle: value })}>
+                      <SelectTrigger className="mt-2">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DOT_STYLES.map(style => (
+                          <SelectItem key={style.id} value={style.id}>
+                            {style.preview} {style.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Corner Style</Label>
+                    <Select value={qrStyle.cornerStyle} onValueChange={(value) => setQrStyle({ ...qrStyle, cornerStyle: value })}>
+                      <SelectTrigger className="mt-2">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CORNER_STYLES.map(style => (
+                          <SelectItem key={style.id} value={style.id}>
+                            {style.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Error Correction</Label>
+                    <Select value={qrStyle.errorCorrectionLevel} onValueChange={(value: 'L' | 'M' | 'Q' | 'H') => setQrStyle({ ...qrStyle, errorCorrectionLevel: value })}>
+                      <SelectTrigger className="mt-2">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="L">Low (7%)</SelectItem>
+                        <SelectItem value="M">Medium (15%)</SelectItem>
+                        <SelectItem value="Q">Quartile (25%)</SelectItem>
+                        <SelectItem value="H">High (30%)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="logo" className="space-y-4 mt-4">
+                  <div>
+                    <Label htmlFor="logo-upload">Upload Logo</Label>
+                    <div className="mt-2">
+                      <Input
+                        id="logo-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="cursor-pointer"
+                      />
+                    </div>
+                    {logo && (
+                      <>
+                        <div className="mt-4">
+                          <img src={logo.url} alt="Logo preview" className="w-20 h-20 object-contain border rounded" />
+                        </div>
+                        <div className="mt-4">
+                          <Label>Logo Size</Label>
+                          <Input
+                            type="range"
+                            min="40"
+                            max="100"
+                            value={logo.size}
+                            onChange={(e) => setLogo({ ...logo, size: parseInt(e.target.value) })}
+                            className="mt-2"
+                          />
+                          <span className="text-sm text-muted-foreground">{logo.size}px</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <input
+                            type="checkbox"
+                            id="excavate"
+                            checked={logo.excavate}
+                            onChange={(e) => setLogo({ ...logo, excavate: e.target.checked })}
+                          />
+                          <Label htmlFor="excavate">Clear background behind logo</Label>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setLogo(null)}
+                          className="mt-2"
+                        >
+                          Remove Logo
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="frame" className="space-y-4 mt-4">
+                  <div>
+                    <Label>Frame Style</Label>
+                    <Select value={frame.style} onValueChange={(value) => setFrame({ ...frame, style: value })}>
+                      <SelectTrigger className="mt-2">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {FRAME_STYLES.map(style => (
+                          <SelectItem key={style.id} value={style.id}>
+                            {style.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {frame.style !== 'none' && (
+                    <>
+                      <div>
+                        <Label>Frame Color</Label>
+                        <Input
+                          type="color"
+                          value={frame.color}
+                          onChange={(e) => setFrame({ ...frame, color: e.target.value })}
+                          className="w-20 h-10 mt-2"
+                        />
+                      </div>
+                      <div>
+                        <Label>Frame Text</Label>
+                        <Input
+                          placeholder="Scan Me!"
+                          value={frame.text}
+                          onChange={(e) => setFrame({ ...frame, text: e.target.value })}
+                          className="mt-2"
+                        />
+                      </div>
+                      <div>
+                        <Label>Text Color</Label>
+                        <Input
+                          type="color"
+                          value={frame.textColor}
+                          onChange={(e) => setFrame({ ...frame, textColor: e.target.value })}
+                          className="w-20 h-10 mt-2"
+                        />
+                      </div>
+                    </>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right: Live Preview */}
+        <div className="lg:sticky lg:top-8 h-fit">
+          <Card>
+            <CardHeader>
+              <CardTitle>Live Preview</CardTitle>
+              <CardDescription>Your QR code will look like this</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center">
+              <div className="relative">
+                <QRCodeDisplay
+                  value={qrValue || 'https://qreatestudios.com'}
+                  size={qrStyle.size}
+                  fgColor={qrStyle.fgColor}
+                  bgColor={qrStyle.bgColor}
+                  level={qrStyle.errorCorrectionLevel}
+                  includeMargin={true}
+                  imageSettings={logo ? {
+                    src: logo.url,
+                    height: logo.size,
+                    width: logo.size,
+                    excavate: logo.excavate,
+                  } : undefined}
+                />
+                {frame.style !== 'none' && frame.text && (
+                  <div 
+                    className="mt-2 text-center font-semibold"
+                    style={{ color: frame.textColor }}
+                  >
+                    {frame.text}
+                  </div>
+                )}
               </div>
               
-              {/* Color Contrast Validation */}
-              {contrastValidation && (
-                <div className={`mt-3 p-2 rounded text-sm ${
-                  contrastValidation.ratio >= 4.5 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200' 
-                    : contrastValidation.ratio >= 3
-                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200'
-                    : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200'
-                }`}>
-                  <strong>Contrast Ratio: {contrastValidation.ratio}:1</strong>
-                  <br />
-                  {contrastValidation.message}
+              {qrValue && (
+                <div className="mt-4 text-center w-full">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    ✅ Ready to scan • Test with your phone camera
+                  </p>
+                  <div className="text-xs text-muted-foreground mt-2 p-2 bg-muted rounded">
+                    {qrType} QR Code
+                  </div>
                 </div>
               )}
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setSelectedTemplate(null);
-                setQrStyle(null);
-                setContrastValidation(null);
-                router.push('/dashboard/qr-codes/create');
-              }}
-              aria-label="Clear template"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </Card>
-      )}
-
-      <Card className="p-6">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">
-              Name <span className="text-destructive" aria-label="required">*</span>
-            </Label>
-            <Input
-              id="name"
-              {...register('name')}
-              placeholder="My QR Code"
-              aria-required="true"
-              aria-invalid={!!errors.name}
-              aria-describedby={errors.name ? 'name-error' : undefined}
-            />
-            {errors.name && (
-              <p id="name-error" className="text-sm text-destructive" role="alert">
-                {errors.name?.message as string}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              {...register('description')}
-              placeholder="Optional description for internal use"
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="type">
-              Type <span className="text-destructive" aria-label="required">*</span>
-            </Label>
-            <select
-              id="type"
-              {...register('type')}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background cursor-pointer transition-all duration-200 hover:border-accent-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:border-blue-500 focus-visible:shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
-              aria-required="true"
-            >
-              <option value="URL">URL - Website Link</option>
-              <option value="VCARD">vCard - Contact Information</option>
-              <option value="EMAIL">Email Address</option>
-              <option value="SMS">SMS Message</option>
-              <option value="WIFI">WiFi Network</option>
-              <option value="TEXT">Plain Text</option>
-              <option value="PHONE">Phone Number</option>
-              <option value="LOCATION">Location/GPS Coordinates</option>
-              <option value="PAYMENT">Payment Link</option>
-              <option value="MENU">Digital Menu</option>
-              <option value="LANDING_PAGE">Landing Page</option>
-            </select>
-          </div>
-
-          {/* Dynamic Fields Based on Type */}
-          <div 
-            className="space-y-6 transition-opacity duration-300"
-            role="region"
-            aria-live="polite"
-            aria-label="Type-specific fields"
-          >
-            {/* URL Type */}
-            {(selectedType === 'URL' || selectedType === 'MENU' || selectedType === 'LANDING_PAGE') && (
-              <div className="space-y-2 animate-in fade-in-50 duration-300">
-                <Label htmlFor="redirectUrl">
-                  Destination URL <span className="text-destructive" aria-label="required">*</span>
-                </Label>
-                <Input
-                  id="redirectUrl"
-                  {...register('redirectUrl')}
-                  ref={firstFieldRef}
-                  placeholder="https://example.com"
-                  type="url"
-                  aria-required="true"
-                  aria-invalid={!!errors.redirectUrl}
-                  aria-describedby={errors.redirectUrl ? 'url-error' : undefined}
-                />
-                {errors.redirectUrl && (
-                  <p id="url-error" className="text-sm text-destructive" role="alert">
-                    {errors.redirectUrl?.message as string}
-                  </p>
-                )}
-                <p className="text-sm text-muted-foreground">
-                  This is where your QR code will redirect when scanned
-                </p>
-              </div>
-            )}
-
-            {/* vCard Type */}
-            {selectedType === 'VCARD' && (
-              <div className="space-y-4 animate-in fade-in-50 duration-300">
-                <div className="space-y-2">
-                  <Label htmlFor="vcardName">
-                    Full Name <span className="text-destructive" aria-label="required">*</span>
-                  </Label>
-                  <Input
-                    id="vcardName"
-                    {...register('vcardName')}
-                    ref={firstFieldRef}
-                    placeholder="John Doe"
-                    aria-required="true"
-                    aria-invalid={!!errors.vcardName}
-                  />
-                  {errors.vcardName && (
-                    <p className="text-sm text-destructive" role="alert">
-                      {errors.vcardName?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="vcardPhone">Phone Number</Label>
-                  <Input
-                    id="vcardPhone"
-                    {...register('vcardPhone')}
-                    placeholder="+1 (555) 123-4567"
-                    type="tel"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="vcardEmail">Email</Label>
-                  <Input
-                    id="vcardEmail"
-                    {...register('vcardEmail')}
-                    placeholder="john@example.com"
-                    type="email"
-                    aria-invalid={!!errors.vcardEmail}
-                  />
-                  {errors.vcardEmail && (
-                    <p className="text-sm text-destructive" role="alert">
-                      {errors.vcardEmail?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="vcardOrganization">Organization</Label>
-                  <Input
-                    id="vcardOrganization"
-                    {...register('vcardOrganization')}
-                    placeholder="Company Name"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="vcardWebsite">Website</Label>
-                  <Input
-                    id="vcardWebsite"
-                    {...register('vcardWebsite')}
-                    placeholder="https://example.com"
-                    type="url"
-                    aria-invalid={!!errors.vcardWebsite}
-                  />
-                  {errors.vcardWebsite && (
-                    <p className="text-sm text-destructive" role="alert">
-                      {errors.vcardWebsite?.message as string}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* WiFi Type */}
-            {selectedType === 'WIFI' && (
-              <div className="space-y-4 animate-in fade-in-50 duration-300">
-                <div className="space-y-2">
-                  <Label htmlFor="wifiSSID">
-                    Network Name (SSID) <span className="text-destructive" aria-label="required">*</span>
-                  </Label>
-                  <Input
-                    id="wifiSSID"
-                    {...register('wifiSSID')}
-                    ref={firstFieldRef}
-                    placeholder="MyWiFiNetwork"
-                    aria-required="true"
-                    aria-invalid={!!errors.wifiSSID}
-                  />
-                  {errors.wifiSSID && (
-                    <p className="text-sm text-destructive" role="alert">
-                      {errors.wifiSSID?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="wifiPassword">Password</Label>
-                  <Input
-                    id="wifiPassword"
-                    {...register('wifiPassword')}
-                    placeholder="Enter WiFi password"
-                    type="password"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Leave empty if network is open
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="wifiEncryption">
-                    Encryption Type <span className="text-destructive" aria-label="required">*</span>
-                  </Label>
-                  <select
-                    id="wifiEncryption"
-                    {...register('wifiEncryption')}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background cursor-pointer transition-all duration-200 hover:border-accent-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    aria-required="true"
-                  >
-                    <option value="WPA">WPA/WPA2</option>
-                    <option value="WEP">WEP</option>
-                    <option value="nopass">No Password</option>
-                  </select>
-                </div>
-              </div>
-            )}
-
-            {/* Email Type */}
-            {selectedType === 'EMAIL' && (
-              <div className="space-y-4 animate-in fade-in-50 duration-300">
-                <div className="space-y-2">
-                  <Label htmlFor="emailAddress">
-                    Email Address <span className="text-destructive" aria-label="required">*</span>
-                  </Label>
-                  <Input
-                    id="emailAddress"
-                    {...register('emailAddress')}
-                    ref={firstFieldRef}
-                    placeholder="contact@example.com"
-                    type="email"
-                    aria-required="true"
-                    aria-invalid={!!errors.emailAddress}
-                  />
-                  {errors.emailAddress && (
-                    <p className="text-sm text-destructive" role="alert">
-                      {errors.emailAddress?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="emailSubject">Subject</Label>
-                  <Input
-                    id="emailSubject"
-                    {...register('emailSubject')}
-                    placeholder="Email subject"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="emailBody">Message</Label>
-                  <Textarea
-                    id="emailBody"
-                    {...register('emailBody')}
-                    placeholder="Pre-filled email message"
-                    rows={4}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* SMS Type */}
-            {selectedType === 'SMS' && (
-              <div className="space-y-4 animate-in fade-in-50 duration-300">
-                <div className="space-y-2">
-                  <Label htmlFor="smsPhone">
-                    Phone Number <span className="text-destructive" aria-label="required">*</span>
-                  </Label>
-                  <Input
-                    id="smsPhone"
-                    {...register('smsPhone')}
-                    ref={firstFieldRef}
-                    placeholder="+1 (555) 123-4567"
-                    type="tel"
-                    aria-required="true"
-                    aria-invalid={!!errors.smsPhone}
-                  />
-                  {errors.smsPhone && (
-                    <p className="text-sm text-destructive" role="alert">
-                      {errors.smsPhone?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="smsMessage">Message</Label>
-                  <Textarea
-                    id="smsMessage"
-                    {...register('smsMessage')}
-                    placeholder="Pre-filled SMS message"
-                    rows={4}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Phone Type */}
-            {selectedType === 'PHONE' && (
-              <div className="space-y-2 animate-in fade-in-50 duration-300">
-                <Label htmlFor="phoneNumber">
-                  Phone Number <span className="text-destructive" aria-label="required">*</span>
-                </Label>
-                <Input
-                  id="phoneNumber"
-                  {...register('phoneNumber')}
-                  ref={firstFieldRef}
-                  placeholder="+1 (555) 123-4567"
-                  type="tel"
-                  aria-required="true"
-                  aria-invalid={!!errors.phoneNumber}
-                />
-                {errors.phoneNumber && (
-                  <p className="text-sm text-destructive" role="alert">
-                    {errors.phoneNumber?.message as string}
-                  </p>
-                )}
-                <p className="text-sm text-muted-foreground">
-                  Scanning will prompt to call this number
-                </p>
-              </div>
-            )}
-
-            {/* Location Type */}
-            {selectedType === 'LOCATION' && (
-              <div className="space-y-4 animate-in fade-in-50 duration-300">
-                <div className="space-y-2">
-                  <Label htmlFor="locationLat">
-                    Latitude <span className="text-destructive" aria-label="required">*</span>
-                  </Label>
-                  <Input
-                    id="locationLat"
-                    {...register('locationLat')}
-                    ref={firstFieldRef}
-                    placeholder="37.7749"
-                    aria-required="true"
-                    aria-invalid={!!errors.locationLat}
-                  />
-                  {errors.locationLat && (
-                    <p className="text-sm text-destructive" role="alert">
-                      {errors.locationLat?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="locationLng">
-                    Longitude <span className="text-destructive" aria-label="required">*</span>
-                  </Label>
-                  <Input
-                    id="locationLng"
-                    {...register('locationLng')}
-                    placeholder="-122.4194"
-                    aria-required="true"
-                    aria-invalid={!!errors.locationLng}
-                  />
-                  {errors.locationLng && (
-                    <p className="text-sm text-destructive" role="alert">
-                      {errors.locationLng?.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="locationAddress">Address (Optional)</Label>
-                  <Input
-                    id="locationAddress"
-                    {...register('locationAddress')}
-                    placeholder="123 Main St, City, State"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Descriptive address or place name
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Text Type */}
-            {selectedType === 'TEXT' && (
-              <div className="space-y-2 animate-in fade-in-50 duration-300">
-                <Label htmlFor="textContent">
-                  Text Content <span className="text-destructive" aria-label="required">*</span>
-                </Label>
-                <Textarea
-                  id="textContent"
-                  {...register('textContent')}
-                  ref={firstFieldRef as any}
-                  placeholder="Enter any text content"
-                  rows={6}
-                  aria-required="true"
-                  aria-invalid={!!errors.textContent}
-                />
-                {errors.textContent && (
-                  <p className="text-sm text-destructive" role="alert">
-                    {errors.textContent?.message as string}
-                  </p>
-                )}
-                <p className="text-sm text-muted-foreground">
-                  Plain text that will be displayed when scanned
-                </p>
-              </div>
-            )}
-
-            {/* Payment Type */}
-            {selectedType === 'PAYMENT' && (
-              <div className="space-y-4 animate-in fade-in-50 duration-300">
-                <div className="space-y-2">
-                  <Label htmlFor="paymentPlatform">
-                    Payment Platform <span className="text-destructive" aria-label="required">*</span>
-                  </Label>
-                  <select
-                    id="paymentPlatform"
-                    {...register('paymentPlatform')}
-                    ref={firstFieldRef as any}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background cursor-pointer transition-all duration-200 hover:border-accent-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    aria-required="true"
-                  >
-                    <option value="cashapp">Cash App</option>
-                    <option value="zelle">Zelle</option>
-                    <option value="venmo">Venmo</option>
-                    <option value="paypal">PayPal</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="paymentHandle">
-                    Username/Handle <span className="text-destructive" aria-label="required">*</span>
-                  </Label>
-                  <Input
-                    id="paymentHandle"
-                    {...register('paymentHandle')}
-                    placeholder="$username or email"
-                    aria-required="true"
-                    aria-invalid={!!errors.paymentHandle}
-                  />
-                  {errors.paymentHandle && (
-                    <p className="text-sm text-destructive" role="alert">
-                      {errors.paymentHandle?.message as string}
-                    </p>
-                  )}
-                  <p className="text-sm text-muted-foreground">
-                    Your payment username, cashtag, or email
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="maxScans">Max Scans (Optional)</Label>
-            <Input
-              id="maxScans"
-              {...register('maxScans', { valueAsNumber: true })}
-              type="number"
-              min="1"
-              placeholder="Unlimited"
-            />
-            <p className="text-sm text-muted-foreground">
-              Leave empty for unlimited scans
-            </p>
-          </div>
-
-          <div className="flex gap-4 pt-4" role="group" aria-label="Form actions">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-              disabled={loading}
-              aria-label="Cancel and go back"
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              loading={loading}
-              aria-label={loading ? 'Creating QR code...' : 'Create QR code'}
-            >
-              {!loading && <QrCode className="mr-2 h-4 w-4" aria-hidden="true" />}
-              {loading ? 'Creating...' : 'Create QR Code'}
-            </Button>
-          </div>
-        </form>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

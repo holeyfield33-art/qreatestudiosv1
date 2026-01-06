@@ -202,21 +202,24 @@ Write in markdown format with clear sections.`;
     let content: any;
     let tokensUsed: any;
     let cost: number;
+    let responseText: string = '';
 
     if (useJSON) {
       const result = await generateJSON(prompt);
       content = result.data;
       tokensUsed = result.tokensUsed;
       cost = result.cost;
+      responseText = JSON.stringify(result.data);
     } else {
       const result = await generateText(prompt);
       content = result.content;
       tokensUsed = result.tokensUsed;
       cost = result.cost;
+      responseText = result.content;
     }
 
     // Track usage
-    await trackAIUsage(session.user.id, feature, tokensUsed, cost);
+    await trackAIUsage(session.user.id, feature, tokensUsed, cost, prompt, responseText);
 
     return NextResponse.json({
       success: true,

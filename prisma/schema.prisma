@@ -8,19 +8,23 @@ datasource db {
 }
 
 model AIUsage {
-  id               String   @id
+  id               String   @id @default(cuid())
   userId           String
   feature          String
-  model            String
-  promptTokens     Int
-  completionTokens Int
-  totalTokens      Int
+  model            String?
+  promptTokens     Int?
+  completionTokens Int?
+  totalTokens      Int?
   cost             Float
   createdAt        DateTime @default(now())
+  prompt           String
+  response         String
+  tokensUsed       Int
   User             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
   @@index([userId])
+  @@index([feature])
 }
 
 model Account {
@@ -415,6 +419,9 @@ model User {
   isSubAccount         Boolean              @default(false)
   createdAt            DateTime             @default(now())
   updatedAt            DateTime
+  aiUsageCount         Int                  @default(0)
+  aiUsageHistory       Json?
+  aiUsageResetDate     DateTime             @default(now())
   AIUsage              AIUsage[]
   Account              Account[]
   AuditLog             AuditLog[]
