@@ -1,7 +1,7 @@
 'use client';
 
-import { QRCodeSVG } from 'qrcode.react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import QRCodeStyling from 'qr-code-styling';
 
 interface QRCodeDisplayProps {
   value: string;
@@ -10,6 +10,8 @@ interface QRCodeDisplayProps {
   bgColor?: string;
   level?: 'L' | 'M' | 'Q' | 'H';
   includeMargin?: boolean;
+  dotStyle?: string;
+  cornerStyle?: string;
   imageSettings?: {
     src: string;
     height: number;
@@ -26,24 +28,115 @@ export default function QRCodeDisplay({
   bgColor = '#FFFFFF',
   level = 'M',
   includeMargin = true,
+  dotStyle = 'square',
+  cornerStyle = 'square',
   imageSettings,
   className = '',
 }: QRCodeDisplayProps) {
   const [mounted, setMounted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const qrRef = useRef<HTMLDivElement>(null);
+  const qrCodeRef = useRef<QRCodeStyling | null>(null);
 
   useEffect(() => {
     setMounted(true);
-    
+  }, []);
+
+  useEffect(() => {
     // Validate value
     if (!value || value.trim() === '') {
       setError('QR code value is required');
+      return;
     } else if (value.length > 2953) {
       setError('QR code data is too long (max 2953 characters)');
+      return;
     } else {
       setError(null);
     }
-  }, [value]);
+
+    if (!mounted || !qrRef.current) return;
+
+    try {
+      // Map our style names to qr-code-styling format
+      const mapDotStyle = (style: string) => {
+        const styleMap: { [key: string]: any } = {
+          'square': 'square',
+          'dots': 'dots',
+          'rounded': 'rounded',
+          'classy': 'classy',
+          'extra-rounded': 'extra-rounded',
+        };
+        return styleMap[style] || 'square';
+      };
+
+      const mapCornerStyle = (style: string) => {
+        const styleMap: { [key: string]: any } = {
+          'square': 'square',
+          'dot': 'dot',
+          'extra-rounded': 'extra-rounded',
+        };
+        return styleMap[style] || 'square';
+      };
+
+      const qrOptions: any = {
+        width: size,
+        height: size,
+        type: 'svg' as const,
+        data: value,
+        margin: includeMargin ? 10 : 0,
+        qrOptions: {
+          typeNumber: 0,
+          mode: 'Byte' as const,
+          errorCorrectionLevel: level,
+        },
+        dotsOptions: {
+          color: fgColor,
+          type: mapDotStyle(dotStyle),
+        },
+        backgroundOptions: {
+          color: bgColor,
+        },
+        cornersSquareOptions: {
+          color: fgColor,
+          type: mapCornerStyle(cornerStyle),
+        },
+        cornersDotOptions: {
+          color: fgColor,
+          type: mapCornerStyle(cornerStyle),
+        },
+      };
+
+      // Add image if provided
+      if (imageSettings && imageSettings.src) {
+        qrOptions.image = imageSettings.src;
+        qrOptions.imageOptions = {
+          hideBackgroundDots: imageSettings.excavate,
+          imageSize: 0.4,
+          margin: 0,
+        };
+      }
+
+      // Create or update QR code
+      if (!qrCodeRef.current) {
+        qrCodeRef.current = new QRCodeStyling(qrOptions);
+        qrCodeRef.current.append(qrRef.current);
+      } else {
+        qrCodeRef.current.update(qrOptions);
+      }
+    } catch (err) {
+      console.error('QR Generation Error:', err);
+      setError('Failed to generate QR code');
+    }
+  }, [mounted, value, size, fgColor, bgColor, level, includeMargin, dotStyle, cornerStyle, imageSettings]);
+
+  useEffect(() => {
+    // Cleanup on unmount
+    return () => {
+      if (qrCodeRef.current && qrRef.current) {
+        qrRef.current.innerHTML = '';
+      }
+    };
+  }, []);
 
   if (!mounted) {
     return (
@@ -93,16 +186,8 @@ export default function QRCodeDisplay({
 
   try {
     return (
-      <div className={`qr-code-container bg-white p-4 rounded-lg shadow-sm ${className}`} key={value}>
-        <QRCodeSVG
-          value={value}
-          size={size}
-          bgColor={bgColor}
-          fgColor={fgColor}
-          level={level}
-          includeMargin={includeMargin}
-          imageSettings={imageSettings}
-        />
+      <div className={`qr-code-container bg-white p-4 rounded-lg shadow-sm ${className}`}>
+        <div ref={qrRef} className="flex items-center justify-center" />
       </div>
     );
   } catch (error) {

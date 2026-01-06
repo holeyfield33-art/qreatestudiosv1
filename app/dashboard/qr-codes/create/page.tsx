@@ -957,6 +957,8 @@ export default function CreateQRCodePage() {
                   bgColor={qrStyle.bgColor}
                   level={qrStyle.errorCorrectionLevel}
                   includeMargin={true}
+                  dotStyle={qrStyle.dotStyle}
+                  cornerStyle={qrStyle.cornerStyle}
                   imageSettings={logo ? {
                     src: logo.url,
                     height: logo.size,
