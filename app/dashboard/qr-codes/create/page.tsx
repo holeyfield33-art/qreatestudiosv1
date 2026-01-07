@@ -12,8 +12,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Upload, Sparkles, Zap } from 'lucide-react';
+import { ArrowLeft, Upload, Sparkles, Zap, Download, Globe, Printer, Eye, Check, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { downloadQRCode } from '@/lib/utils/qr-download';
 
 const QR_TYPES = [
   { id: 'URL', name: 'URL', icon: '🔗', description: 'Website or link' },
@@ -68,6 +69,8 @@ export default function CreateQRCodePage() {
   const [loading, setLoading] = useState(false);
   const [qrType, setQrType] = useState('URL');
   const [aiOptimizing, setAiOptimizing] = useState(false);
+  const [createdQR, setCreatedQR] = useState<any>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -219,7 +222,9 @@ export default function CreateQRCodePage() {
         toast.success('AI optimization applied!');
       }
     } catch (error) {
-      console.error('AI optimization error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('AI optimization error:', error);
+      }
       toast.error('AI optimization unavailable');
     } finally {
       setAiOptimizing(false);
@@ -253,7 +258,9 @@ export default function CreateQRCodePage() {
       };
       reader.readAsDataURL(file);
     } catch (error) {
-      console.error('Logo upload error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Logo upload error:', error);
+      }
       toast.error('Failed to upload logo');
     }
   }
@@ -271,7 +278,7 @@ export default function CreateQRCodePage() {
     try {
       const shortCode = generateShortCode(8);
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-      const shortUrl = `${baseUrl}/${shortCode}`;
+      const shortUrl = `${baseUrl}/s/${shortCode}`;
 
       const styleData = {
         fgColor: qrStyle.fgColor,
@@ -306,10 +313,14 @@ export default function CreateQRCodePage() {
 
       const data = await response.json();
 
+      // Show success modal instead of redirecting
+      setCreatedQR(data);
+      setShowSuccessModal(true);
       toast.success('QR code created successfully!');
-      router.push(`/dashboard/qr-codes/${data.id}`);
     } catch (error) {
-      console.error('Error creating QR code:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error creating QR code:', error);
+      }
       toast.error(error instanceof Error ? error.message : 'Failed to create QR code. Please try again.');
     } finally {
       setLoading(false);
@@ -949,7 +960,7 @@ export default function CreateQRCodePage() {
               <CardDescription>Your QR code will look like this</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
-              <div className="relative" key={`${qrValue}-${qrStyle.fgColor}-${qrStyle.bgColor}-${qrStyle.dotStyle}-${frame.style}-${frame.color}`}>
+              <div className="relative" key={`${qrValue}-${qrStyle.fgColor}-${qrStyle.bgColor}-${qrStyle.dotStyle}`}>
                 <QRCodeDisplay
                   value={qrValue || 'https://qreatestudios.com'}
                   size={qrStyle.size}
@@ -959,7 +970,6 @@ export default function CreateQRCodePage() {
                   includeMargin={true}
                   dotStyle={qrStyle.dotStyle}
                   cornerStyle={qrStyle.cornerStyle}
-                  frame={frame.style !== 'none' ? frame : null}
                   imageSettings={logo ? {
                     src: logo.url,
                     height: logo.size,
@@ -967,6 +977,14 @@ export default function CreateQRCodePage() {
                     excavate: logo.excavate,
                   } : undefined}
                 />
+                {frame.style !== 'none' && frame.text && (
+                  <div 
+                    className="mt-2 text-center font-semibold"
+                    style={{ color: frame.textColor }}
+                  >
+                    {frame.text}
+                  </div>
+                )}
               </div>
               
               {qrValue && (
@@ -983,6 +1001,187 @@ export default function CreateQRCodePage() {
           </Card>
         </div>
       </div>
+
+      {/* SUCCESS MODAL */}
+      {showSuccessModal && createdQR && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <CardHeader className="text-center pb-4">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Check className="w-10 h-10 text-green-600" />
+              </div>
+              <CardTitle className="text-3xl mb-2">QR Code Created! 🎉</CardTitle>
+              <CardDescription className="text-base">
+                Your QR code is ready to use. What would you like to do next?
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="space-y-6">
+              {/* QR Code Preview */}
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 flex flex-col items-center qr-code-container">
+                <QRCodeDisplay
+                  value={qrValue}
+                  size={240}
+                  fgColor={qrStyle.fgColor}
+                  bgColor={qrStyle.bgColor}
+                  level="M"
+                  includeMargin={true}
+                />
+                <p className="text-sm text-muted-foreground mt-4 font-medium">
+                  {createdQR.name}
+                </p>
+              </div>
+
+              {/* Short URL */}
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <Label className="text-sm font-semibold text-blue-900 mb-2 block">
+                  Your Short URL
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={createdQR.shortUrl}
+                    readOnly
+                    className="flex-1 bg-white font-mono text-sm"
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(createdQR.shortUrl);
+                      toast.success('Copied to clipboard!');
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </div>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="mt-2 p-0 h-auto text-xs"
+                  onClick={() => window.open(createdQR.shortUrl, '_blank')}
+                >
+                  <ExternalLink className="w-3 h-3 mr-1" />
+                  Test QR Code
+                </Button>
+              </div>
+
+              {/* Primary Actions */}
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-auto py-4 flex-col gap-2"
+                    onClick={async () => {
+                      try {
+                        await downloadQRCode(
+                          '.qr-code-container',
+                          `qr-${createdQR.id}`,
+                          'png',
+                          2048
+                        );
+                        toast.success('QR code downloaded as PNG!');
+                      } catch (error) {
+                        toast.error('Download failed. Please try again.');
+                      }
+                    }}
+                  >
+                    <Download className="w-6 h-6" />
+                    <div className="text-center">
+                      <div className="font-semibold">Download PNG</div>
+                      <div className="text-xs text-muted-foreground">High Quality</div>
+                    </div>
+                  </Button>
+
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-auto py-4 flex-col gap-2"
+                    onClick={async () => {
+                      try {
+                        await downloadQRCode(
+                          '.qr-code-container',
+                          `qr-${createdQR.id}`,
+                          'svg'
+                        );
+                        toast.success('QR code downloaded as SVG!');
+                      } catch (error) {
+                        toast.error('Download failed. Please try again.');
+                      }
+                    }}
+                  >
+                    <Download className="w-6 h-6" />
+                    <div className="text-center">
+                      <div className="font-semibold">Download SVG</div>
+                      <div className="text-xs text-muted-foreground">Scalable</div>
+                    </div>
+                  </Button>
+                </div>
+
+                {/* Create Landing Page */}
+                <Button
+                  size="lg"
+                  className="w-full h-auto py-4 flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  onClick={() => {
+                    router.push(`/dashboard/landing-pages/create?qrId=${createdQR.id}`);
+                  }}
+                >
+                  <Globe className="w-5 h-5" />
+                  <div className="text-left">
+                    <div className="font-semibold">Create Landing Page</div>
+                    <div className="text-xs opacity-90">Build a custom page for this QR code</div>
+                  </div>
+                </Button>
+
+                {/* Order Prints */}
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full h-auto py-4 flex items-center justify-center gap-3"
+                  onClick={() => {
+                    router.push(`/dashboard/print/order?qrCodeId=${createdQR.id}`);
+                  }}
+                >
+                  <Printer className="w-5 h-5" />
+                  <div className="text-left">
+                    <div className="font-semibold">Order Physical Products</div>
+                    <div className="text-xs text-muted-foreground">NFC cards, stickers, flyers & more</div>
+                  </div>
+                </Button>
+
+                {/* View Dashboard */}
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    router.push(`/dashboard/qr-codes/${createdQR.id}`);
+                  }}
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View in Dashboard
+                </Button>
+              </div>
+
+              {/* Bottom Actions */}
+              <div className="pt-4 border-t">
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    setCreatedQR(null);
+                    // Reset form to create another
+                    window.location.reload();
+                  }}
+                >
+                  Create Another QR Code
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

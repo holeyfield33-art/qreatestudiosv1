@@ -15,7 +15,7 @@ export default async function PublicLandingPage({ params }: RouteContext) {
     where: { slug },
   });
 
-  if (!landingPage || !landingPage.published) {
+  if (!landingPage || !landingPage.isPublished) {
     notFound();
   }
 
@@ -28,7 +28,7 @@ export default async function PublicLandingPage({ params }: RouteContext) {
     .catch(() => {}); // Don't fail if view count fails
 
   const content = landingPage.content as any;
-  const theme = landingPage.theme as any;
+  const theme = (landingPage.metadata as any) || {};
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: theme?.backgroundColor || '#FFFFFF' }}>
@@ -53,7 +53,7 @@ export default async function PublicLandingPage({ params }: RouteContext) {
 
       {/* Footer */}
       <footer className="py-8 text-center text-sm text-muted-foreground border-t">
-        <p>© {new Date().getFullYear()} {landingPage.title}. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} {landingPage.name}. All rights reserved.</p>
         <p className="mt-2">
           <a href="https://qreatestudios.com" className="hover:underline" target="_blank" rel="noopener noreferrer">
             Powered by Qreate Studios

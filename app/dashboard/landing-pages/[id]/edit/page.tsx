@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { LANDING_PAGE_TEMPLATES, LandingPageTemplate } from '@/lib/templates/landing-page-templates';
 import { ImageBrowser } from '@/components/ImageBrowser';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Save, Image as ImageIcon, ArrowLeft, ExternalLink } from 'lucide-react';
+import { Save, Image as ImageIcon, ArrowLeft, ExternalLink, Check, Eye, Printer, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface LandingPage {
@@ -20,12 +20,15 @@ interface LandingPage {
   content: any;
   theme: any;
   published: boolean;
+  customDomain?: string | null;
 }
 
 export default function TemplateEditorPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const landingPageId = params.id as string;
+  const qrId = searchParams.get('qrId');
 
   const [landingPage, setLandingPage] = useState<LandingPage | null>(null);
   const [template, setTemplate] = useState<LandingPageTemplate | null>(null);
@@ -37,6 +40,7 @@ export default function TemplateEditorPage() {
   const [saving, setSaving] = useState(false);
   const [title, setTitle] = useState('');
   const [published, setPublished] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
 
   useEffect(() => {
     loadLandingPage();
@@ -83,7 +87,9 @@ export default function TemplateEditorPage() {
         setHtml(page.content?.html || '');
       }
     } catch (error) {
-      console.error('Error loading landing page:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error loading landing page:', error);
+      }
       toast.error('Failed to load landing page');
       router.push('/dashboard/landing-pages');
     } finally {
@@ -142,8 +148,78 @@ export default function TemplateEditorPage() {
         toast.error(result.error || 'Failed to save');
       }
     } catch (error) {
-      console.error('Error saving landing page:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error saving landing page:', error);
+      }
       toast.error('Failed to save landing page');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!landingPage) return;
+
+    setSaving(true);
+    try {
+      // Save current changes and publish
+      const res = await fetch(`/api/landing-pages/${landingPageId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          published: true,
+          content: {
+            html,
+            templateId: template?.id,
+            metadata: template?.metadata,
+            images,
+          },
+        }),
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        setPublished(true);
+        setLandingPage(result.landingPage);
+
+        // If coming from QR creation, connect them
+        if (qrId) {
+          try {
+            // Update landing page with qrCodeId
+            await fetch(`/api/landing-pages/${landingPageId}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                qrCodeId: qrId,
+              }),
+            });
+            
+            // Update QR code redirectUrl to point to landing page
+            await fetch(`/api/qr/${qrId}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                redirectUrl: `${window.location.origin}/l/${landingPage.slug}`,
+              }),
+            });
+          } catch (error) {
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Failed to connect QR:', error);
+            }
+          }
+        }
+
+        setShowPublishModal(true);
+      } else {
+        toast.error(result.error || 'Failed to publish');
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error publishing landing page:', error);
+      }
+      toast.error('Failed to publish landing page');
     } finally {
       setSaving(false);
     }
@@ -173,136 +249,225 @@ export default function TemplateEditorPage() {
     : null;
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
-      {/* Left Sidebar - Mobile: takes full width, Desktop: fixed width */}
-      <div className="w-full lg:w-96 bg-white border-b lg:border-b-0 lg:border-r border-gray-200 flex flex-col max-h-screen">
-        {/* Header */}
-        <div className="p-4 lg:p-6 border-b border-gray-200">
+    <div className="flex flex-col h-screen">
+      {/* Top Header Bar */}
+      <div className="bg-white border-b px-4 py-3 flex justify-between items-center shrink-0">
+        <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push('/dashboard/landing-pages')}
-            className="mb-4 min-h-[44px]"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Landing Pages
+            Back
           </Button>
-          
-          {/* Title Input */}
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="title">Page Title</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter page title"
-                className="min-h-[44px]"
-              />
+          <div>
+            <h2 className="font-semibold text-lg">{title || 'Untitled Page'}</h2>
+            {landingPage && (
+              <p className="text-xs text-muted-foreground">
+                {window.location.origin}/l/{landingPage.slug}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleSave} disabled={saving}>
+            <Save className="w-4 h-4 mr-2" />
+            Save Draft
+          </Button>
+          <Button onClick={handlePublish} disabled={saving}>
+            {saving ? 'Publishing...' : 'Publish →'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar - Controls */}
+        <div className="w-80 bg-white border-r overflow-y-auto">
+          <div className="p-4 space-y-6">
+            {/* Page Settings */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-sm text-gray-700 uppercase tracking-wide">
+                Page Settings
+              </h3>
+              
+              <div>
+                <Label htmlFor="title">Page Title</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter page title"
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <Label htmlFor="published" className="cursor-pointer font-medium">
+                    Published
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {published ? 'Live on the web' : 'Draft mode'}
+                  </p>
+                </div>
+                <Switch
+                  id="published"
+                  checked={published}
+                  onCheckedChange={setPublished}
+                />
+              </div>
+
+              {published && landingPage && (
+                <a
+                  href={`/l/${landingPage.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  View live page
+                </a>
+              )}
             </div>
 
-            {/* Published Toggle */}
-            <div className="flex items-center justify-between">
-              <Label htmlFor="published" className="cursor-pointer">
-                Published
-              </Label>
-              <Switch
-                id="published"
-                checked={published}
-                onCheckedChange={setPublished}
-              />
-            </div>
-
-            {/* View Live Link */}
-            {published && landingPage && (
-              <a
-                href={`/l/${landingPage.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-              >
-                <ExternalLink className="w-3 h-3" />
-                View live page
-              </a>
+            {/* Image Slots */}
+            {template && template.metadata.imageSlots.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-gray-700 uppercase tracking-wide">
+                  Page Images
+                </h3>
+                <div className="space-y-3">
+                  {template.metadata.imageSlots.map((slot) => (
+                    <Card
+                      key={slot.id}
+                      className="cursor-pointer hover:shadow-md transition-all hover:border-blue-300"
+                      onClick={() => handleSlotClick(slot.id)}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="relative w-16 h-16 rounded overflow-hidden border flex-shrink-0">
+                            {images[slot.id] ? (
+                              <img
+                                src={images[slot.id]}
+                                alt={slot.label}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                                <ImageIcon className="w-6 h-6 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{slot.label}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {slot.aspectRatio} • Click to change
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Image Slots */}
-        {template && template.metadata.imageSlots.length > 0 && (
-          <div className="flex-1 overflow-y-auto p-4 lg:p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Image Slots</h2>
-            <div className="space-y-4">
-              {template.metadata.imageSlots.map((slot) => (
-                <Card
-                  key={slot.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => handleSlotClick(slot.id)}
+        {/* Center Preview Area */}
+        <div className="flex-1 bg-gray-100 p-8 overflow-auto">
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+              <div className="bg-gray-800 text-white px-4 py-2 flex items-center justify-between">
+                <span className="text-sm font-medium">Live Preview</span>
+                <span className="text-xs text-gray-400">Updates in real-time</span>
+              </div>
+              <div
+                className="w-full min-h-[600px]"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Publish Success Modal */}
+      {showPublishModal && landingPage && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <Card className="max-w-lg w-full animate-in fade-in zoom-in duration-300">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Check className="w-8 h-8 text-green-600" />
+              </div>
+              <CardTitle className="text-2xl">Page Published! 🚀</CardTitle>
+              <CardDescription>Your landing page is now live on the web</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Live URL */}
+              <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <p className="text-sm text-muted-foreground mb-2">Live at:</p>
+                <p className="font-mono text-blue-600 font-semibold break-all">
+                  {window.location.origin}/l/{landingPage.slug}
+                </p>
+              </div>
+
+              {/* QR Connected Banner */}
+              {qrId && (
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <p className="text-sm text-green-800 font-medium text-center">
+                    ✅ QR code connected to this page
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="space-y-2">
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => window.open(`/l/${landingPage.slug}`, '_blank')}
                 >
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4" />
-                      {slot.label}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {images[slot.id] ? (
-                      <div className="relative rounded-lg overflow-hidden border border-gray-200">
-                        <img
-                          src={images[slot.id]}
-                          alt={slot.label}
-                          className="w-full h-32 object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-center justify-center">
-                          <span className="text-white opacity-0 hover:opacity-100 transition-opacity font-medium">
-                            Click to change
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="h-32 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <ImageIcon className="w-8 h-8 text-gray-400" />
-                      </div>
-                    )}
-                    <div className="mt-2 text-xs text-gray-500">
-                      Aspect Ratio: {slot.aspectRatio}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Live Page
+                </Button>
 
-        {/* Save Button */}
-        <div className="p-4 lg:p-6 border-t border-gray-200">
-          <Button 
-            onClick={handleSave} 
-            className="w-full min-h-[44px]" 
-            size="lg"
-            disabled={saving}
-          >
-            <Save className="w-4 h-4 mr-2" />
-            {saving ? 'Saving...' : 'Save Changes'}
-          </Button>
-        </div>
-      </div>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => router.push(`/dashboard/print-orders/new?landingPageId=${landingPageId}`)}
+                >
+                  <Printer className="w-4 h-4 mr-2" />
+                  Order Prints & Flyers
+                </Button>
 
-      {/* Center Preview - Hidden on mobile, shown on desktop */}
-      <div className="hidden lg:flex flex-1 overflow-auto">
-        <div className="p-8 w-full">
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-6xl mx-auto">
-            <div className="bg-gray-800 text-white px-4 py-2 flex items-center justify-between">
-              <span className="text-sm font-medium">Live Preview</span>
-              <span className="text-xs text-gray-400">Updates in real-time</span>
-            </div>
-            <div
-              className="w-full min-h-[600px]"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
-          </div>
+                {!landingPage.customDomain && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => router.push('/pricing')}
+                  >
+                    <Globe className="w-4 h-4 mr-2" />
+                    Connect Custom Domain (Pro)
+                  </Button>
+                )}
+
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => {
+                    setShowPublishModal(false);
+                    router.push('/dashboard/landing-pages');
+                  }}
+                >
+                  Back to Dashboard
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
+      )}
 
       {/* Image Browser Modal */}
       <Dialog open={isBrowserOpen} onOpenChange={setIsBrowserOpen}>

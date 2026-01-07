@@ -16,6 +16,7 @@ import {
   Settings,
   Palette,
   LogOut,
+  Globe,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -37,7 +38,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'AI Studio', href: '/dashboard/ai-studio', icon: Sparkles, badge: 'NEW', badgeColor: 'bg-purple-500 text-white' },
   { name: 'QR Codes', href: '/dashboard/qr-codes', icon: QrCode },
-  { name: 'Landing Pages', href: '/dashboard/landing-pages', icon: Sparkles },
+  { name: 'Landing Pages', href: '/dashboard/landing-pages', icon: Globe },
   { name: 'Menus', href: '/dashboard/menus', icon: Menu },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
   { name: 'Clients', href: '/dashboard/clients', icon: Users },

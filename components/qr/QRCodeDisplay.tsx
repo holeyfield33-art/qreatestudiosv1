@@ -18,12 +18,6 @@ interface QRCodeDisplayProps {
     width: number;
     excavate: boolean;
   };
-  frame?: {
-    style: string;
-    color: string;
-    text: string;
-    textColor: string;
-  } | null;
   className?: string;
 }
 
@@ -37,7 +31,6 @@ export default function QRCodeDisplay({
   dotStyle = 'square',
   cornerStyle = 'square',
   imageSettings,
-  frame,
   className = '',
 }: QRCodeDisplayProps) {
   const [mounted, setMounted] = useState(false);
@@ -192,76 +185,9 @@ export default function QRCodeDisplay({
   }
 
   try {
-    // Get frame styles
-    const getFrameStyles = () => {
-      if (!frame || frame.style === 'none') return null;
-
-      const baseStyles = {
-        border: `4px solid ${frame.color}`,
-        padding: '16px',
-        position: 'relative' as const,
-      };
-
-      switch (frame.style) {
-        case 'simple':
-          return {
-            ...baseStyles,
-            borderRadius: '8px',
-          };
-        case 'box':
-          return {
-            ...baseStyles,
-            borderRadius: '12px',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          };
-        case 'circular':
-          return {
-            ...baseStyles,
-            borderRadius: '50%',
-            border: `6px solid ${frame.color}`,
-          };
-        case 'banner':
-          return {
-            ...baseStyles,
-            borderRadius: '8px',
-            borderTop: `8px solid ${frame.color}`,
-            borderBottom: `8px solid ${frame.color}`,
-          };
-        case 'tooltip':
-          return {
-            ...baseStyles,
-            borderRadius: '16px',
-            border: `3px solid ${frame.color}`,
-            boxShadow: '0 8px 16px rgba(0,0,0,0.15)',
-          };
-        default:
-          return baseStyles;
-      }
-    };
-
-    const frameStyles = getFrameStyles();
-
     return (
-      <div className={`qr-code-container ${className}`}>
-        <div 
-          className="bg-white rounded-lg shadow-sm"
-          style={frameStyles || undefined}
-        >
-          <div ref={qrRef} className="flex items-center justify-center" />
-          
-          {frame && frame.style !== 'none' && frame.text && (
-            <div 
-              className="mt-3 text-center font-bold text-sm"
-              style={{ 
-                color: frame.textColor,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-              }}
-            >
-              {frame.text}
-            </div>
-          )}
-        </div>
+      <div className={`qr-code-container bg-white p-4 rounded-lg shadow-sm ${className}`}>
+        <div ref={qrRef} className="flex items-center justify-center" />
       </div>
     );
   } catch (error) {

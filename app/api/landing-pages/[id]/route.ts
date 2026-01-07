@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-helpers';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -8,10 +9,10 @@ interface RouteContext {
 
 export async function GET(req: Request, context: RouteContext) {
   const { id } = await context.params;
-  const session = await auth();
-
+  const { session, error } = await requireAuth();
+  if (error) return error;
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'No user ID' }, { status: 401 });
   }
 
   try {
@@ -38,10 +39,10 @@ export async function GET(req: Request, context: RouteContext) {
 
 export async function PATCH(req: Request, context: RouteContext) {
   const { id } = await context.params;
-  const session = await auth();
-
+  const { session, error } = await requireAuth();
+  if (error) return error;
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'No user ID' }, { status: 401 });
   }
 
   const body = await req.json();

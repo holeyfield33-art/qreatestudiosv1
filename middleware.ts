@@ -1,14 +1,15 @@
 import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { prisma } from '@/lib/prisma'
 
 const publicPaths = [
   '/',
   '/auth/signin',
   '/auth/signup',
+  '/auth/banned',
   '/legal/terms',
   '/legal/privacy',
+  '/pricing',
 ]
 
 const publicApiPaths = [
@@ -49,16 +50,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(signInUrl)
   }
 
-  // Check if user is banned
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { isBanned: true, bannedReason: true },
-  })
-
-  if (user?.isBanned) {
-    const bannedUrl = new URL('/auth/banned', request.url)
-    return NextResponse.redirect(bannedUrl)
-  }
+  // Note: Ban checking should be done in API routes or page components, not middleware
+  // Middleware should be lightweight and not make database calls
 
   return NextResponse.next()
 }

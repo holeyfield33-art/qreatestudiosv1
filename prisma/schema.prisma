@@ -129,22 +129,25 @@ model FeatureFlag {
 }
 
 model LandingPage {
-  id        String   @id
-  userId    String
-  qrCodeId  String?  @unique
-  title     String
-  slug      String   @unique
-  content   Json
-  theme     Json?
-  published Boolean  @default(false)
-  views     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-  QRCode    QRCode?  @relation(fields: [qrCodeId], references: [id])
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  userId       String
+  qrCodeId     String?  @unique
+  name         String   @default("Untitled Landing Page")
+  slug         String   @unique
+  customDomain String?  @unique
+  templateId   String   @default("modern-minimal")
+  content      Json
+  metadata     Json?
+  isPublished  Boolean  @default(false)
+  views        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  QRCode       QRCode?  @relation(fields: [qrCodeId], references: [id])
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([slug])
   @@index([userId])
+  @@index([customDomain])
 }
 
 model Menu {

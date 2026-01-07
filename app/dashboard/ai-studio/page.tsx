@@ -109,7 +109,9 @@ export default function AIStudioPage() {
         setCredits(data);
       }
     } catch (error) {
-      console.error('Failed to fetch credits:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to fetch credits:', error);
+      }
     }
   }
 

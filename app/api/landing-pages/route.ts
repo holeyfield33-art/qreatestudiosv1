@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { requireAuth } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 import { randomUUID } from 'crypto';
 
 export async function POST(req: Request) {
-  const session = await auth();
+  const { session, error } = await requireAuth();
+  if (error) return error;
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'No user ID in session' }, { status: 401 });
   }
 
   const body = await req.json();
@@ -31,11 +32,11 @@ export async function POST(req: Request) {
         id: randomUUID(),
         userId: session.user.id,
         qrCodeId: qrCodeId || null,
-        title,
+        name: title,
         slug,
         content: content || {},
-        theme: theme || {},
-        published: false,
+        metadata: theme || {},
+        isPublished: false,
         updatedAt: new Date(),
       },
     });
@@ -53,9 +54,10 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const session = await auth();
+  const { session, error } = await requireAuth();
+  if (error) return error;
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'No user ID in session' }, { status: 401 });
   }
 
   try {

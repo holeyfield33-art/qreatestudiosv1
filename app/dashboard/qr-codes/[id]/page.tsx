@@ -87,7 +87,9 @@ export default function QRDetailPage() {
         setAiCredits({ remaining: data.remaining, plan: data.plan });
       }
     } catch (error) {
-      console.error('Failed to fetch AI credits:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to fetch AI credits:', error);
+      }
     }
   }
 
@@ -137,7 +139,9 @@ export default function QRDetailPage() {
       await downloadQRCode('.qr-code-container', filename, format, size);
       toast.success(`QR code downloaded as ${format.toUpperCase()}`);
     } catch (error) {
-      console.error('Download error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Download error:', error);
+      }
       toast.error('Failed to download QR code');
     }
   }

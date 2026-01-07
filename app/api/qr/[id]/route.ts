@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-helpers';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -8,10 +9,11 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const session = await auth();
+    const { session, error } = await requireAuth();
+    if (error) return error;
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'No user ID' }, { status: 401 });
     }
 
     const qrCode = await prisma.qRCode.findUnique({
@@ -47,7 +49,12 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const session = await auth();
+    const { session, error } = await requireAuth();
+    if (error) return error;
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'No user ID' }, { status: 401 });
+    }
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
