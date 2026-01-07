@@ -29,7 +29,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.26",
     "geoip-lite": "^1.4.10",
-    "jspdf": "^3.0.4",
+    "jspdf": "^4.0.0",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.562.0",
     "mapbox-gl": "^3.17.0",
