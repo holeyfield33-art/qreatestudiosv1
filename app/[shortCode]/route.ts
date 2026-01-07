@@ -67,12 +67,14 @@ export async function GET(
     return Response.redirect(warningUrl, 307);
   }
 
-  // Special handling for ZELLE payment QRs
-  if (qrCode.paymentProvider === 'ZELLE') {
-    return Response.redirect(`${getBaseUrl()}/pay/zelle/${shortCode}`, 307);
+  // Special handling for payment QR codes
+  if (qrCode.paymentProvider) {
+    // For payment QR codes, always use the redirectUrl which contains the payment link
+    // Don't use smart redirect for payment links
+    return Response.redirect(qrCode.redirectUrl, 307);
   }
 
-  // Use AI-powered smart redirect based on device/browser/location
+  // Use AI-powered smart redirect based on device/browser/location for non-payment QRs
   let redirectUrl = qrCode.redirectUrl;
   try {
     redirectUrl = await getSmartRedirect(qrCode.id, userAgent);

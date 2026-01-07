@@ -57,6 +57,10 @@ export async function POST(req: Request) {
       paymentNote
     );
 
+    // The QR code should contain the short URL, which will redirect to the payment URL
+    const baseUrl = getBaseUrl();
+    const shortUrl = `${baseUrl}/${shortCode}`;
+
     const qrCode = await prisma.qRCode.create({
       data: {
         id: randomUUID(),
@@ -65,9 +69,9 @@ export async function POST(req: Request) {
         name,
         description,
         type: 'PAYMENT_LINK',
-        data: redirectUrl,
+        data: shortUrl, // QR code contains the short URL
         shortCode,
-        redirectUrl,
+        redirectUrl, // This is where it redirects to
         style: style || null,
         paymentProvider,
         paymentHandle,

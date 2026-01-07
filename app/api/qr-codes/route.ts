@@ -61,7 +61,7 @@ export async function POST(req: Request) {
     // Generate short code if not provided
     const finalShortCode = shortCode || await generateShortCode();
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const finalShortUrl = shortUrl || `${baseUrl}/s/${finalShortCode}`;
+    const finalShortUrl = shortUrl || `${baseUrl}/${finalShortCode}`;
 
     // Create QR code in database with all advanced features
     const qrCode = await prisma.qRCode.create({
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
         name,
         description: description || null,
         type: type.toUpperCase(),
-        data: content || destinationUrl, // Store form data or destination URL
+        data: finalShortUrl, // QR code contains the short URL for redirect tracking
         shortCode: finalShortCode,
         redirectUrl: destinationUrl,
         style: style || {

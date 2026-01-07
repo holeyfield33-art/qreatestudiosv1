@@ -51,6 +51,8 @@ export async function POST(req: Request) {
 
   try {
     const shortCode = await generateUniqueShortCode(prisma);
+    const baseUrl = getBaseUrl();
+    const shortUrl = `${baseUrl}/${shortCode}`;
 
     const qrCode = await prisma.qRCode.create({
       data: {
@@ -60,7 +62,7 @@ export async function POST(req: Request) {
         name,
         description,
         type,
-        data: data || redirectUrl,
+        data: shortUrl, // QR code contains the short URL for redirect tracking
         shortCode,
         redirectUrl,
         style: style || null,

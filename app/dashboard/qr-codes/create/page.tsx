@@ -271,7 +271,7 @@ export default function CreateQRCodePage() {
     try {
       const shortCode = generateShortCode(8);
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-      const shortUrl = `${baseUrl}/s/${shortCode}`;
+      const shortUrl = `${baseUrl}/${shortCode}`;
 
       const styleData = {
         fgColor: qrStyle.fgColor,
