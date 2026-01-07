@@ -949,7 +949,7 @@ export default function CreateQRCodePage() {
               <CardDescription>Your QR code will look like this</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
-              <div className="relative" key={`${qrValue}-${qrStyle.fgColor}-${qrStyle.bgColor}-${qrStyle.dotStyle}`}>
+              <div className="relative" key={`${qrValue}-${qrStyle.fgColor}-${qrStyle.bgColor}-${qrStyle.dotStyle}-${frame.style}-${frame.color}`}>
                 <QRCodeDisplay
                   value={qrValue || 'https://qreatestudios.com'}
                   size={qrStyle.size}
@@ -959,6 +959,7 @@ export default function CreateQRCodePage() {
                   includeMargin={true}
                   dotStyle={qrStyle.dotStyle}
                   cornerStyle={qrStyle.cornerStyle}
+                  frame={frame.style !== 'none' ? frame : null}
                   imageSettings={logo ? {
                     src: logo.url,
                     height: logo.size,
@@ -966,14 +967,6 @@ export default function CreateQRCodePage() {
                     excavate: logo.excavate,
                   } : undefined}
                 />
-                {frame.style !== 'none' && frame.text && (
-                  <div 
-                    className="mt-2 text-center font-semibold"
-                    style={{ color: frame.textColor }}
-                  >
-                    {frame.text}
-                  </div>
-                )}
               </div>
               
               {qrValue && (
