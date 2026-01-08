@@ -12,22 +12,22 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Upload, Sparkles, Zap, Download, Globe, Printer, Eye, Check, ExternalLink, Copy } from 'lucide-react';
+import { ArrowLeft, Upload, Sparkles, Zap, Download, Globe, Printer, Eye, Check, ExternalLink, Copy, Package } from 'lucide-react';
 import Link from 'next/link';
 import { downloadQRCode } from '@/lib/utils/qr-download';
 
 const QR_TYPES = [
-  { id: 'URL', name: 'URL', icon: '🔗', description: 'Website or link' },
-  { id: 'VCARD', name: 'vCard', icon: '👤', description: 'Contact information' },
-  { id: 'WIFI', name: 'WiFi', icon: '📶', description: 'Network credentials' },
-  { id: 'EMAIL', name: 'Email', icon: '✉️', description: 'Email address' },
-  { id: 'SMS', name: 'SMS', icon: '💬', description: 'Text message' },
-  { id: 'PHONE', name: 'Phone', icon: '📞', description: 'Phone number' },
-  { id: 'TEXT', name: 'Text', icon: '📝', description: 'Plain text' },
-  { id: 'PAYMENT_LINK', name: 'Payment', icon: '💳', description: 'Payment link' },
-  { id: 'MENU', name: 'Menu', icon: '🍽️', description: 'Digital menu' },
-  { id: 'LANDING_PAGE', name: 'Landing', icon: '🚀', description: 'Landing page' },
-  { id: 'LOCATION', name: 'Location', icon: '📍', description: 'GPS coordinates' },
+  { id: 'URL', name: 'URL', icon: '', description: 'Website or link' },
+  { id: 'VCARD', name: 'vCard', icon: '', description: 'Contact information' },
+  { id: 'WIFI', name: 'WiFi', icon: '', description: 'Network credentials' },
+  { id: 'EMAIL', name: 'Email', icon: '', description: 'Email address' },
+  { id: 'SMS', name: 'SMS', icon: '', description: 'Text message' },
+  { id: 'PHONE', name: 'Phone', icon: '', description: 'Phone number' },
+  { id: 'TEXT', name: 'Text', icon: '', description: 'Plain text' },
+  { id: 'PAYMENT_LINK', name: 'Payment', icon: '', description: 'Payment link' },
+  { id: 'MENU', name: 'Menu', icon: '', description: 'Digital menu' },
+  { id: 'LANDING_PAGE', name: 'Landing', icon: '', description: 'Landing page' },
+  { id: 'LOCATION', name: 'Location', icon: '', description: 'GPS coordinates' },
 ];
 
 const PAYMENT_PLATFORMS = [
@@ -1012,7 +1012,7 @@ export default function CreateQRCodePage() {
               </div>
               <div>
                 <CardTitle className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                  QR Code Created! 🎉
+                  QR Code Created Successfully
                 </CardTitle>
                 <CardDescription className="text-base mt-2">
                   Your QR code is ready to use. What would you like to do next?

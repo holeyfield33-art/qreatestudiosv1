@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 import { randomUUID } from 'crypto';
+import { getLandingPageUrl } from '@/lib/utils/url-helpers';
 
 export async function POST(req: Request) {
   const { session, error } = await requireAuth();
@@ -40,6 +41,17 @@ export async function POST(req: Request) {
         updatedAt: new Date(),
       },
     });
+
+    // If connecting to a QR code, update the QR with the landing page URL
+    if (qrCodeId) {
+      await prisma.qRCode.update({
+        where: { id: qrCodeId, userId: session.user.id },
+        data: {
+          landingPageId: landingPage.id,
+          destinationUrl: getLandingPageUrl(slug),
+        },
+      });
+    }
 
     return NextResponse.json({ success: true, landingPage });
   } catch (error) {

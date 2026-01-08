@@ -16,8 +16,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Qreate Studios - Professional QR Code Management Platform",
-  description: "Create, manage, and analyze dynamic QR codes with AI-powered tools and integrated print services",
+  title: "Qreate Studios - Professional QR Code Platform",
+  description: "Create, manage, and track QR codes with landing pages and AI tools",
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

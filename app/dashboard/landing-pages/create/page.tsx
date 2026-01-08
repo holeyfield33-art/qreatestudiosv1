@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { LANDING_PAGE_TEMPLATES } from '@/lib/templates/landing-page-templates';
 import Image from 'next/image';
 import { ArrowLeft, Sparkles } from 'lucide-react';
+import { getLandingPageUrl } from '@/lib/utils/url-helpers';
 
 export default function CreateLandingPagePage() {
   const router = useRouter();

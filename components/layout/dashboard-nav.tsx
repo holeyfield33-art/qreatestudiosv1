@@ -10,12 +10,13 @@ import {
   BarChart3,
   Users,
   Printer,
-  Sparkles,
+  Palette,
   Settings,
   LogOut,
   Globe,
   CreditCard,
   Crown,
+  ShoppingBag,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -48,13 +49,13 @@ const navigation: NavItem[] = [
   { name: 'QR Codes', href: '/dashboard/qr-codes', icon: QrCode },
   { name: 'Landing Pages', href: '/dashboard/landing-pages', icon: Globe },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
-  { name: 'Print Shop', href: '/dashboard/print-orders', icon: Printer },
+  { name: 'Print Shop', href: '/dashboard/print-orders', icon: ShoppingBag },
   
   // Business+ features
   { name: 'Team & CRM', href: '/dashboard/crm', icon: Users, badge: 'BUSINESS', requiresPlan: ['BUSINESS', 'AGENCY'] },
   
   // Agency features
-  { name: 'White Label', href: '/dashboard/white-label', icon: Sparkles, badge: 'AGENCY', requiresPlan: ['AGENCY'] },
+  { name: 'White Label', href: '/dashboard/white-label', icon: Palette, badge: 'AGENCY', requiresPlan: ['AGENCY'] },
   
   // All users (content differs by plan)
   { name: 'Billing', href: '/dashboard/billing', icon: CreditCard },
@@ -102,13 +103,19 @@ export function DashboardNav({ user }: DashboardNavProps) {
       className="flex h-full w-64 flex-col border-r bg-muted/40"
       aria-label="Main navigation"
     >
-      <div className="flex h-16 items-center border-b px-6">
-        <Link
-          href="/dashboard"
-          className="flex items-center space-x-2 font-bold text-xl transition-all duration-200 hover:text-primary hover:scale-[1.02] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded"
-        >
-          <QrCode className="h-6 w-6" aria-hidden="true" />
-          <span>Qreate Studios</span>
+      <div className="flex items-center justify-center px-6 py-6 border-b">
+        <Link href="/dashboard" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+            <QrCode className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Qreate Studios
+            </h1>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+              Professional QR Platform
+            </p>
+          </div>
         </Link>
       </div>
 
@@ -142,10 +149,12 @@ export function DashboardNav({ user }: DashboardNavProps) {
                     <span>{item.name}</span>
                   </div>
                   {isLocked && item.badge && (
-                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-xs font-semibold text-purple-400">
-                      <Crown className="h-3 w-3" />
-                      {item.badge}
-                    </span>
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200">
+                      <Crown className="w-3 h-3 text-amber-600" />
+                      <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">
+                        {item.badge}
+                      </span>
+                    </div>
                   )}
                 </Link>
               </li>
