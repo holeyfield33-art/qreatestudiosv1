@@ -43,6 +43,8 @@ interface Stats {
 
 export default function WhiteLabelPage() {
   const router = useRouter();
+  const [userPlan, setUserPlan] = useState<string>('FREE');
+  const [planLoading, setPlanLoading] = useState(true);
   const [branding, setBranding] = useState<BrandingConfig>({
     companyName: '',
     logo: { url: '' },
@@ -58,10 +60,30 @@ export default function WhiteLabelPage() {
   const [copied, setCopied] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchBranding();
-    fetchDomain();
-    fetchSubAccounts();
-    fetchStats();
+    // Check user plan first
+    fetch('/api/user/session')
+      .then((res) => res.json())
+      .then((data) => {
+        const plan = data?.user?.plan || data?.user?.organization?.plan || 'FREE'
+        setUserPlan(plan)
+        setPlanLoading(false)
+
+        // Redirect if not Agency
+        if (plan !== 'AGENCY') {
+          setTimeout(() => {
+            router.push('/dashboard/billing?upgrade=agency')
+          }, 3000)
+        } else {
+          // Only fetch data if user has access
+          fetchBranding();
+          fetchDomain();
+          fetchSubAccounts();
+          fetchStats();
+        }
+      })
+      .catch(() => {
+        setPlanLoading(false)
+      })
   }, []);
 
   const fetchBranding = async () => {
@@ -245,6 +267,81 @@ export default function WhiteLabelPage() {
     toast.success('Copied to clipboard');
     setTimeout(() => setCopied(null), 2000);
   };
+
+  // Show loading state
+  if (planLoading) {
+    return (
+      <div className="container mx-auto py-8 px-4 max-w-6xl">
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500" />
+        </div>
+      </div>
+    )
+  }
+
+  // Show upgrade prompt if not Agency
+  if (userPlan !== 'AGENCY') {
+    return (
+      <div className="container mx-auto py-8 px-4 max-w-4xl">
+        <Card className="border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-pink-500/5 p-8">
+          <div className="text-center mb-6">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500">
+              <span className="text-3xl">👑</span>
+            </div>
+            <h2 className="text-3xl font-bold mb-2">Unlock White Label Features</h2>
+            <p className="text-lg text-muted-foreground">
+              Upgrade to Agency to brand the platform as your own
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3 mb-6">
+            <div className="rounded-lg border p-4 text-center">
+              <span className="text-2xl mb-2 block">🎨</span>
+              <h3 className="font-semibold mb-1">Custom Branding</h3>
+              <p className="text-sm text-muted-foreground">
+                Use your logo, colors, and brand identity
+              </p>
+            </div>
+            <div className="rounded-lg border p-4 text-center">
+              <span className="text-2xl mb-2 block">🔗</span>
+              <h3 className="font-semibold mb-1">Custom Domain</h3>
+              <p className="text-sm text-muted-foreground">
+                Host on your own domain with SSL
+              </p>
+            </div>
+            <div className="rounded-lg border p-4 text-center">
+              <span className="text-2xl mb-2 block">🏢</span>
+              <h3 className="font-semibold mb-1">Sub-Accounts</h3>
+              <p className="text-sm text-muted-foreground">
+                Create and manage unlimited client accounts
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+              onClick={() => router.push('/dashboard/billing?upgrade=agency')}
+            >
+              Upgrade to Agency →
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => router.push('/dashboard')}
+            >
+              Back to Dashboard
+            </Button>
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Redirecting to billing page in 3 seconds...
+          </p>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">

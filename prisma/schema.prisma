@@ -129,25 +129,44 @@ model FeatureFlag {
 }
 
 model LandingPage {
-  id           String   @id @default(cuid())
-  userId       String
-  qrCodeId     String?  @unique
-  name         String   @default("Untitled Landing Page")
-  slug         String   @unique
-  customDomain String?  @unique
-  templateId   String   @default("modern-minimal")
-  content      Json
-  metadata     Json?
-  isPublished  Boolean  @default(false)
-  views        Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  QRCode       QRCode?  @relation(fields: [qrCodeId], references: [id])
-  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 String               @id @default(cuid())
+  userId             String
+  qrCodeId           String?              @unique
+  name               String               @default("Untitled Landing Page")
+  slug               String               @unique
+  customDomain       String?              @unique
+  templateId         String               @default("modern-minimal")
+  content            Json
+  metadata           Json?
+  isPublished        Boolean              @default(false)
+  views              Int                  @default(0)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  QRCode             QRCode?              @relation(fields: [qrCodeId], references: [id])
+  User               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  landingPageMenuItems LandingPageMenuItem[]
 
   @@index([slug])
   @@index([userId])
   @@index([customDomain])
+}
+
+model LandingPageMenuItem {
+  id            String      @id @default(cuid())
+  landingPageId String
+  name          String
+  description   String?     @db.Text
+  price         Decimal     @db.Decimal(10, 2)
+  category      String
+  image         String?
+  available     Boolean     @default(true)
+  order         Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  landingPage   LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+
+  @@index([landingPageId])
+  @@index([category])
 }
 
 model Menu {

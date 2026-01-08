@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { LANDING_PAGE_TEMPLATES, LandingPageTemplate } from '@/lib/templates/landing-page-templates';
 import { ImageBrowser } from '@/components/ImageBrowser';
+import MenuManager from '@/components/landing-pages/MenuManager';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Save, Image as ImageIcon, ArrowLeft, ExternalLink, Check, Eye, Printer, Globe } from 'lucide-react';
+import { Save, Image as ImageIcon, ArrowLeft, ExternalLink, Check, Eye, Printer, Globe, UtensilsCrossed } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface LandingPage {
@@ -285,95 +287,159 @@ export default function TemplateEditorPage() {
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Controls */}
         <div className="w-80 bg-white border-r overflow-y-auto">
-          <div className="p-4 space-y-6">
-            {/* Page Settings */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-sm text-gray-700 uppercase tracking-wide">
-                Page Settings
-              </h3>
-              
-              <div>
-                <Label htmlFor="title">Page Title</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter page title"
-                  className="mt-1"
-                />
-              </div>
+          <Tabs defaultValue="design" className="w-full">
+            <TabsList className="w-full grid grid-cols-3 p-1 m-2">
+              <TabsTrigger value="design" className="text-xs">
+                <ImageIcon className="w-3 h-3 mr-1" />
+                Design
+              </TabsTrigger>
+              <TabsTrigger value="menu" className="text-xs">
+                <UtensilsCrossed className="w-3 h-3 mr-1" />
+                Menu
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="text-xs">
+                Settings
+              </TabsTrigger>
+            </TabsList>
 
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <Label htmlFor="published" className="cursor-pointer font-medium">
-                    Published
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    {published ? 'Live on the web' : 'Draft mode'}
-                  </p>
-                </div>
-                <Switch
-                  id="published"
-                  checked={published}
-                  onCheckedChange={setPublished}
-                />
-              </div>
-
-              {published && landingPage && (
-                <a
-                  href={`/l/${landingPage.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  View live page
-                </a>
-              )}
-            </div>
-
-            {/* Image Slots */}
-            {template && template.metadata.imageSlots.length > 0 && (
+            {/* Design Tab */}
+            <TabsContent value="design" className="p-4 space-y-6 m-0">
+              {/* Page Settings */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-sm text-gray-700 uppercase tracking-wide">
-                  Page Images
+                  Page Settings
                 </h3>
-                <div className="space-y-3">
-                  {template.metadata.imageSlots.map((slot) => (
-                    <Card
-                      key={slot.id}
-                      className="cursor-pointer hover:shadow-md transition-all hover:border-blue-300"
-                      onClick={() => handleSlotClick(slot.id)}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-center gap-3">
-                          <div className="relative w-16 h-16 rounded overflow-hidden border flex-shrink-0">
-                            {images[slot.id] ? (
-                              <img
-                                src={images[slot.id]}
-                                alt={slot.label}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                <ImageIcon className="w-6 h-6 text-gray-400" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate">{slot.label}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {slot.aspectRatio} • Click to change
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                
+                <div>
+                  <Label htmlFor="title">Page Title</Label>
+                  <Input
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter page title"
+                    className="mt-1"
+                  />
                 </div>
+
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <Label htmlFor="published" className="cursor-pointer font-medium">
+                      Published
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {published ? 'Live on the web' : 'Draft mode'}
+                    </p>
+                  </div>
+                  <Switch
+                    id="published"
+                    checked={published}
+                    onCheckedChange={setPublished}
+                  />
+                </div>
+
+                {published && landingPage && (
+                  <a
+                    href={`/l/${landingPage.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    View live page
+                  </a>
+                )}
               </div>
-            )}
-          </div>
+
+              {/* Image Slots */}
+              {template && template.metadata.imageSlots.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-sm text-gray-700 uppercase tracking-wide">
+                    Page Images
+                  </h3>
+                  <div className="space-y-3">
+                    {template.metadata.imageSlots.map((slot) => (
+                      <Card
+                        key={slot.id}
+                        className="cursor-pointer hover:shadow-md transition-all hover:border-blue-300"
+                        onClick={() => handleSlotClick(slot.id)}
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-center gap-3">
+                            <div className="relative w-16 h-16 rounded overflow-hidden border flex-shrink-0">
+                              {images[slot.id] ? (
+                                <img
+                                  src={images[slot.id]}
+                                  alt={slot.label}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                                  <ImageIcon className="w-6 h-6 text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">{slot.label}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {slot.aspectRatio} • Click to change
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Menu Tab */}
+            <TabsContent value="menu" className="p-4 m-0">
+              <div className="space-y-4">
+                {qrId && (
+                  <div className="bg-green-50 border-2 border-green-200 rounded-lg p-3 mb-4">
+                    <p className="text-sm font-semibold text-green-800 flex items-center gap-2">
+                      <Check className="w-4 h-4" />
+                      Connected to QR Code
+                    </p>
+                    <p className="text-xs text-green-700 mt-1">
+                      This landing page is linked to your QR code
+                    </p>
+                  </div>
+                )}
+                <MenuManager landingPageId={landingPageId} />
+              </div>
+            </TabsContent>
+
+            {/* Settings Tab */}
+            <TabsContent value="settings" className="p-4 space-y-4 m-0">
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-gray-700 uppercase tracking-wide">
+                  Advanced Settings
+                </h3>
+                
+                {landingPage && (
+                  <div className="space-y-3">
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <Label className="text-xs font-semibold">Landing Page URL</Label>
+                      <p className="text-sm font-mono mt-1 break-all">
+                        {window.location.origin}/l/{landingPage.slug}
+                      </p>
+                    </div>
+
+                    {landingPage.customDomain && (
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <Label className="text-xs font-semibold">Custom Domain</Label>
+                        <p className="text-sm font-mono mt-1">
+                          {landingPage.customDomain}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Center Preview Area */}

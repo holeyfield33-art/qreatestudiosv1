@@ -1,22 +1,21 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { getFeatureAccess, type PlanType } from '@/lib/utils/feature-access'
 import {
   LayoutDashboard,
   QrCode,
-  Menu,
   BarChart3,
   Users,
-  UserCircle,
   Printer,
   Sparkles,
   Settings,
-  Palette,
   LogOut,
   Globe,
+  CreditCard,
+  Crown,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -27,6 +26,7 @@ interface DashboardNavProps {
     name?: string | null
     email?: string | null
     image?: string | null
+    plan?: string
     organization?: {
       plan?: string
       isWhiteLabel?: boolean
@@ -34,34 +34,58 @@ interface DashboardNavProps {
   }
 }
 
-const navigation = [
+interface NavItem {
+  name: string
+  href: string
+  icon: any
+  badge?: string
+  requiresPlan?: string[]
+}
+
+const navigation: NavItem[] = [
+  // Core features (all users)
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'AI Studio', href: '/dashboard/ai-studio', icon: Sparkles, badge: 'NEW', badgeColor: 'bg-purple-500 text-white' },
   { name: 'QR Codes', href: '/dashboard/qr-codes', icon: QrCode },
   { name: 'Landing Pages', href: '/dashboard/landing-pages', icon: Globe },
-  { name: 'Menus', href: '/dashboard/menus', icon: Menu },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
-  { name: 'Clients', href: '/dashboard/clients', icon: Users },
-  { name: 'CRM', href: '/dashboard/crm', icon: UserCircle },
-  { name: 'Print Orders', href: '/dashboard/print', icon: Printer },
-  { name: 'White-Label', href: '/dashboard/white-label', icon: Palette, requiresWhiteLabel: true },
-  { name: 'Billing', href: '/dashboard/billing', icon: Settings },
+  { name: 'Print Shop', href: '/dashboard/print-orders', icon: Printer },
+  
+  // Business+ features
+  { name: 'Team & CRM', href: '/dashboard/crm', icon: Users, badge: 'BUSINESS', requiresPlan: ['BUSINESS', 'AGENCY'] },
+  
+  // Agency features
+  { name: 'White Label', href: '/dashboard/white-label', icon: Sparkles, badge: 'AGENCY', requiresPlan: ['AGENCY'] },
+  
+  // All users (content differs by plan)
+  { name: 'Billing', href: '/dashboard/billing', icon: CreditCard },
+  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 
 export function DashboardNav({ user }: DashboardNavProps) {
   const pathname = usePathname()
-  
-  // Get feature access based on organization plan
-  const plan = (user.organization?.plan as PlanType) || 'FREE'
-  const features = getFeatureAccess(plan)
-  
-  // Filter navigation based on feature access
-  const visibleNavigation = navigation.filter((item) => {
-    if ('requiresWhiteLabel' in item && item.requiresWhiteLabel) {
-      return features.canAccessWhiteLabel
+  const router = useRouter()
+  const userPlan = (user?.plan || user?.organization?.plan || 'FREE') as PlanType
+
+  const canAccessFeature = (requiredPlans?: string[]): boolean => {
+    if (!requiredPlans || requiredPlans.length === 0) return true
+    return requiredPlans.includes(userPlan)
+  }
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, item: NavItem) => {
+    if (item.requiresPlan && !canAccessFeature(item.requiresPlan)) {
+      e.preventDefault()
+      
+      // Create upgrade message
+      const planName = item.badge || item.requiresPlan[0]
+      const upgradeMessage = `This feature requires a ${planName} plan. Upgrade to access ${item.name}.`
+      
+      // Show alert and redirect to billing
+      if (typeof window !== 'undefined') {
+        alert(upgradeMessage)
+        router.push('/dashboard/billing?upgrade=' + planName.toLowerCase())
+      }
     }
-    return true
-  })
+  }
 
   const getInitials = (name?: string | null) => {
     if (!name) return 'U'
@@ -90,22 +114,26 @@ export function DashboardNav({ user }: DashboardNavProps) {
 
       <div className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1 px-3" role="list">
-          {visibleNavigation.map((item) => {
+          {navigation.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             const Icon = item.icon
-            const showBadge = 'badge' in item && item.badge
+            const hasAccess = canAccessFeature(item.requiresPlan)
+            const isLocked = item.requiresPlan && !hasAccess
             
             return (
               <li key={item.name}>
                 <Link
                   href={item.href}
+                  onClick={(e) => handleNavClick(e, item)}
                   className={cn(
                     'flex items-center justify-between space-x-3 rounded-md px-3 py-2 text-sm transition-all duration-200 cursor-pointer',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
                     'min-h-[44px]', // Minimum touch target size
-                    isActive
+                    isActive && hasAccess
                       ? 'bg-blue-500 text-white font-bold shadow-md'
-                      : 'text-muted-foreground font-medium hover:bg-accent hover:text-accent-foreground hover:scale-[1.02] hover:shadow-sm active:scale-[0.98]'
+                      : hasAccess
+                      ? 'text-muted-foreground font-medium hover:bg-accent hover:text-accent-foreground hover:scale-[1.02] hover:shadow-sm active:scale-[0.98]'
+                      : 'text-muted-foreground/40 font-medium hover:bg-accent/50 opacity-60'
                   )}
                   aria-current={isActive ? 'page' : undefined}
                 >
@@ -113,11 +141,9 @@ export function DashboardNav({ user }: DashboardNavProps) {
                     <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
                     <span>{item.name}</span>
                   </div>
-                  {showBadge && (
-                    <span className={cn(
-                      'text-xs px-2 py-0.5 rounded-full font-bold',
-                      'badgeColor' in item ? item.badgeColor : 'bg-blue-500 text-white'
-                    )}>
+                  {isLocked && item.badge && (
+                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-xs font-semibold text-purple-400">
+                      <Crown className="h-3 w-3" />
                       {item.badge}
                     </span>
                   )}
@@ -137,6 +163,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{user.name || 'User'}</p>
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+            <p className="text-xs text-purple-500 font-semibold mt-0.5">{userPlan} Plan</p>
           </div>
         </div>
         <Button

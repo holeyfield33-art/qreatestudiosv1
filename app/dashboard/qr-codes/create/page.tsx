@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Upload, Sparkles, Zap, Download, Globe, Printer, Eye, Check, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Upload, Sparkles, Zap, Download, Globe, Printer, Eye, Check, ExternalLink, Copy } from 'lucide-react';
 import Link from 'next/link';
 import { downloadQRCode } from '@/lib/utils/qr-download';
 
@@ -1004,60 +1004,66 @@ export default function CreateQRCodePage() {
 
       {/* SUCCESS MODAL */}
       {showSuccessModal && createdQR && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <CardHeader className="text-center pb-4">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Check className="w-10 h-10 text-green-600" />
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
+          <Card className="w-full max-w-2xl max-h-[95vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 duration-500">
+            <CardHeader className="text-center space-y-4 pb-6 bg-gradient-to-b from-green-50 to-white">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto shadow-xl">
+                <Check className="w-10 h-10 text-white" strokeWidth={3} />
               </div>
-              <CardTitle className="text-3xl mb-2">QR Code Created! 🎉</CardTitle>
-              <CardDescription className="text-base">
-                Your QR code is ready to use. What would you like to do next?
-              </CardDescription>
+              <div>
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                  QR Code Created! 🎉
+                </CardTitle>
+                <CardDescription className="text-base mt-2">
+                  Your QR code is ready to use. What would you like to do next?
+                </CardDescription>
+              </div>
             </CardHeader>
-            
-            <CardContent className="space-y-6">
-              {/* QR Code Preview */}
-              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 flex flex-col items-center qr-code-container">
-                <QRCodeDisplay
-                  value={qrValue}
-                  size={240}
-                  fgColor={qrStyle.fgColor}
-                  bgColor={qrStyle.bgColor}
-                  level="M"
-                  includeMargin={true}
-                />
-                <p className="text-sm text-muted-foreground mt-4 font-medium">
-                  {createdQR.name}
-                </p>
+            <CardContent className="space-y-6 p-6">
+              {/* QR Preview */}
+              <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-8 border-2 border-blue-100">
+                <div className="bg-white rounded-xl p-6 shadow-lg mx-auto max-w-fit qr-code-container">
+                  <QRCodeDisplay
+                    value={qrValue}
+                    size={220}
+                    fgColor={qrStyle.fgColor}
+                    bgColor={qrStyle.bgColor}
+                    level="M"
+                    includeMargin={true}
+                  />
+                  <p className="text-sm font-semibold text-gray-700 mt-4 text-center">
+                    {createdQR.name}
+                  </p>
+                </div>
               </div>
 
               {/* Short URL */}
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <Label className="text-sm font-semibold text-blue-900 mb-2 block">
-                  Your Short URL
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4">
+                <Label className="text-sm font-bold text-blue-900 mb-2 block">
+                  📎 Short URL
                 </Label>
-                <div className="flex items-center gap-2">
+                <div className="flex gap-2">
                   <Input
                     value={createdQR.shortUrl}
                     readOnly
-                    className="flex-1 bg-white font-mono text-sm"
+                    className="font-mono text-sm bg-white border-blue-200"
                   />
                   <Button
                     size="sm"
                     variant="outline"
+                    className="border-blue-300 hover:bg-blue-100"
                     onClick={() => {
                       navigator.clipboard.writeText(createdQR.shortUrl);
                       toast.success('Copied to clipboard!');
                     }}
                   >
-                    Copy
+                    <Copy className="w-4 h-4" />
                   </Button>
                 </div>
                 <Button
                   variant="link"
                   size="sm"
-                  className="mt-2 p-0 h-auto text-xs"
+                  className="mt-2 p-0 h-auto text-xs text-blue-600"
                   onClick={() => window.open(createdQR.shortUrl, '_blank')}
                 >
                   <ExternalLink className="w-3 h-3 mr-1" />
@@ -1065,117 +1071,117 @@ export default function CreateQRCodePage() {
                 </Button>
               </div>
 
-              {/* Primary Actions */}
+              {/* Download Section */}
               <div className="space-y-3">
+                <h3 className="font-bold text-lg flex items-center gap-2">
+                  <Download className="w-5 h-5 text-purple-600" />
+                  Download Your QR Code
+                </h3>
                 <div className="grid grid-cols-2 gap-3">
                   <Button
                     size="lg"
                     variant="outline"
-                    className="h-auto py-4 flex-col gap-2"
+                    className="h-auto py-6 flex flex-col gap-3 border-2 hover:border-blue-400 hover:bg-blue-50 transition-all"
                     onClick={async () => {
                       try {
-                        await downloadQRCode(
-                          '.qr-code-container',
-                          `qr-${createdQR.id}`,
-                          'png',
-                          2048
-                        );
-                        toast.success('QR code downloaded as PNG!');
+                        await downloadQRCode('.qr-code-container', `qr-${createdQR.id}`, 'png', 2048);
+                        toast.success('✅ Downloaded PNG (2048x2048)!');
                       } catch (error) {
                         toast.error('Download failed. Please try again.');
                       }
                     }}
                   >
-                    <Download className="w-6 h-6" />
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Download className="w-6 h-6 text-blue-600" />
+                    </div>
                     <div className="text-center">
-                      <div className="font-semibold">Download PNG</div>
-                      <div className="text-xs text-muted-foreground">High Quality</div>
+                      <div className="font-bold">PNG Image</div>
+                      <div className="text-xs text-muted-foreground">High Quality • 2048x2048</div>
                     </div>
                   </Button>
 
                   <Button
                     size="lg"
                     variant="outline"
-                    className="h-auto py-4 flex-col gap-2"
+                    className="h-auto py-6 flex flex-col gap-3 border-2 hover:border-purple-400 hover:bg-purple-50 transition-all"
                     onClick={async () => {
                       try {
-                        await downloadQRCode(
-                          '.qr-code-container',
-                          `qr-${createdQR.id}`,
-                          'svg'
-                        );
-                        toast.success('QR code downloaded as SVG!');
+                        await downloadQRCode('.qr-code-container', `qr-${createdQR.id}`, 'svg');
+                        toast.success('✅ Downloaded SVG (Vector)!');
                       } catch (error) {
                         toast.error('Download failed. Please try again.');
                       }
                     }}
                   >
-                    <Download className="w-6 h-6" />
+                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                      <Download className="w-6 h-6 text-purple-600" />
+                    </div>
                     <div className="text-center">
-                      <div className="font-semibold">Download SVG</div>
-                      <div className="text-xs text-muted-foreground">Scalable</div>
+                      <div className="font-bold">SVG Vector</div>
+                      <div className="text-xs text-muted-foreground">Scalable • Print-Ready</div>
                     </div>
                   </Button>
                 </div>
+              </div>
 
-                {/* Create Landing Page */}
+              {/* Primary Actions */}
+              <div className="space-y-3 pt-2">
+                <h3 className="font-bold text-lg">What's Next?</h3>
+                
                 <Button
                   size="lg"
-                  className="w-full h-auto py-4 flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  className="w-full h-auto py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all"
                   onClick={() => {
                     router.push(`/dashboard/landing-pages/create?qrId=${createdQR.id}`);
                   }}
                 >
-                  <Globe className="w-5 h-5" />
-                  <div className="text-left">
-                    <div className="font-semibold">Create Landing Page</div>
+                  <Globe className="w-6 h-6 mr-3" />
+                  <div className="text-left flex-1">
+                    <div className="font-bold text-base">Create Landing Page</div>
                     <div className="text-xs opacity-90">Build a custom page for this QR code</div>
                   </div>
                 </Button>
 
-                {/* Order Prints */}
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full h-auto py-4 flex items-center justify-center gap-3"
+                  className="w-full h-auto py-5 border-2 hover:bg-orange-50 hover:border-orange-300 transition-all"
                   onClick={() => {
-                    router.push(`/dashboard/print/order?qrCodeId=${createdQR.id}`);
+                    router.push(`/dashboard/print-orders/new?qrId=${createdQR.id}`);
                   }}
                 >
-                  <Printer className="w-5 h-5" />
-                  <div className="text-left">
-                    <div className="font-semibold">Order Physical Products</div>
+                  <Printer className="w-6 h-6 mr-3 text-orange-600" />
+                  <div className="text-left flex-1">
+                    <div className="font-bold text-base">Order Physical Products</div>
                     <div className="text-xs text-muted-foreground">NFC cards, stickers, flyers & more</div>
                   </div>
                 </Button>
 
-                {/* View Dashboard */}
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full"
+                  className="w-full border-2"
                   onClick={() => {
                     router.push(`/dashboard/qr-codes/${createdQR.id}`);
                   }}
                 >
-                  <Eye className="w-4 h-4 mr-2" />
-                  View in Dashboard
+                  <Eye className="w-5 h-5 mr-2" />
+                  View Details & Analytics
                 </Button>
               </div>
 
-              {/* Bottom Actions */}
-              <div className="pt-4 border-t">
+              {/* Footer Actions */}
+              <div className="pt-4 border-t space-y-2">
                 <Button
                   variant="ghost"
-                  className="w-full"
+                  className="w-full text-muted-foreground hover:text-foreground"
                   onClick={() => {
                     setShowSuccessModal(false);
                     setCreatedQR(null);
-                    // Reset form to create another
                     window.location.reload();
                   }}
                 >
-                  Create Another QR Code
+                  ← Create Another QR Code
                 </Button>
               </div>
             </CardContent>
