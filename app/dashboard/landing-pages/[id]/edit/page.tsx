@@ -130,8 +130,8 @@ export default function TemplateEditorPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title,
-          published,
+          name: title,
+          isPublished: published,
           content: {
             html,
             templateId: template?.id,
@@ -169,8 +169,8 @@ export default function TemplateEditorPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title,
-          published: true,
+          name: title,
+          isPublished: true,
           content: {
             html,
             templateId: template?.id,
@@ -467,7 +467,7 @@ export default function TemplateEditorPage() {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check className="w-8 h-8 text-green-600" />
               </div>
-              <CardTitle className="text-2xl">Page Published! 🚀</CardTitle>
+              <CardTitle className="text-2xl">Page Published</CardTitle>
               <CardDescription>Your landing page is now live on the web</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -482,8 +482,9 @@ export default function TemplateEditorPage() {
               {/* QR Connected Banner */}
               {qrId && (
                 <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                  <p className="text-sm text-green-800 font-medium text-center">
-                    ✅ QR code connected to this page
+                  <p className="text-sm text-green-800 font-medium text-center flex items-center justify-center gap-2">
+                    <Check className="w-4 h-4" />
+                    QR code connected to this page
                   </p>
                 </div>
               )}

@@ -198,8 +198,9 @@ export default function PrintOrderPage() {
                   Min: {currentProduct.minQuantity}, Max: {currentProduct.maxQuantity}
                 </p>
                 {quantity >= 10 && (
-                  <p className="text-xs text-green-600 mt-1" role="status">
-                    🎉 Volume discount applied!
+                  <p className="text-xs text-green-600 mt-1 flex items-center gap-1" role="status">
+                    <Check className="w-3 h-3" />
+                    Volume discount applied
                   </p>
                 )}
               </div>

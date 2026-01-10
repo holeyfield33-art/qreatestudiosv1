@@ -12,9 +12,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Upload, Sparkles, Zap, Download, Globe, Printer, Eye, Check, ExternalLink, Copy, Package } from 'lucide-react';
+import { ArrowLeft, Upload, Sparkles, Zap, Download, Globe, Printer, Eye, Check, ExternalLink, Copy, Package, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import { downloadQRCode } from '@/lib/utils/qr-download';
+import { getDisplayUrl } from '@/lib/utils/domains';
 
 const QR_TYPES = [
   { id: 'URL', name: 'URL', icon: '', description: 'Website or link' },
@@ -989,8 +990,14 @@ export default function CreateQRCodePage() {
               
               {qrValue && (
                 <div className="mt-4 text-center w-full">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    ✅ Ready to scan • Test with your phone camera
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Check className="w-4 h-4 text-green-600" />
+                    <p className="text-sm text-muted-foreground">
+                      Ready to scan
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Test with your phone camera
                   </p>
                   <div className="text-xs text-muted-foreground mt-2 p-2 bg-muted rounded">
                     {qrType} QR Code
@@ -1039,22 +1046,20 @@ export default function CreateQRCodePage() {
 
               {/* Short URL */}
               <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4">
-                <Label className="text-sm font-bold text-blue-900 mb-2 block">
-                  📎 Short URL
+                <Label className="text-sm font-bold text-blue-900 mb-2 block uppercase tracking-wide">
+                  Short URL
                 </Label>
                 <div className="flex gap-2">
-                  <Input
-                    value={createdQR.shortUrl}
-                    readOnly
-                    className="font-mono text-sm bg-white border-blue-200"
-                  />
+                  <div className="flex-1 px-3 py-2 bg-white rounded border-2 border-blue-200 font-mono text-sm text-slate-700">
+                    {getDisplayUrl(createdQR.shortUrl).display}
+                  </div>
                   <Button
                     size="sm"
                     variant="outline"
                     className="border-blue-300 hover:bg-blue-100"
                     onClick={() => {
                       navigator.clipboard.writeText(createdQR.shortUrl);
-                      toast.success('Copied to clipboard!');
+                      toast.success('Copied to clipboard');
                     }}
                   >
                     <Copy className="w-4 h-4" />
@@ -1085,7 +1090,7 @@ export default function CreateQRCodePage() {
                     onClick={async () => {
                       try {
                         await downloadQRCode('.qr-code-container', `qr-${createdQR.id}`, 'png', 2048);
-                        toast.success('✅ Downloaded PNG (2048x2048)!');
+                        toast.success('Downloaded PNG (2048x2048)');
                       } catch (error) {
                         toast.error('Download failed. Please try again.');
                       }
@@ -1107,7 +1112,7 @@ export default function CreateQRCodePage() {
                     onClick={async () => {
                       try {
                         await downloadQRCode('.qr-code-container', `qr-${createdQR.id}`, 'svg');
-                        toast.success('✅ Downloaded SVG (Vector)!');
+                        toast.success('Downloaded SVG (Vector)');
                       } catch (error) {
                         toast.error('Download failed. Please try again.');
                       }

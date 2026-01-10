@@ -8,75 +8,64 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, Check, CreditCard, Package, Truck, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Check, CreditCard, Package, Truck, ShoppingCart, Smartphone, Sticker, Triangle, FileText, ContactCard } from 'lucide-react';
 import Image from 'next/image';
 
 const PRINT_PRODUCTS = [
   {
     id: 'nfc-cards',
-    name: 'NFC Smart Cards',
-    description: 'Tap-to-view business cards with embedded NFC chip',
-    basePrice: 2.99,
+    name: 'NFC Cards',
+    description: 'Tap-to-share smart business cards',
+    basePrice: 4.99,
     unit: 'card',
     minQty: 25,
-    image: '💳',
+    icon: Smartphone,
     features: ['Waterproof', 'Durable PVC', 'Works with any phone', 'Instant tap activation'],
     sizes: ['Standard (3.5" x 2")'],
   },
   {
-    id: 'stickers',
+    id: 'qr-stickers',
     name: 'QR Code Stickers',
-    description: 'Weather-resistant vinyl stickers with your QR code',
-    basePrice: 19.99,
-    unit: 'pack of 100',
-    minQty: 1,
-    image: '🏷️',
+    description: 'Weatherproof vinyl stickers',
+    basePrice: 24.99,
+    unit: 'per 100',
+    minQty: 100,
+    icon: Sticker,
     features: ['Waterproof vinyl', 'UV resistant', 'Strong adhesive', 'Indoor/outdoor use'],
     sizes: ['Small (2" x 2")', 'Medium (3" x 3")', 'Large (4" x 4")'],
   },
   {
+    id: 'table-tents',
+    name: 'Table Tents',
+    description: 'Folded table displays with QR',
+    basePrice: 39.99,
+    unit: 'per 50',
+    minQty: 50,
+    icon: Triangle,
+    features: ['Self-standing', 'Durable cardstock', 'Easy assembly', 'Professional look'],
+    sizes: ['Standard (4" x 6")'],
+  },
+  {
     id: 'flyers',
-    name: 'Marketing Flyers',
-    description: 'Full-color flyers with QR code and landing page info',
+    name: 'Flyers',
+    description: 'Full-color promotional flyers',
     basePrice: 49.99,
-    unit: 'pack of 500',
-    minQty: 1,
-    image: '📄',
+    unit: 'per 500',
+    minQty: 500,
+    icon: FileText,
     features: ['Full color', 'Glossy finish', 'Premium paper', 'Professional printing'],
     sizes: ['Standard (8.5" x 11")', 'Postcard (6" x 4")'],
   },
   {
     id: 'business-cards',
     name: 'Business Cards',
-    description: 'Premium business cards with QR code on back',
+    description: 'Premium cards with QR code',
     basePrice: 29.99,
-    unit: 'pack of 250',
-    minQty: 1,
-    image: '🎴',
+    unit: 'per 250',
+    minQty: 250,
+    icon: ContactCard,
     features: ['Premium cardstock', 'Matte or glossy', 'Double-sided', 'QR code included'],
     sizes: ['Standard (3.5" x 2")', 'Square (2.5" x 2.5")'],
-  },
-  {
-    id: 'posters',
-    name: 'Posters',
-    description: 'Large format posters with prominent QR code',
-    basePrice: 39.99,
-    unit: 'poster',
-    minQty: 1,
-    image: '🖼️',
-    features: ['High resolution', 'Thick paper', 'Multiple sizes', 'Eye-catching design'],
-    sizes: ['Medium (18" x 24")', 'Large (24" x 36")'],
-  },
-  {
-    id: 'table-tents',
-    name: 'Table Tents',
-    description: 'Folded table displays perfect for restaurants',
-    basePrice: 24.99,
-    unit: 'pack of 50',
-    minQty: 1,
-    image: '⛺',
-    features: ['Self-standing', 'Durable cardstock', 'Easy assembly', 'Professional look'],
-    sizes: ['Standard (4" x 6")'],
   },
 ];
 
@@ -266,7 +255,9 @@ export default function NewPrintOrderPage() {
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <div className="text-6xl mb-4">{product.image}</div>
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                      <product.icon className="w-8 h-8 text-blue-600" />
+                    </div>
                     <Badge variant="secondary" className="text-xs">
                       from ${product.basePrice}
                     </Badge>
@@ -301,7 +292,9 @@ export default function NewPrintOrderPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-4">
-                  <div className="text-6xl">{selectedProductData.image}</div>
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                    <selectedProductData.icon className="w-8 h-8 text-blue-600" />
+                  </div>
                   <div>
                     <CardTitle className="text-2xl">{selectedProductData.name}</CardTitle>
                     <CardDescription>{selectedProductData.description}</CardDescription>
@@ -468,7 +461,9 @@ export default function NewPrintOrderPage() {
                 {/* Order Details */}
                 <div className="p-4 bg-gray-50 rounded-lg space-y-2">
                   <div className="flex items-center gap-3 pb-3 border-b">
-                    <div className="text-4xl">{selectedProductData.image}</div>
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      <selectedProductData.icon className="w-6 h-6 text-blue-600" />
+                    </div>
                     <div>
                       <p className="font-semibold">{selectedProductData.name}</p>
                       <p className="text-sm text-muted-foreground">

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { LANDING_PAGE_TEMPLATES } from '@/lib/templates/landing-page-templates';
-import { Search, Sparkles, Plus, Eye } from 'lucide-react';
+import { Search, Sparkles, Plus, Eye, Package, Calendar, Home, Palette, FileText, ShoppingBag, Dumbbell, Scissors, Wrench, Building, Scale } from 'lucide-react';
 import Image from 'next/image';
 
 export default function LandingPagesPage() {
@@ -77,18 +77,18 @@ export default function LandingPagesPage() {
     router.push(`/dashboard/landing-pages/create?template=${templateId}`);
   }
 
-  function getTemplateIcon(templateId: string): string {
-    if (templateId.includes('restaurant')) return '🍽️';
-    if (templateId.includes('retail') || templateId.includes('product')) return '🛍️';
-    if (templateId.includes('realestate') || templateId.includes('property')) return '🏡';
-    if (templateId.includes('fitness') || templateId.includes('gym')) return '💪';
-    if (templateId.includes('salon') || templateId.includes('spa')) return '💅';
-    if (templateId.includes('event')) return '🎉';
-    if (templateId.includes('service')) return '🔧';
-    if (templateId.includes('portfolio')) return '🎨';
-    if (templateId.includes('medical') || templateId.includes('clinic')) return '🏥';
-    if (templateId.includes('law') || templateId.includes('legal')) return '⚖️';
-    return '📄';
+  function getTemplateIcon(templateId: string): JSX.Element {
+    if (templateId.includes('restaurant')) return <Package className="w-6 h-6" />;
+    if (templateId.includes('retail') || templateId.includes('product')) return <ShoppingBag className="w-6 h-6" />;
+    if (templateId.includes('realestate') || templateId.includes('property')) return <Home className="w-6 h-6" />;
+    if (templateId.includes('fitness') || templateId.includes('gym')) return <Dumbbell className="w-6 h-6" />;
+    if (templateId.includes('salon') || templateId.includes('spa')) return <Scissors className="w-6 h-6" />;
+    if (templateId.includes('event')) return <Calendar className="w-6 h-6" />;
+    if (templateId.includes('service')) return <Wrench className="w-6 h-6" />;
+    if (templateId.includes('portfolio')) return <Palette className="w-6 h-6" />;
+    if (templateId.includes('medical') || templateId.includes('clinic')) return <Building className="w-6 h-6" />;
+    if (templateId.includes('law') || templateId.includes('legal')) return <Scale className="w-6 h-6" />;
+    return <FileText className="w-6 h-6" />;
   }
 
   if (loading) {

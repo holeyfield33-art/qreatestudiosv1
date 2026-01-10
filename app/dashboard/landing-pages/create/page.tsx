@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { LANDING_PAGE_TEMPLATES } from '@/lib/templates/landing-page-templates';
 import Image from 'next/image';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles, FileText, Package, Calendar, Rocket, Download, Home, Palette, Video, Lightbulb, Clock } from 'lucide-react';
 import { getLandingPageUrl } from '@/lib/utils/url-helpers';
 
 export default function CreateLandingPagePage() {
@@ -118,7 +118,7 @@ export default function CreateLandingPagePage() {
               <Sparkles className="w-5 h-5 text-blue-600" />
             </div>
             <p className="text-sm text-blue-900 font-medium">
-              ✨ Creating landing page for your QR code - it will be connected automatically!
+              Creating landing page for your QR code - it will be connected automatically
             </p>
           </div>
         )}
@@ -151,9 +151,9 @@ export default function CreateLandingPagePage() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-                        <span className="text-5xl">
+                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
                           {getTemplateIcon(template.id)}
-                        </span>
+                        </div>
                       </div>
                     )}
                     {selectedTemplate === template.id && (
@@ -223,9 +223,9 @@ export default function CreateLandingPagePage() {
                 <div className="p-4 bg-gray-50 rounded-lg border">
                   <p className="text-sm text-muted-foreground mb-2">Selected Template:</p>
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                       {getTemplateIcon(selectedTemplate)}
-                    </span>
+                    </div>
                     <div>
                       <p className="font-semibold">
                         {LANDING_PAGE_TEMPLATES.find(t => t.id === selectedTemplate)?.name}
@@ -319,18 +319,18 @@ export default function CreateLandingPagePage() {
   );
 }
 
-function getTemplateIcon(templateId: string): string {
-  const icons: Record<string, string> = {
-    'modern-saas': '💼',
-    'restaurant-menu': '🍽️',
-    'event-registration': '🎟️',
-    'product-launch': '🚀',
-    'lead-generation': '📥',
-    'real-estate': '🏡',
-    'portfolio': '🎨',
-    'webinar': '🎥',
-    'service-business': '💡',
-    'coming-soon': '⏰',
+function getTemplateIcon(templateId: string): JSX.Element {
+  const iconMap: Record<string, JSX.Element> = {
+    'modern-saas': <FileText className="w-8 h-8" />,
+    'restaurant-menu': <Package className="w-8 h-8" />,
+    'event-registration': <Calendar className="w-8 h-8" />,
+    'product-launch': <Rocket className="w-8 h-8" />,
+    'lead-generation': <Download className="w-8 h-8" />,
+    'real-estate': <Home className="w-8 h-8" />,
+    'portfolio': <Palette className="w-8 h-8" />,
+    'webinar': <Video className="w-8 h-8" />,
+    'service-business': <Lightbulb className="w-8 h-8" />,
+    'coming-soon': <Clock className="w-8 h-8" />,
   };
-  return icons[templateId] || '📄';
+  return iconMap[templateId] || <FileText className="w-8 h-8" />;
 }

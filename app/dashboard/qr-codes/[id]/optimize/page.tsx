@@ -270,12 +270,12 @@ export default function OptimizeQRPage() {
 
         <p className="text-sm text-muted-foreground mt-4">
           {(optimization?.score ?? 0) >= 85
-            ? '🎉 Excellent! Your QR code is well optimized for maximum scan rates.'
+            ? 'Excellent! Your QR code is well optimized for maximum scan rates.'
             : (optimization?.score ?? 0) >= 70
-            ? '👍 Good performance, but there\'s room for improvement.'
+            ? 'Good performance, but there\'s room for improvement.'
             : (optimization?.score ?? 0) >= 50
-            ? '⚡ Fair optimization. Follow recommendations to boost performance.'
-            : '⚠️ Multiple optimizations recommended to improve scan rates.'}
+            ? 'Fair optimization. Follow recommendations to boost performance.'
+            : 'Multiple optimizations recommended to improve scan rates.'}
         </p>
       </Card>
 
@@ -436,7 +436,10 @@ export default function OptimizeQRPage() {
 
             {linkHealth?.alternatives && linkHealth.alternatives.length > 0 && (
               <div className="mt-4 p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-lg">
-                <p className="font-medium text-sm mb-3">✅ Alternative URLs Found:</p>
+                <p className="font-medium text-sm mb-3 flex items-center gap-2">
+                  <Check className="w-4 h-4" />
+                  Alternative URLs Found:
+                </p>
                 <div className="space-y-2">
                   {linkHealth.alternatives.map((alt, index) => (
                     <div

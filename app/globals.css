@@ -72,6 +72,26 @@
   box-shadow: 0 10px 40px -10px rgba(102, 126, 234, 0.3);
 }
 
+.shadow-premium-lg {
+  box-shadow: 0 20px 60px -15px rgba(59, 130, 246, 0.35);
+}
+
+/* Card hover effects */
+.card-premium {
+  transition: all 0.2s ease-in-out;
+}
+
+.card-premium:hover {
+  box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Professional borders */
+.border-premium {
+  border-width: 2px;
+  border-color: rgb(226 232 240);
+}
+
 /* Remove emojis globally */
 .no-emoji::before {
   content: none !important;
