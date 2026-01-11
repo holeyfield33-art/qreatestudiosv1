@@ -100,7 +100,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
 
   return (
     <nav
-      className="flex h-full w-64 flex-col border-r bg-muted/40"
+      className="h-full w-64 flex-col border-r bg-muted/40 hidden lg:flex"
       aria-label="Main navigation"
     >
       <div className="flex items-center justify-center px-6 py-6 border-b">

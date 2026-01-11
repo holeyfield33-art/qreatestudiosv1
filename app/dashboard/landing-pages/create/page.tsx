@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -109,15 +109,15 @@ export default function CreateLandingPagePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-gray-50 py-4 px-4 lg:py-8">
       <div className="max-w-6xl mx-auto">
         {/* QR Connection Banner */}
         {qrId && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-blue-600" />
+          <div className="mb-4 lg:mb-6 p-3 lg:p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 lg:gap-3">
+            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 text-blue-600" />
             </div>
-            <p className="text-sm text-blue-900 font-medium">
+            <p className="text-xs lg:text-sm text-blue-900 font-medium">
               Creating landing page for your QR code - it will be connected automatically
             </p>
           </div>
@@ -126,12 +126,12 @@ export default function CreateLandingPagePage() {
         {/* Step 1: Choose Template */}
         {step === 1 && (
           <div>
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold mb-2">Choose a Template</h1>
-              <p className="text-muted-foreground">Pick a starting point for your landing page</p>
+            <div className="mb-6 lg:mb-8">
+              <h1 className="text-2xl lg:text-4xl font-bold mb-1 lg:mb-2">Choose a Template</h1>
+              <p className="text-sm text-muted-foreground">Pick a starting point for your landing page</p>
             </div>
             
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
               {LANDING_PAGE_TEMPLATES.map(template => (
                 <Card
                   key={template.id}
@@ -166,8 +166,8 @@ export default function CreateLandingPagePage() {
                       </div>
                     )}
                   </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-lg mb-1">{template.name}</h3>
+                  <CardContent className="p-3 lg:p-4">
+                    <h3 className="font-semibold text-base lg:text-lg mb-1">{template.name}</h3>
                     <p className="text-xs text-muted-foreground line-clamp-2">
                       {template.description}
                     </p>
@@ -176,11 +176,12 @@ export default function CreateLandingPagePage() {
               ))}
             </div>
 
-            <div className="mt-8 flex justify-end gap-3">
+            <div className="mt-6 lg:mt-8 flex flex-col sm:flex-row justify-end gap-3">
               <Button
                 variant="outline"
                 size="lg"
                 onClick={() => router.back()}
+                className="w-full sm:w-auto"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Cancel
@@ -189,7 +190,7 @@ export default function CreateLandingPagePage() {
                 size="lg"
                 disabled={!selectedTemplate}
                 onClick={() => setStep(2)}
-                className="min-w-[200px]"
+                className="w-full sm:w-auto sm:min-w-[200px]"
               >
                 Next: Customize →
               </Button>
@@ -200,25 +201,25 @@ export default function CreateLandingPagePage() {
         {/* Step 2: Name & Launch */}
         {step === 2 && (
           <div>
-            <div className="mb-8">
+            <div className="mb-6 lg:mb-8">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setStep(1)}
-                className="mb-4"
+                className="mb-3 lg:mb-4"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Templates
               </Button>
-              <h1 className="text-4xl font-bold mb-2">Name Your Page</h1>
-              <p className="text-muted-foreground">Give your landing page a name and URL</p>
+              <h1 className="text-2xl lg:text-4xl font-bold mb-1 lg:mb-2">Name Your Page</h1>
+              <p className="text-sm text-muted-foreground">Give your landing page a name and URL</p>
             </div>
 
             <Card className="max-w-2xl mx-auto">
-              <CardHeader>
-                <CardTitle className="text-2xl">Page Details</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-xl lg:text-2xl">Page Details</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 lg:space-y-6">
                 {/* Selected Template Preview */}
                 <div className="p-4 bg-gray-50 rounded-lg border">
                   <p className="text-sm text-muted-foreground mb-2">Selected Template:</p>
@@ -239,7 +240,7 @@ export default function CreateLandingPagePage() {
 
                 {/* Page Name Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="pageName" className="text-base font-semibold">
+                  <Label htmlFor="pageName" className="text-sm lg:text-base font-semibold">
                     Page Name *
                   </Label>
                   <Input
@@ -250,7 +251,7 @@ export default function CreateLandingPagePage() {
                       setSlug(generateSlug(e.target.value));
                     }}
                     placeholder="My Restaurant Menu"
-                    className="text-lg h-12"
+                    className="text-base lg:text-lg h-11 lg:h-12 w-full"
                     autoFocus
                   />
                   <p className="text-xs text-muted-foreground">
@@ -260,11 +261,11 @@ export default function CreateLandingPagePage() {
 
                 {/* URL Slug Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="slug" className="text-base font-semibold">
+                  <Label htmlFor="slug" className="text-sm lg:text-base font-semibold">
                     Your Custom URL *
                   </Label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                    <span className="text-xs lg:text-sm text-muted-foreground whitespace-nowrap">
                       qreatestudios.com/l/
                     </span>
                     <Input
@@ -272,7 +273,7 @@ export default function CreateLandingPagePage() {
                       value={slug}
                       onChange={(e) => setSlug(generateSlug(e.target.value))}
                       placeholder="my-page"
-                      className="text-lg h-12"
+                      className="text-base lg:text-lg h-11 lg:h-12 w-full"
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -283,20 +284,22 @@ export default function CreateLandingPagePage() {
                 {/* Preview URL */}
                 {slug && (
                   <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-xs text-blue-700 mb-1">Your landing page will be:</p>
-                    <p className="text-sm font-mono text-blue-900 font-semibold">
-                      {window.location.origin}/l/{slug}
-                    </p>
+                    <p className="text-xs text-blue-700 mb-2 font-semibold">Your landing page will be:</p>
+                    <div className="flex items-center gap-2 p-2 bg-white rounded-lg">
+                      <span className="text-sm font-mono truncate flex-1 text-blue-900 font-medium">
+                        {window.location.origin.replace(/^https?:\/\//, '')}/l/{slug}
+                      </span>
+                    </div>
                   </div>
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-3 pt-4">
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <Button
                     variant="outline"
                     size="lg"
                     onClick={() => setStep(1)}
-                    className="flex-1"
+                    className="w-full sm:flex-1"
                   >
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back
@@ -305,7 +308,7 @@ export default function CreateLandingPagePage() {
                     size="lg"
                     onClick={createAndEdit}
                     disabled={loading || !pageName || !slug}
-                    className="flex-1"
+                    className="w-full sm:flex-1"
                   >
                     {loading ? 'Creating...' : 'Create & Edit Page →'}
                   </Button>

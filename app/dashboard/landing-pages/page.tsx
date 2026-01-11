@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -103,17 +103,17 @@ export default function LandingPagesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 lg:gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Landing Pages</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl lg:text-3xl font-bold">Landing Pages</h1>
+          <p className="text-sm text-muted-foreground">
             Create beautiful landing pages from professional templates
           </p>
         </div>
-        <Link href="/dashboard/landing-pages/create">
-          <Button size="lg" className="min-h-[44px]">
+        <Link href="/dashboard/landing-pages/create" className="w-full sm:w-auto">
+          <Button size="lg" className="min-h-[44px] w-full sm:w-auto">
             <Plus className="mr-2 h-5 w-5" />
             Create Landing Page
           </Button>
@@ -122,23 +122,25 @@ export default function LandingPagesPage() {
 
       {/* Tabs for My Pages vs Templates */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'my-pages' | 'templates')}>
-        <TabsList className="grid w-full max-w-[400px] grid-cols-2">
-          <TabsTrigger value="templates">
-            <Sparkles className="mr-2 h-4 w-4" />
-            Templates
+        <TabsList className="grid w-full max-w-full sm:max-w-[400px] grid-cols-2">
+          <TabsTrigger value="templates" className="text-sm">
+            <Sparkles className="mr-1 lg:mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Templates</span>
+            <span className="sm:hidden">Browse</span>
           </TabsTrigger>
-          <TabsTrigger value="my-pages">
-            <Eye className="mr-2 h-4 w-4" />
-            My Pages ({landingPages.length})
+          <TabsTrigger value="my-pages" className="text-sm">
+            <Eye className="mr-1 lg:mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">My Pages ({landingPages.length})</span>
+            <span className="sm:hidden">Mine ({landingPages.length})</span>
           </TabsTrigger>
         </TabsList>
 
         {/* Templates Tab */}
-        <TabsContent value="templates" className="space-y-6">
+        <TabsContent value="templates" className="space-y-4 lg:space-y-6">
           {/* Search and Filter */}
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row gap-4">
+            <CardContent className="pt-4 lg:pt-6">
+              <div className="flex flex-col gap-3 lg:gap-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -148,13 +150,14 @@ export default function LandingPagesPage() {
                     className="pl-10 min-h-[44px]"
                   />
                 </div>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
                   {categories.map((category) => (
                     <Button
                       key={category}
+                      size="sm"
                       variant={selectedCategory === category ? 'default' : 'outline'}
                       onClick={() => setSelectedCategory(category)}
-                      className="min-h-[44px] capitalize"
+                      className="min-h-[36px] capitalize whitespace-nowrap flex-shrink-0"
                     >
                       {category}
                     </Button>
@@ -165,7 +168,7 @@ export default function LandingPagesPage() {
           </Card>
 
           {/* Template Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" role="list" aria-label="Template library">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6" role="list" aria-label="Template library">
             {filteredTemplates.map((template) => (
               <Card 
                 key={template.id} 

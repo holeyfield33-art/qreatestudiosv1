@@ -40,20 +40,20 @@ export default function QRCodesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 lg:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-3xl font-bold">QR Codes</h1>
-          <p className="text-muted-foreground">Manage your QR codes</p>
+          <h1 className="text-2xl lg:text-3xl font-bold">QR Codes</h1>
+          <p className="text-sm text-muted-foreground">Manage your QR codes</p>
         </div>
-        <Button onClick={() => router.push('/dashboard/qr-codes/create')}>
+        <Button onClick={() => router.push('/dashboard/qr-codes/create')} size="lg" className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
           Create QR Code
         </Button>
       </div>
 
       <div className="flex gap-4">
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Input
             placeholder="Search QR codes..."
@@ -66,7 +66,7 @@ export default function QRCodesPage() {
       </div>
 
       {loading ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           <QRCardSkeleton />
           <QRCardSkeleton />
           <QRCardSkeleton />

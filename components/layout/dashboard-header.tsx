@@ -37,13 +37,15 @@ export function DashboardHeader({ title, user }: DashboardHeaderProps) {
 
   return (
     <header className="border-b bg-background">
-      <div className="flex h-16 items-center justify-between px-6">
-        <h1 id="main-content" className="text-2xl font-bold" tabIndex={-1}>
+      <div className="flex h-14 lg:h-16 items-center justify-between px-4 lg:px-6">
+        <h1 id="main-content" className="text-lg lg:text-2xl font-bold truncate max-w-[50%]" tabIndex={-1}>
           {title}
         </h1>
 
-        <div className="flex items-center gap-4">
-          <AICreditsWidget />
+        <div className="flex items-center gap-2 lg:gap-4">
+          <div className="hidden sm:block">
+            <AICreditsWidget />
+          </div>
           
           <DropdownMenu>
           <DropdownMenuTrigger asChild>

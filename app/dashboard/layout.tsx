@@ -1,11 +1,8 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { DashboardNav } from '@/components/layout/dashboard-nav'
-import { DashboardHeader } from '@/components/layout/dashboard-header'
+import { DashboardLayoutClient } from '@/components/layout/dashboard-layout-client'
 import { SkipLink } from '@/components/ui/skip-link'
 import { Toaster } from '@/components/ui/sonner'
-import { PageTransition } from '@/components/page-transition'
-import { AIChatInterface } from '@/components/ai/AIChatInterface'
 
 export default async function DashboardLayout({
   children,
@@ -19,19 +16,12 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <>
       <SkipLink />
-      <DashboardNav user={session.user} />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <DashboardHeader title="Dashboard" user={session.user} />
-        <main className="flex-1 overflow-y-auto p-6" id="main-content">
-          <PageTransition>
-            {children}
-          </PageTransition>
-        </main>
-      </div>
+      <DashboardLayoutClient user={session.user}>
+        {children}
+      </DashboardLayoutClient>
       <Toaster position="top-right" />
-      <AIChatInterface />
-    </div>
+    </>
   )
 }

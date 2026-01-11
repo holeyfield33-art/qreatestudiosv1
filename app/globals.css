@@ -24,6 +24,13 @@
   --radius: 0.5rem;
 }
 
+/* iOS Safe Area Support */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 /* Ensure focus indicators are visible */
 *:focus-visible {
   outline: 2px solid hsl(var(--ring));

@@ -332,26 +332,25 @@ export default function QRDetailPage() {
               <p className="font-medium">{qrCode.type}</p>
             </div>
             <div>
-              <Label className="text-muted-foreground">Short URL</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={`${window.location.origin}/${qrCode.shortCode}`}
-                  readOnly
-                  className="font-mono text-sm"
-                  aria-label="Short URL"
-                />
+              <Label className="text-muted-foreground text-sm font-medium">Short URL</Label>
+              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg mt-1 hover:bg-gray-100 transition-colors">
+                <span className="text-sm font-mono truncate flex-1 text-gray-700">
+                  {window.location.origin.replace(/^https?:\/\//, '')}/{qrCode.shortCode}
+                </span>
                 <Button 
-                  variant="outline" 
-                  size="icon"
+                  variant="ghost" 
+                  size="sm"
                   onClick={copyShortUrl}
+                  className="flex-shrink-0 h-8 w-8 p-0"
                   aria-label="Copy short URL"
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
                 <Button 
-                  variant="outline" 
-                  size="icon"
+                  variant="ghost" 
+                  size="sm"
                   onClick={() => window.open(`/${qrCode.shortCode}`, '_blank')}
+                  className="flex-shrink-0 h-8 w-8 p-0"
                   aria-label="Open in new tab"
                 >
                   <ExternalLink className="h-4 w-4" />

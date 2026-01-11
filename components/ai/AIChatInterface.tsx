@@ -213,7 +213,7 @@ export function AIChatInterface({ initialContext }: AIChatInterfaceProps) {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
-            className="fixed bottom-6 right-6 z-50"
+            className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50"
           >
             <Button
               onClick={() => setIsOpen(true)}
@@ -243,9 +243,9 @@ export function AIChatInterface({ initialContext }: AIChatInterfaceProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-50 w-[400px] max-h-[600px] flex flex-col"
+            className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50 w-[calc(100vw-2rem)] max-w-[400px] max-h-[70vh] lg:max-h-[600px] flex flex-col"
           >
-            <Card className="flex flex-col h-full shadow-2xl">
+            <Card className="flex flex-col h-full shadow-2xl backdrop-blur-md bg-white/95">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-lg">
                 <div className="flex items-center gap-2">

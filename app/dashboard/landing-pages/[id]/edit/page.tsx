@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Save, Image as ImageIcon, ArrowLeft, ExternalLink, Check, Eye, Printer, Globe, UtensilsCrossed } from 'lucide-react';
+import { Save, Image as ImageIcon, ArrowLeft, ExternalLink, Check, Eye, Printer, Globe, UtensilsCrossed, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface LandingPage {
@@ -420,19 +420,56 @@ export default function TemplateEditorPage() {
                 
                 {landingPage && (
                   <div className="space-y-3">
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <Label className="text-xs font-semibold">Landing Page URL</Label>
-                      <p className="text-sm font-mono mt-1 break-all">
-                        {window.location.origin}/l/{landingPage.slug}
-                      </p>
+                    <div>
+                      <Label className="text-xs font-semibold mb-1 block">Landing Page URL</Label>
+                      <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <span className="text-sm font-mono truncate flex-1 text-gray-700">
+                          {window.location.origin.replace(/^https?:\/\//, '')}/l/{landingPage.slug}
+                        </span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${window.location.origin}/l/${landingPage.slug}`);
+                            toast.success('URL copied to clipboard');
+                          }}
+                          className="flex-shrink-0 h-8 w-8 p-0"
+                          aria-label="Copy URL"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => window.open(`/l/${landingPage.slug}`, '_blank')}
+                          className="flex-shrink-0 h-8 w-8 p-0"
+                          aria-label="Open in new tab"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
 
                     {landingPage.customDomain && (
-                      <div className="p-3 bg-blue-50 rounded-lg">
-                        <Label className="text-xs font-semibold">Custom Domain</Label>
-                        <p className="text-sm font-mono mt-1">
-                          {landingPage.customDomain}
-                        </p>
+                      <div>
+                        <Label className="text-xs font-semibold mb-1 block">Custom Domain</Label>
+                        <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                          <span className="text-sm font-mono truncate flex-1 text-blue-900">
+                            {landingPage.customDomain}
+                          </span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(landingPage.customDomain);
+                              toast.success('Domain copied to clipboard');
+                            }}
+                            className="flex-shrink-0 h-8 w-8 p-0"
+                            aria-label="Copy domain"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>

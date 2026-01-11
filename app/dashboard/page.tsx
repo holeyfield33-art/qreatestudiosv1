@@ -45,21 +45,21 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container max-w-7xl mx-auto py-8 px-4">
+    <div className="container max-w-7xl mx-auto py-4 px-4 lg:py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">
+      <div className="mb-6 lg:mb-8">
+        <h1 className="text-2xl lg:text-4xl font-bold mb-2">
           Welcome back, {session?.user?.name || 'User'}!
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Here's what's happening with your QR codes and landing pages
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">QR Codes</CardTitle>
             <QrCode className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -69,8 +69,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Landing Pages</CardTitle>
             <Globe className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -80,8 +80,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Total Scans</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -91,8 +91,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Print Orders</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -103,15 +103,16 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Get started with common tasks</CardDescription>
+      {/* Quick Actions Grid - 2x2 on mobile, side by side on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Quick Actions</CardTitle>
+            <CardDescription className="text-sm">Get started with common tasks</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2">
             <Button 
+              size="lg"
               className="w-full justify-start" 
               onClick={() => router.push('/dashboard/qr-codes/create')}
             >
@@ -120,6 +121,7 @@ export default function DashboardPage() {
             </Button>
             <Button 
               variant="outline" 
+              size="default"
               className="w-full justify-start"
               onClick={() => router.push('/dashboard/landing-pages/create')}
             >
@@ -128,6 +130,7 @@ export default function DashboardPage() {
             </Button>
             <Button 
               variant="outline" 
+              size="default"
               className="w-full justify-start"
               onClick={() => router.push('/dashboard/analytics')}
             >
@@ -137,10 +140,10 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Getting Started</CardTitle>
-            <CardDescription>Learn how to use Qreate Studios</CardDescription>
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Getting Started</CardTitle>
+            <CardDescription className="text-sm">Learn how to use Qreate Studios</CardDescription>
           </CardHeader>
           <CardContent>
             <ol className="space-y-3 text-sm">

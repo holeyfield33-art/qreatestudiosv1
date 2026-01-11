@@ -21,6 +21,7 @@ import {
   Truck,
   Shield,
   Zap,
+  Copy,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -248,22 +249,38 @@ export default function OrderNFCPage() {
             Back
           </Button>
           
-          <h1 className="text-3xl font-bold mb-2">
+          <h1 className="text-2xl lg:text-3xl font-bold mb-2">
             Order NFC Products for: {qrCode.name}
           </h1>
-          <p className="text-muted-foreground flex items-center gap-2">
-            These will be encoded with:
-            <code className="px-2 py-1 bg-muted rounded text-sm font-mono">
-              {shortUrl}
-            </code>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.open(shortUrl, '_blank')}
-            >
-              <ExternalLink className="h-4 w-4" />
-            </Button>
-          </p>
+          <div className="text-sm text-muted-foreground">
+            <p className="mb-2">These will be encoded with:</p>
+            <div className="flex items-center gap-2 p-2 lg:p-3 bg-gray-50 rounded-lg inline-flex max-w-full hover:bg-gray-100 transition-colors">
+              <span className="text-sm font-mono truncate text-gray-700">
+                {shortUrl.replace(/^https?:\/\//, '')}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(shortUrl);
+                  toast.success('URL copied to clipboard');
+                }}
+                className="flex-shrink-0 h-7 w-7 p-0"
+                aria-label="Copy URL"
+              >
+                <Copy className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.open(shortUrl, '_blank')}
+                className="flex-shrink-0 h-7 w-7 p-0"
+                aria-label="Open in new tab"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Trust Indicators */}
