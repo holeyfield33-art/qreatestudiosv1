@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, Check, CreditCard, Package, Truck, ShoppingCart, Smartphone, Sticker, Triangle, FileText, ContactCard } from 'lucide-react';
+import { ArrowLeft, Check, CreditCard, Package, Truck, ShoppingCart, Smartphone, Sticker, Triangle, FileText, Contact } from 'lucide-react';
 import Image from 'next/image';
 
 const PRINT_PRODUCTS = [
@@ -63,7 +63,7 @@ const PRINT_PRODUCTS = [
     basePrice: 29.99,
     unit: 'per 250',
     minQty: 250,
-    icon: ContactCard,
+    icon: Contact,
     features: ['Premium cardstock', 'Matte or glossy', 'Double-sided', 'QR code included'],
     sizes: ['Standard (3.5" x 2")', 'Square (2.5" x 2.5")'],
   },
