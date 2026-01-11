@@ -47,8 +47,7 @@ export async function POST(req: Request) {
       await prisma.qRCode.update({
         where: { id: qrCodeId, userId: session.user.id },
         data: {
-          landingPageId: landingPage.id,
-          destinationUrl: getLandingPageUrl(slug),
+          redirectUrl: getLandingPageUrl(slug),
         },
       });
     }
