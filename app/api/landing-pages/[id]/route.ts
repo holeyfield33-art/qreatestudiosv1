@@ -18,14 +18,18 @@ export async function GET(req: Request, context: RouteContext) {
   try {
     const landingPage = await prisma.landingPage.findUnique({
       where: { id },
-      include: { QRCode: true },
+      include: { 
+        QRCode: true,
+        Template: true,
+        RestaurantMenu: true,
+      },
     });
 
     if (!landingPage || landingPage.userId !== session.user.id) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, landingPage });
+    return NextResponse.json(landingPage);
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error('Landing page fetch error:', error);

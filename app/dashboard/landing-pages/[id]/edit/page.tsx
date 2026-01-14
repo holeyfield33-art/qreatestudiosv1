@@ -461,8 +461,10 @@ export default function TemplateEditorPage() {
                             variant="ghost" 
                             size="sm"
                             onClick={() => {
-                              navigator.clipboard.writeText(landingPage.customDomain);
-                              toast.success('Domain copied to clipboard');
+                              if (landingPage.customDomain) {
+                                navigator.clipboard.writeText(landingPage.customDomain);
+                                toast.success('Domain copied to clipboard');
+                              }
                             }}
                             className="flex-shrink-0 h-8 w-8 p-0"
                             aria-label="Copy domain"

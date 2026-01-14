@@ -22,6 +22,19 @@ export async function POST(req: Request) {
   }
 
   try {
+    // Verify user exists
+    const userExists = await prisma.user.findUnique({ 
+      where: { id: session.user.id },
+      select: { id: true }
+    });
+    
+    if (!userExists) {
+      return NextResponse.json({ 
+        error: 'User not found in database. Please sign out and sign in again.',
+        code: 'USER_NOT_FOUND'
+      }, { status: 400 });
+    }
+
     // Check slug uniqueness
     const existing = await prisma.landingPage.findUnique({ where: { slug } });
     if (existing) {
@@ -33,9 +46,11 @@ export async function POST(req: Request) {
         id: randomUUID(),
         userId: session.user.id,
         qrCodeId: qrCodeId || null,
+        templateId: null, // Legacy pages don't have templates
         name: title,
         slug,
         content: content || {},
+        draftContent: content || {}, // Initialize draft content
         metadata: theme || {},
         isPublished: false,
         updatedAt: new Date(),

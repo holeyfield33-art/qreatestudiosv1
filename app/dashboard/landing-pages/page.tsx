@@ -77,7 +77,7 @@ export default function LandingPagesPage() {
     router.push(`/dashboard/landing-pages/create?template=${templateId}`);
   }
 
-  function getTemplateIcon(templateId: string): JSX.Element {
+  function getTemplateIcon(templateId: string): React.ReactElement {
     if (templateId.includes('restaurant')) return <Package className="w-6 h-6" />;
     if (templateId.includes('retail') || templateId.includes('product')) return <ShoppingBag className="w-6 h-6" />;
     if (templateId.includes('realestate') || templateId.includes('property')) return <Home className="w-6 h-6" />;
@@ -273,14 +273,14 @@ export default function LandingPagesPage() {
                   </div>
 
                   <div className="flex gap-2" role="group" aria-label="Landing page actions">
-                    <Link href={`/dashboard/landing-pages/${page.id}/edit`} className="flex-1">
-                      <Button variant="outline" className="w-full min-h-[44px]">
-                        Edit
+                    <Link href={`/dashboard/landing-pages/${page.id}/builder`} className="flex-1">
+                      <Button variant="default" className="w-full min-h-[44px]">
+                        Visual Editor
                       </Button>
                     </Link>
                     {page.published && (
                       <Link href={`/l/${page.slug}`} target="_blank" className="flex-1">
-                        <Button variant="default" className="w-full min-h-[44px]">
+                        <Button variant="outline" className="w-full min-h-[44px]">
                           View
                         </Button>
                       </Link>

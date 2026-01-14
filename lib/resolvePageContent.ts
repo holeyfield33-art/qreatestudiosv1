@@ -1,0 +1,164 @@
+import merge from 'lodash/merge';
+import { PuckData } from './schemas/page';
+
+interface Template {
+  id: string;
+  defaultSections: any;
+  defaultStyles?: any;
+}
+
+interface Page {
+  templateId?: string;
+  draftContent?: any;
+  publishedContent?: any;
+  content?: any; // Legacy HTML content
+  isPublished: boolean;
+}
+
+/**
+ * Resolves page content by merging user customizations over template defaults
+ * This ensures pages never render blank - template defaults always display
+ * 
+ * Priority order:
+ * 1. User's published content (if published)
+ * 2. User's draft content (if editing)
+ * 3. Template defaults (always available)
+ */
+export function resolvePageContent(
+  page: Page,
+  template?: Template | null,
+  mode: 'draft' | 'published' = 'published'
+): PuckData {
+  // Start with template defaults if available
+  const baseContent = template?.defaultSections || { content: [], root: {} };
+  
+  // Determine which user content to use
+  const userContent = mode === 'published' && page.isPublished
+    ? page.publishedContent
+    : page.draftContent;
+  
+  // If user has Puck content, deep merge over defaults
+  if (userContent && typeof userContent === 'object' && 'content' in userContent) {
+    return merge({}, baseContent, userContent);
+  }
+  
+  // If no Puck content but has legacy HTML content, return it in Puck format
+  if (page.content && typeof page.content === 'object' && 'html' in page.content) {
+    // Legacy format - convert to Puck structure with single HTML section
+    return {
+      content: [
+        {
+          type: 'LegacyHTML',
+          props: {
+            html: page.content.html || '',
+            templateId: page.content.templateId,
+          },
+        },
+      ],
+      root: {},
+    };
+  }
+  
+  // Fallback: return template defaults (ensures never blank)
+  return baseContent;
+}
+
+/**
+ * Check if a page has custom content (not just template defaults)
+ */
+export function hasCustomContent(page: Page): boolean {
+  return !!(
+    page.draftContent ||
+    page.publishedContent ||
+    (page.content && typeof page.content === 'object' && Object.keys(page.content).length > 0)
+  );
+}
+
+/**
+ * Get the appropriate content for editing (draft or published as starting point)
+ */
+export function getEditableContent(page: Page, template?: Template | null): PuckData {
+  // If has draft content, use that
+  if (page.draftContent) {
+    return page.draftContent as PuckData;
+  }
+  
+  // If has published content, clone it for editing
+  if (page.publishedContent) {
+    return structuredClone(page.publishedContent) as PuckData;
+  }
+  
+  // Otherwise start with template defaults
+  return template?.defaultSections || { content: [], root: {} };
+}
+
+/**
+ * Prepare content for saving (validate structure)
+ */
+export function prepareContentForSave(content: any): PuckData {
+  if (!content || typeof content !== 'object') {
+    throw new Error('Invalid content: must be an object');
+  }
+  
+  if (!Array.isArray(content.content)) {
+    throw new Error('Invalid content: content.content must be an array');
+  }
+  
+  // Ensure all sections have required fields
+  const validatedContent = content.content.map((section: any, index: number) => {
+    if (!section.type) {
+      throw new Error(`Invalid content: section at index ${index} missing type`);
+    }
+    if (!section.props || typeof section.props !== 'object') {
+      throw new Error(`Invalid content: section at index ${index} missing or invalid props`);
+    }
+    return section;
+  });
+  
+  return {
+    content: validatedContent,
+    root: content.root || {},
+    zones: content.zones,
+  };
+}
+
+/**
+ * Check if content is in Puck format (vs legacy HTML)
+ */
+export function isPuckContent(content: any): boolean {
+  return !!(
+    content &&
+    typeof content === 'object' &&
+    'content' in content &&
+    Array.isArray(content.content)
+  );
+}
+
+/**
+ * Check if content is legacy HTML format
+ */
+export function isLegacyContent(content: any): boolean {
+  return !!(
+    content &&
+    typeof content === 'object' &&
+    'html' in content &&
+    typeof content.html === 'string'
+  );
+}
+
+/**
+ * Get a default empty Puck structure
+ */
+export function getEmptyPuckContent(): PuckData {
+  return {
+    content: [],
+    root: {},
+  };
+}
+
+/**
+ * Merge two Puck content structures
+ */
+export function mergePuckContent(base: PuckData, override: Partial<PuckData>): PuckData {
+  return merge({}, base, override);
+}

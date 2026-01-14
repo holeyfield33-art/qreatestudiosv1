@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { QrCode, Globe, Package } from 'lucide-react'
 
 export default async function Home() {
   const session = await auth()
@@ -21,8 +21,7 @@ export default async function Home() {
       <header className="border-b bg-white sticky top-0 z-50" role="banner">
         <nav className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center" aria-label="Main navigation">
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold">Qreate Studios</span>
-            <Badge variant="secondary">v1.1</Badge>
+            <span className="text-2xl font-bold tracking-tight">Qreate Studios</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/pricing" className="text-sm hover:text-blue-600">
@@ -86,7 +85,9 @@ export default async function Home() {
             </h2>
             <div className="grid md:grid-cols-3 gap-12">
               <div className="text-center">
-                <div className="text-5xl mb-4" aria-hidden="true">📱</div>
+                <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <QrCode className="h-8 w-8 text-blue-600" />
+                </div>
                 <h3 className="text-2xl font-semibold mb-3">Dynamic QR Codes</h3>
                 <p className="text-muted-foreground">
                   Create QR codes for URLs, payments, menus, events, and more.
@@ -94,7 +95,9 @@ export default async function Home() {
                 </p>
               </div>
               <div className="text-center">
-                <div className="text-5xl mb-4" aria-hidden="true">🤖</div>
+                <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Globe className="h-8 w-8 text-purple-600" />
+                </div>
                 <h3 className="text-2xl font-semibold mb-3">AI Content Tools</h3>
                 <p className="text-muted-foreground">
                   Generate landing pages, blog posts, ads, social media content,
@@ -102,7 +105,9 @@ export default async function Home() {
                 </p>
               </div>
               <div className="text-center">
-                <div className="text-5xl mb-4" aria-hidden="true">🖨️</div>
+                <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Package className="h-8 w-8 text-green-600" />
+                </div>
                 <h3 className="text-2xl font-semibold mb-3">Professional Printing</h3>
                 <p className="text-muted-foreground">
                   Order stickers, standees, business cards, and posters delivered

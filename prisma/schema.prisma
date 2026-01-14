@@ -58,10 +58,15 @@ model Analytics {
   ipAddress  String?
   userAgent  String?
   referrer   String?
+  tableNumber String? // For restaurant table-specific QR tracking
+  location   String?  // For multi-location tracking
+  metadata   Json?    // Additional tracking data
   QRCode     QRCode   @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
 
   @@index([qrCodeId])
   @@index([scannedAt])
+  @@index([tableNumber])
+  @@index([location])
 }
 
 model AuditLog {
@@ -128,27 +133,75 @@ model FeatureFlag {
   updatedAt   DateTime
 }
 
+model Template {
+  id              String        @id @default(cuid())
+  name            String
+  category        String        // "restaurant", "business", "portfolio", "event"
+  description     String?       @db.Text
+  isPremium       Boolean       @default(false)
+  thumbnail       String?
+  defaultSections Json          // Puck-format section array
+  defaultStyles   Json?         // Color schemes, fonts
+  metadata        Json?         // Additional template configuration
+  schemaVersion   String        @default("1.0.0")
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  LandingPages    LandingPage[]
+
+  @@index([category])
+  @@index([isPremium])
+  @@index([isActive])
+}
+
+model RestaurantMenu {
+  id             String       @id @default(cuid())
+  landingPageId  String       @unique
+  name           String       @default("Main Menu")
+  description    String?      @db.Text
+  currency       String       @default("USD")
+  currencySymbol String       @default("$")
+  categories     Json         // Array of MenuCategory with nested items
+  settings       Json?        // Display preferences (showPrices, showImages, etc.)
+  schemaVersion  String       @default("1.0.0")
+  version        String       @default("1.0.0")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  LandingPage    LandingPage  @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+
+  @@index([landingPageId])
+}
+
 model LandingPage {
-  id                 String               @id @default(cuid())
-  userId             String
-  qrCodeId           String?              @unique
-  name               String               @default("Untitled Landing Page")
-  slug               String               @unique
-  customDomain       String?              @unique
-  templateId         String               @default("modern-minimal")
-  content            Json
-  metadata           Json?
-  isPublished        Boolean              @default(false)
-  views              Int                  @default(0)
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  QRCode             QRCode?              @relation(fields: [qrCodeId], references: [id])
-  User               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                   String               @id @default(cuid())
+  userId               String
+  qrCodeId             String?              @unique
+  name                 String               @default("Untitled Landing Page")
+  slug                 String               @unique
+  customDomain         String?              @unique
+  templateId           String?              // Optional - for Puck-based pages only
+  content              Json                 // Legacy HTML content (for backward compatibility)
+  draftContent         Json?                // Puck JSON format - draft version
+  publishedContent     Json?                // Puck JSON format - published version
+  metadata             Json?
+  seo                  Json?                // SEO metadata (metaTitle, metaDescription, ogImage)
+  schemaVersion        String               @default("1.0.0")
+  isPublished          Boolean              @default(false)
+  views                Int                  @default(0)
+  publishedAt          DateTime?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  QRCode               QRCode?              @relation(fields: [qrCodeId], references: [id])
+  Template             Template?            @relation(fields: [templateId], references: [id])
+  User                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   landingPageMenuItems LandingPageMenuItem[]
+  RestaurantMenu       RestaurantMenu?
 
   @@index([slug])
   @@index([userId])
   @@index([customDomain])
+  @@index([templateId])
+  @@index([isPublished])
 }
 
 model LandingPageMenuItem {

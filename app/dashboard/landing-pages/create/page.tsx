@@ -322,8 +322,8 @@ export default function CreateLandingPagePage() {
   );
 }
 
-function getTemplateIcon(templateId: string): JSX.Element {
-  const iconMap: Record<string, JSX.Element> = {
+function getTemplateIcon(templateId: string): React.ReactElement {
+  const iconMap: Record<string, React.ReactElement> = {
     'modern-saas': <FileText className="w-8 h-8" />,
     'restaurant-menu': <Package className="w-8 h-8" />,
     'event-registration': <Calendar className="w-8 h-8" />,

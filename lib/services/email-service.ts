@@ -205,7 +205,7 @@ export async function sendWelcomeEmail(user: { name: string; email: string }) {
       <body>
         <div class="container">
           <div class="header">
-            <h1>🎉 Welcome to Qreate Studios!</h1>
+            <h1>Welcome to Qreate Studios</h1>
           </div>
           <div class="content">
             <p>Hi ${user.name},</p>
@@ -213,15 +213,15 @@ export async function sendWelcomeEmail(user: { name: string; email: string }) {
             
             <h3 style="color: #1f2937;">Here's what you can do:</h3>
             <div class="feature">
-              <strong>📱 Create QR Codes</strong><br>
+              <strong>Create QR Codes</strong><br>
               Generate dynamic QR codes for any purpose with full analytics
             </div>
             <div class="feature">
-              <strong>🤖 Use AI Tools</strong><br>
+              <strong>Use AI Tools</strong><br>
               Generate content with GPT-4o powered tools
             </div>
             <div class="feature">
-              <strong>🖨️ Order Prints</strong><br>
+              <strong>Order Prints</strong><br>
               Get professional prints delivered to your door
             </div>
             
@@ -244,7 +244,7 @@ export async function sendWelcomeEmail(user: { name: string; email: string }) {
 
   return sendEmail(
     user.email,
-    'Welcome to Qreate Studios! 🎉',
+    'Welcome to Qreate Studios',
     html
   );
 }

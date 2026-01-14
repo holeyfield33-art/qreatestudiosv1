@@ -456,7 +456,7 @@ export default function QRDetailPage() {
             }}
             disabled={featuresLoading}
           >
-            <span className="mr-2" aria-hidden="true">📊</span>
+            <BarChart3 className="mr-2 h-4 w-4" aria-hidden="true" />
             Advanced Analytics
             {!features.canAccessAdvancedAnalytics && <Badge className="ml-2" variant="secondary">Pro</Badge>}
           </Button>

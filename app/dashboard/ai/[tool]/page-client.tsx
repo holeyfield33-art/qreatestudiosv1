@@ -10,11 +10,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { use } from 'react';
+import { Palette, Globe, FileText, Megaphone, Share2, Mail, UtensilsCrossed, FileCheck } from 'lucide-react';
 
 const TOOL_CONFIGS: Record<string, any> = {
   'design-assistant': {
     name: 'Design Assistant',
-    icon: '🎨',
+    icon: Palette,
     description: 'Get professional design concepts with color palettes, typography, and logo ideas',
     fields: [
       { name: 'businessType', label: 'Business Type', type: 'text', placeholder: 'e.g., Coffee Shop, Tech Startup', required: true },
@@ -24,7 +25,7 @@ const TOOL_CONFIGS: Record<string, any> = {
   },
   'webpage-designer': {
     name: 'Webpage Designer',
-    icon: '💻',
+    icon: Globe,
     description: 'Create complete landing page layouts with compelling copy',
     fields: [
       { name: 'businessName', label: 'Business Name', type: 'text', placeholder: 'Your business name', required: true },
@@ -35,7 +36,7 @@ const TOOL_CONFIGS: Record<string, any> = {
   },
   'blog-writer': {
     name: 'Blog Writer',
-    icon: '✍️',
+    icon: FileText,
     description: 'Write SEO-optimized blog posts on any topic',
     fields: [
       { name: 'topic', label: 'Blog Topic', type: 'text', placeholder: 'What do you want to write about?', required: true },
@@ -46,7 +47,7 @@ const TOOL_CONFIGS: Record<string, any> = {
   },
   'ad-copy': {
     name: 'Ad Copy Generator',
-    icon: '📢',
+    icon: Megaphone,
     description: 'Write high-converting ads for any platform',
     fields: [
       { name: 'platform', label: 'Platform', type: 'select', options: ['Facebook/Instagram', 'Google', 'LinkedIn', 'Twitter'], required: true },
@@ -59,7 +60,7 @@ const TOOL_CONFIGS: Record<string, any> = {
   },
   'social-media': {
     name: 'Social Media Captions',
-    icon: '📱',
+    icon: Share2,
     description: 'Generate engaging posts for all platforms',
     fields: [
       { name: 'platform', label: 'Platform', type: 'select', options: ['Instagram', 'Facebook', 'Twitter', 'LinkedIn', 'TikTok'], required: true },
@@ -71,7 +72,7 @@ const TOOL_CONFIGS: Record<string, any> = {
   },
   'email-template': {
     name: 'Email Templates',
-    icon: '📧',
+    icon: Mail,
     description: 'Create professional email campaigns',
     fields: [
       { name: 'purpose', label: 'Email Purpose', type: 'text', placeholder: 'e.g., Welcome email, Newsletter, Sales', required: true },
@@ -81,7 +82,7 @@ const TOOL_CONFIGS: Record<string, any> = {
   },
   'menu-description': {
     name: 'Menu Descriptions',
-    icon: '🍽️',
+    icon: UtensilsCrossed,
     description: 'Write appetizing food descriptions',
     fields: [
       { name: 'items', label: 'Menu Items', type: 'menu-items', placeholder: 'Add menu items', required: true },
@@ -91,7 +92,7 @@ const TOOL_CONFIGS: Record<string, any> = {
   },
   'business-proposal': {
     name: 'Business Proposals',
-    icon: '📄',
+    icon: FileCheck,
     description: 'Generate professional service proposals',
     fields: [
       { name: 'clientName', label: 'Client Name', type: 'text', placeholder: 'Client or company name', required: true },
@@ -200,8 +201,10 @@ export default function AIToolPageClient({ params }: AIToolPageProps) {
           ← Back
         </Button>
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <span aria-hidden="true">{config.icon}</span>
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center" aria-hidden="true">
+              <config.icon className="h-5 w-5 text-blue-600" />
+            </div>
             {config.name}
           </h1>
           <p className="text-muted-foreground">{config.description}</p>

@@ -69,9 +69,11 @@ function SignInForm() {
       <Card className="w-full max-w-md" id="main-content">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
-            <QrCode className="h-10 w-10" aria-hidden="true" />
+            <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
+              <QrCode className="h-7 w-7 text-blue-600" aria-hidden="true" />
+            </div>
           </div>
-          <CardTitle className="text-2xl text-center">Sign in to Qreate Studios</CardTitle>
+          <CardTitle className="text-2xl text-center font-bold">Sign in to Qreate Studios</CardTitle>
           <CardDescription className="text-center">
             Enter your credentials to access your account
           </CardDescription>

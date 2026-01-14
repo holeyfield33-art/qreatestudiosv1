@@ -5,55 +5,56 @@ import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Palette, Globe, FileText, Megaphone, Share2, Mail, UtensilsCrossed, FileCheck } from 'lucide-react';
 
 const AI_TOOLS = [
   {
     id: 'design-assistant',
     name: 'Design Assistant',
     description: 'Get color palettes, typography, and logo ideas',
-    icon: '🎨',
+    icon: Palette,
   },
   {
     id: 'webpage-designer',
     name: 'Webpage Designer',
     description: 'Generate complete landing page layouts and copy',
-    icon: '💻',
+    icon: Globe,
   },
   {
     id: 'blog-writer',
     name: 'Blog Writer',
     description: 'Create SEO-optimized blog posts on any topic',
-    icon: '✍️',
+    icon: FileText,
   },
   {
     id: 'ad-copy',
     name: 'Ad Copy Generator',
     description: 'Write high-converting ads for any platform',
-    icon: '📢',
+    icon: Megaphone,
   },
   {
     id: 'social-media',
     name: 'Social Media Captions',
     description: 'Generate engaging posts for all platforms',
-    icon: '📱',
+    icon: Share2,
   },
   {
     id: 'email-template',
     name: 'Email Templates',
     description: 'Create professional email campaigns',
-    icon: '📧',
+    icon: Mail,
   },
   {
     id: 'menu-description',
     name: 'Menu Descriptions',
     description: 'Write appetizing food descriptions',
-    icon: '🍽️',
+    icon: UtensilsCrossed,
   },
   {
     id: 'business-proposal',
     name: 'Business Proposals',
     description: 'Generate professional service proposals',
-    icon: '📄',
+    icon: FileCheck,
   },
 ];
 
@@ -146,7 +147,9 @@ export default function AIToolsPage() {
               }
             }}
           >
-            <div className="text-4xl mb-4" aria-hidden="true">{tool.icon}</div>
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4" aria-hidden="true">
+              <tool.icon className="h-6 w-6 text-blue-600" />
+            </div>
             <h3 className="font-semibold mb-2">{tool.name}</h3>
             <p className="text-sm text-muted-foreground">{tool.description}</p>
           </Card>
@@ -157,7 +160,8 @@ export default function AIToolsPage() {
       {!loading && !usage && (
         <Card className="p-6 bg-yellow-50 border-yellow-200" role="alert">
           <p className="text-sm">
-            ⚠️ AI features require an OpenAI API key. Add{' '}
+            <Badge variant="outline" className="mr-2">Note</Badge> 
+            AI features require an OpenAI API key. Add{' '}
             <code className="bg-gray-100 px-2 py-1 rounded">OPENAI_API_KEY</code> to your environment variables to
             enable AI tools.
           </p>

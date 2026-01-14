@@ -18,7 +18,11 @@ import {
   CheckCircle,
   Target,
   Globe,
-  BarChart3
+  BarChart3,
+  Lightbulb,
+  Ruler,
+  Shield,
+  Check
 } from 'lucide-react';
 
 interface OptimizationData {
@@ -301,7 +305,9 @@ export default function OptimizeQRPage() {
                   key={index}
                   className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900"
                 >
-                  <span className="text-2xl flex-shrink-0">💡</span>
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Lightbulb className="h-4 w-4 text-blue-600" />
+                  </div>
                   <p className="text-sm flex-1">{rec}</p>
                 </div>
               ))}
@@ -354,7 +360,7 @@ export default function OptimizeQRPage() {
 
                 {optimization.improvements.suggestedSize && (
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-xl">📏</span>
+                    <Ruler className="h-5 w-5 text-muted-foreground" />
                     <span>
                       Recommended size: <strong>{optimization.improvements.suggestedSize}px</strong>
                     </span>
@@ -363,7 +369,7 @@ export default function OptimizeQRPage() {
 
                 {optimization.improvements.suggestedErrorCorrection && (
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-xl">🛡️</span>
+                    <Shield className="h-5 w-5 text-muted-foreground" />
                     <span>
                       Recommended error correction:{' '}
                       <strong>{optimization.improvements.suggestedErrorCorrection}</strong>
@@ -493,7 +499,7 @@ export default function OptimizeQRPage() {
                   key={index}
                   className="flex items-start gap-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-sm"
                 >
-                  <span>📊</span>
+                  <BarChart3 className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                   <span>{factor}</span>
                 </div>
               ))}
