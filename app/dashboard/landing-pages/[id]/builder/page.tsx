@@ -14,17 +14,6 @@ import './builder.css';
 const Puck = dynamic(
   () => import('@measured/puck').then((mod) => mod.Puck),
   {
-    loading: () => (
-      <div className="flex items-center justify-center h-full bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="text-center">
-          <div className="relative">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-            <Sparkles className="h-5 w-5 text-primary/60 absolute -top-1 -right-1 animate-pulse" />
-          </div>
-          <p className="text-sm text-muted-foreground mt-4 font-medium">Loading your workspace...</p>
-        </div>
-      </div>
-    ),
     ssr: false,
   }
 );
@@ -335,14 +324,12 @@ export default function BuilderPage({ params }: BuilderPageProps) {
 
       {/* Puck Editor with onChange handler */}
       <div className="flex-1 overflow-hidden puck-editor-wrapper">
-        {data && (
-          <Puck
-            config={puckConfig}
-            data={data}
-            onChange={handleChange}
-            onPublish={handleManualSave}
-          />
-        )}
+        <Puck
+          config={puckConfig}
+          data={data}
+          onChange={handleChange}
+          onPublish={handleManualSave}
+        />
       </div>
     </div>
   );
