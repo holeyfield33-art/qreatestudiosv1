@@ -2,6 +2,9 @@ import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+// Force Node.js runtime instead of Edge
+export const runtime = 'nodejs'
+
 const publicPaths = [
   '/',
   '/auth/signin',

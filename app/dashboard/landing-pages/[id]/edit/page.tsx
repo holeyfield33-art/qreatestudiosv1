@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { LANDING_PAGE_TEMPLATES, LandingPageTemplate } from '@/lib/templates/landing-page-templates';
 import { ImageBrowser } from '@/components/ImageBrowser';
@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Save, Image as ImageIcon, ArrowLeft, ExternalLink, Check, Eye, Printer, Globe, UtensilsCrossed, Copy } from 'lucide-react';
+import { Save, Image as ImageIcon, ArrowLeft, ExternalLink, Check, Eye, Printer, Globe, UtensilsCrossed, Copy, Edit3 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface LandingPage {
@@ -43,6 +43,14 @@ export default function TemplateEditorPage() {
   const [title, setTitle] = useState('');
   const [published, setPublished] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (previewRef.current && !editMode) {
+      previewRef.current.innerHTML = html;
+    }
+  }, [html, editMode]);
 
   useEffect(() => {
     loadLandingPage();
@@ -119,6 +127,12 @@ export default function TemplateEditorPage() {
     
     setIsBrowserOpen(false);
     setSelectedSlot(null);
+  };
+
+  const handleContentEdit = (e: React.FormEvent<HTMLDivElement>) => {
+    if (editMode) {
+      setHtml(e.currentTarget.innerHTML);
+    }
   };
 
   const handleSave = async () => {
@@ -273,6 +287,14 @@ export default function TemplateEditorPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant={editMode ? "default" : "outline"} 
+            onClick={() => setEditMode(!editMode)}
+            size="sm"
+          >
+            <Edit3 className="w-4 h-4 mr-2" />
+            {editMode ? 'Editing' : 'Edit Text'}
+          </Button>
           <Button variant="outline" onClick={handleSave} disabled={saving}>
             <Save className="w-4 h-4 mr-2" />
             Save Draft
@@ -356,12 +378,24 @@ export default function TemplateEditorPage() {
                   <h3 className="font-semibold text-sm text-gray-700 uppercase tracking-wide">
                     Page Images
                   </h3>
+                  {editMode && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-xs text-blue-800">
+                        💡 <strong>Edit Mode Active:</strong> Click any text in the preview to edit it directly.
+                        Turn off Edit Mode to change images.
+                      </p>
+                    </div>
+                  )}
                   <div className="space-y-3">
                     {template.metadata.imageSlots.map((slot) => (
                       <Card
                         key={slot.id}
-                        className="cursor-pointer hover:shadow-md transition-all hover:border-blue-300"
-                        onClick={() => handleSlotClick(slot.id)}
+                        className={`cursor-pointer transition-all ${
+                          editMode 
+                            ? 'opacity-50 pointer-events-none' 
+                            : 'hover:shadow-md hover:border-blue-300'
+                        }`}
+                        onClick={() => !editMode && handleSlotClick(slot.id)}
                       >
                         <CardContent className="p-3">
                           <div className="flex items-center gap-3">
@@ -487,11 +521,17 @@ export default function TemplateEditorPage() {
             <div className="bg-white shadow-xl rounded-lg overflow-hidden">
               <div className="bg-gray-800 text-white px-4 py-2 flex items-center justify-between">
                 <span className="text-sm font-medium">Live Preview</span>
-                <span className="text-xs text-gray-400">Updates in real-time</span>
+                <span className="text-xs text-gray-400">
+                  {editMode ? 'Click text to edit' : 'Updates in real-time'}
+                </span>
               </div>
               <div
-                className="w-full min-h-[600px]"
-                dangerouslySetInnerHTML={{ __html: html }}
+                ref={previewRef}
+                className={`w-full min-h-[600px] ${editMode ? 'cursor-text outline-none' : ''}`}
+                contentEditable={editMode}
+                onInput={handleContentEdit}
+                onBlur={handleContentEdit}
+                suppressContentEditableWarning={true}
               />
             </div>
           </div>

@@ -3,6 +3,8 @@ import { requireAuth } from '@/lib/auth-helpers';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 
+export const runtime = 'nodejs';
+
 interface RouteContext {
   params: Promise<{ id: string }>;
 }
@@ -29,7 +31,14 @@ export async function GET(req: Request, context: RouteContext) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    return NextResponse.json(landingPage);
+    return NextResponse.json({ 
+      success: true, 
+      landingPage: {
+        ...landingPage,
+        title: landingPage.name,
+        published: landingPage.isPublished
+      }
+    });
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error('Landing page fetch error:', error);
@@ -58,12 +67,34 @@ export async function PATCH(req: Request, context: RouteContext) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
+    // Map frontend fields to database fields
+    const updateData: any = {};
+    if (body.name !== undefined) updateData.name = body.name;
+    if (body.isPublished !== undefined) updateData.isPublished = body.isPublished;
+    if (body.content !== undefined) updateData.content = body.content;
+    if (body.qrCodeId !== undefined) updateData.qrCodeId = body.qrCodeId;
+    if (body.customDomain !== undefined) updateData.customDomain = body.customDomain;
+    if (body.metadata !== undefined) updateData.metadata = body.metadata;
+    if (body.seo !== undefined) updateData.seo = body.seo;
+    
+    // If publishing, set publishedAt timestamp
+    if (body.isPublished === true && !landingPage.isPublished) {
+      updateData.publishedAt = new Date();
+    }
+
     const updated = await prisma.landingPage.update({
       where: { id },
-      data: body,
+      data: updateData,
     });
 
-    return NextResponse.json({ success: true, landingPage: updated });
+    return NextResponse.json({ 
+      success: true, 
+      landingPage: {
+        ...updated,
+        title: updated.name,
+        published: updated.isPublished
+      }
+    });
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error('Landing page update error:', error);
