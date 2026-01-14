@@ -6,6 +6,8 @@ import { GallerySection } from '@/components/sections/GallerySection';
 import { ContactSection } from '@/components/sections/ContactSection';
 import { MenuSection } from '@/components/sections/MenuSection';
 import { QRCodeSection } from '@/components/sections/QRCodeSection';
+import { ImageField } from '@/components/puck/ImageField';
+import { ImageArrayField } from '@/components/puck/ImageArrayField';
 
 /**
  * Puck configuration for restaurant landing page builder
@@ -24,13 +26,11 @@ export const puckConfig: Config = {
           label: 'Subheadline',
         },
         backgroundImage: {
-          type: 'object',
+          type: 'custom',
           label: 'Background Image',
-          objectFields: {
-            url: { type: 'text', label: 'Image URL' },
-            alt: { type: 'text', label: 'Alt Text' },
-            blurhash: { type: 'text', label: 'Blurhash' },
-          },
+          render: ({ value, onChange }) => (
+            <ImageField value={value} onChange={onChange} category="restaurant" />
+          ),
         },
         ctaText: {
           type: 'text',
@@ -246,15 +246,11 @@ export const puckConfig: Config = {
           label: 'Subtitle',
         },
         images: {
-          type: 'array',
+          type: 'custom',
           label: 'Images',
-          arrayFields: {
-            id: { type: 'text', label: 'ID' },
-            url: { type: 'text', label: 'Image URL' },
-            alt: { type: 'text', label: 'Alt Text' },
-            blurhash: { type: 'text', label: 'Blurhash' },
-            caption: { type: 'text', label: 'Caption' },
-          },
+          render: ({ value, onChange }) => (
+            <ImageArrayField value={value} onChange={onChange} category="restaurant" />
+          ),
         },
         columns: {
           type: 'radio',
@@ -321,13 +317,11 @@ export const puckConfig: Config = {
           },
         },
         backgroundImage: {
-          type: 'object',
+          type: 'custom',
           label: 'Background Image',
-          objectFields: {
-            url: { type: 'text', label: 'Image URL' },
-            alt: { type: 'text', label: 'Alt Text' },
-            blurhash: { type: 'text', label: 'Blurhash' },
-          },
+          render: ({ value, onChange }) => (
+            <ImageField value={value} onChange={onChange} category="restaurant" />
+          ),
         },
         backgroundColor: {
           type: 'text',
