@@ -19,28 +19,28 @@
 }
 
 /* Override Puck's default styles with premium aesthetics */
-.puck-editor-wrapper :global(.Puck) {
+.puck-editor-wrapper .Puck {
   font-family: inherit;
   background: var(--puck-color-background);
 }
 
 /* Left panel (components) */
-.puck-editor-wrapper :global(.Puck-leftSidebar) {
+.puck-editor-wrapper .Puck-leftSidebar {
   background: white;
   border-right: 1px solid var(--puck-color-border);
   box-shadow: var(--puck-shadow);
 }
 
-.puck-editor-wrapper :global(.Puck-leftSidebarInner) {
+.puck-editor-wrapper .Puck-leftSidebarInner {
   padding: 1rem;
 }
 
 /* Component list items */
-.puck-editor-wrapper :global(.Puck-componentList) {
+.puck-editor-wrapper .Puck-componentList {
   gap: 0.5rem;
 }
 
-.puck-editor-wrapper :global(.Puck-componentListItem) {
+.puck-editor-wrapper .Puck-componentListItem {
   border-radius: var(--puck-radius);
   border: 1px solid var(--puck-color-border);
   padding: 0.75rem 1rem;
@@ -49,40 +49,40 @@
   cursor: move;
 }
 
-.puck-editor-wrapper :global(.Puck-componentListItem:hover) {
+.puck-editor-wrapper .Puck-componentListItem:hover {
   border-color: var(--puck-color-primary);
   box-shadow: var(--puck-shadow-md);
   transform: translateY(-1px);
 }
 
 /* Canvas (center) */
-.puck-editor-wrapper :global(.Puck-canvas) {
+.puck-editor-wrapper .Puck-canvas {
   background: linear-gradient(to bottom, hsl(210 40% 98%), hsl(214.3 31.8% 96%));
 }
 
-.puck-editor-wrapper :global(.Puck-frame) {
+.puck-editor-wrapper .Puck-frame {
   border-radius: var(--puck-radius);
   box-shadow: 0 8px 16px -4px rgb(0 0 0 / 0.1);
   overflow: hidden;
 }
 
 /* Right panel (fields) */
-.puck-editor-wrapper :global(.Puck-rightSidebar) {
+.puck-editor-wrapper .Puck-rightSidebar {
   background: white;
   border-left: 1px solid var(--puck-color-border);
   box-shadow: var(--puck-shadow);
 }
 
-.puck-editor-wrapper :global(.Puck-fields) {
+.puck-editor-wrapper .Puck-fields {
   padding: 1.5rem;
 }
 
 /* Field groups */
-.puck-editor-wrapper :global(.Puck-field) {
+.puck-editor-wrapper .Puck-field {
   margin-bottom: 1.5rem;
 }
 
-.puck-editor-wrapper :global(.Puck-field label) {
+.puck-editor-wrapper .Puck-field label {
   font-weight: 500;
   font-size: 0.875rem;
   color: var(--puck-color-text);
@@ -90,9 +90,9 @@
   display: block;
 }
 
-.puck-editor-wrapper :global(.Puck-field input[type="text"]),
-.puck-editor-wrapper :global(.Puck-field textarea),
-.puck-editor-wrapper :global(.Puck-field select) {
+.puck-editor-wrapper .Puck-field input[type="text"],
+.puck-editor-wrapper .Puck-field textarea,
+.puck-editor-wrapper .Puck-field select {
   border-radius: var(--puck-radius);
   border: 1px solid var(--puck-color-border);
   padding: 0.5rem 0.75rem;
@@ -101,16 +101,16 @@
   width: 100%;
 }
 
-.puck-editor-wrapper :global(.Puck-field input[type="text"]:focus),
-.puck-editor-wrapper :global(.Puck-field textarea:focus),
-.puck-editor-wrapper :global(.Puck-field select:focus) {
+.puck-editor-wrapper .Puck-field input[type="text"]:focus,
+.puck-editor-wrapper .Puck-field textarea:focus,
+.puck-editor-wrapper .Puck-field select:focus {
   outline: none;
   border-color: var(--puck-color-primary);
   box-shadow: 0 0 0 3px hsl(221.2 83.2% 53.3% / 0.1);
 }
 
 /* Buttons */
-.puck-editor-wrapper :global(.Puck-button) {
+.puck-editor-wrapper .Puck-button {
   border-radius: var(--puck-radius);
   font-weight: 500;
   font-size: 0.875rem;
@@ -119,45 +119,45 @@
   border: 1px solid var(--puck-color-border);
 }
 
-.puck-editor-wrapper :global(.Puck-button--primary) {
+.puck-editor-wrapper .Puck-button--primary {
   background: var(--puck-color-primary);
   color: white;
   border-color: var(--puck-color-primary);
 }
 
-.puck-editor-wrapper :global(.Puck-button--primary:hover) {
+.puck-editor-wrapper .Puck-button--primary:hover {
   background: var(--puck-color-primary-hover);
   border-color: var(--puck-color-primary-hover);
   transform: translateY(-1px);
   box-shadow: var(--puck-shadow-md);
 }
 
-.puck-editor-wrapper :global(.Puck-button:hover) {
+.puck-editor-wrapper .Puck-button:hover {
   background: var(--puck-color-secondary);
   border-color: var(--puck-color-primary);
 }
 
 /* Draggable items in canvas */
-.puck-editor-wrapper :global(.Puck-droppableArea) {
+.puck-editor-wrapper .Puck-droppableArea {
   min-height: 3rem;
   border: 2px dashed transparent;
   border-radius: var(--puck-radius);
   transition: all 0.2s ease;
 }
 
-.puck-editor-wrapper :global(.Puck-droppableArea--isOver) {
+.puck-editor-wrapper .Puck-droppableArea--isOver {
   border-color: var(--puck-color-primary);
   background: hsl(221.2 83.2% 53.3% / 0.05);
 }
 
-.puck-editor-wrapper :global(.Puck-selectedItem) {
+.puck-editor-wrapper .Puck-selectedItem {
   outline: 2px solid var(--puck-color-primary);
   outline-offset: 2px;
   border-radius: var(--puck-radius);
 }
 
 /* Action icons */
-.puck-editor-wrapper :global(.Puck-actionButton) {
+.puck-editor-wrapper .Puck-actionButton {
   width: 2rem;
   height: 2rem;
   border-radius: 0.375rem;
@@ -169,14 +169,14 @@
   background: white;
 }
 
-.puck-editor-wrapper :global(.Puck-actionButton:hover) {
+.puck-editor-wrapper .Puck-actionButton:hover {
   background: var(--puck-color-secondary);
   border-color: var(--puck-color-primary);
   transform: scale(1.05);
 }
 
 /* Section headers */
-.puck-editor-wrapper :global(.Puck-sidebarHeader) {
+.puck-editor-wrapper .Puck-sidebarHeader {
   font-weight: 600;
   font-size: 0.875rem;
   text-transform: uppercase;
@@ -188,13 +188,13 @@
 }
 
 /* Tabs */
-.puck-editor-wrapper :global(.Puck-tabList) {
+.puck-editor-wrapper .Puck-tabList {
   border-bottom: 1px solid var(--puck-color-border);
   margin-bottom: 1rem;
   gap: 0.5rem;
 }
 
-.puck-editor-wrapper :global(.Puck-tab) {
+.puck-editor-wrapper .Puck-tab {
   padding: 0.5rem 1rem;
   border-bottom: 2px solid transparent;
   font-weight: 500;
@@ -204,18 +204,18 @@
   cursor: pointer;
 }
 
-.puck-editor-wrapper :global(.Puck-tab:hover) {
+.puck-editor-wrapper .Puck-tab:hover {
   color: var(--puck-color-text);
   border-bottom-color: var(--puck-color-border);
 }
 
-.puck-editor-wrapper :global(.Puck-tab--active) {
+.puck-editor-wrapper .Puck-tab--active {
   color: var(--puck-color-primary);
   border-bottom-color: var(--puck-color-primary);
 }
 
 /* Tooltips */
-.puck-editor-wrapper :global(.Puck-tooltip) {
+.puck-editor-wrapper .Puck-tooltip {
   background: var(--puck-color-text);
   color: white;
   border-radius: 0.375rem;
@@ -225,29 +225,29 @@
 }
 
 /* Scrollbar styling */
-.puck-editor-wrapper :global(.Puck-leftSidebar::-webkit-scrollbar),
-.puck-editor-wrapper :global(.Puck-rightSidebar::-webkit-scrollbar) {
+.puck-editor-wrapper .Puck-leftSidebar::-webkit-scrollbar,
+.puck-editor-wrapper .Puck-rightSidebar::-webkit-scrollbar {
   width: 8px;
 }
 
-.puck-editor-wrapper :global(.Puck-leftSidebar::-webkit-scrollbar-track),
-.puck-editor-wrapper :global(.Puck-rightSidebar::-webkit-scrollbar-track) {
+.puck-editor-wrapper .Puck-leftSidebar::-webkit-scrollbar-track,
+.puck-editor-wrapper .Puck-rightSidebar::-webkit-scrollbar-track {
   background: var(--puck-color-secondary);
 }
 
-.puck-editor-wrapper :global(.Puck-leftSidebar::-webkit-scrollbar-thumb),
-.puck-editor-wrapper :global(.Puck-rightSidebar::-webkit-scrollbar-thumb) {
+.puck-editor-wrapper .Puck-leftSidebar::-webkit-scrollbar-thumb,
+.puck-editor-wrapper .Puck-rightSidebar::-webkit-scrollbar-thumb {
   background: var(--puck-color-border);
   border-radius: 4px;
 }
 
-.puck-editor-wrapper :global(.Puck-leftSidebar::-webkit-scrollbar-thumb:hover),
-.puck-editor-wrapper :global(.Puck-rightSidebar::-webkit-scrollbar-thumb:hover) {
+.puck-editor-wrapper .Puck-leftSidebar::-webkit-scrollbar-thumb:hover,
+.puck-editor-wrapper .Puck-rightSidebar::-webkit-scrollbar-thumb:hover {
   background: var(--puck-color-text-muted);
 }
 
 /* Empty state */
-.puck-editor-wrapper :global(.Puck-emptyState) {
+.puck-editor-wrapper .Puck-emptyState {
   padding: 3rem 2rem;
   text-align: center;
   color: var(--puck-color-text-muted);
@@ -256,7 +256,7 @@
   margin: 2rem;
 }
 
-.puck-editor-wrapper :global(.Puck-emptyState h3) {
+.puck-editor-wrapper .Puck-emptyState h3 {
   font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -264,13 +264,13 @@
 }
 
 /* Loading states */
-.puck-editor-wrapper :global(.Puck-loadingOverlay) {
+.puck-editor-wrapper .Puck-loadingOverlay {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(4px);
 }
 
 /* Focus rings for accessibility */
-.puck-editor-wrapper :global(*:focus-visible) {
+.puck-editor-wrapper *:focus-visible {
   outline: 2px solid var(--puck-color-primary);
   outline-offset: 2px;
   border-radius: 0.25rem;
@@ -278,32 +278,32 @@
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
-  .puck-editor-wrapper :global(.Puck-leftSidebar),
-  .puck-editor-wrapper :global(.Puck-rightSidebar) {
+  .puck-editor-wrapper .Puck-leftSidebar,
+  .puck-editor-wrapper .Puck-rightSidebar {
     width: 280px;
   }
 }
 
 @media (max-width: 768px) {
-  .puck-editor-wrapper :global(.Puck-leftSidebar) {
+  .puck-editor-wrapper .Puck-leftSidebar {
     position: absolute;
     left: -100%;
     z-index: 50;
     transition: left 0.3s ease;
   }
   
-  .puck-editor-wrapper :global(.Puck-leftSidebar--open) {
+  .puck-editor-wrapper .Puck-leftSidebar--open {
     left: 0;
   }
   
-  .puck-editor-wrapper :global(.Puck-rightSidebar) {
+  .puck-editor-wrapper .Puck-rightSidebar {
     position: absolute;
     right: -100%;
     z-index: 50;
     transition: right 0.3s ease;
   }
   
-  .puck-editor-wrapper :global(.Puck-rightSidebar--open) {
+  .puck-editor-wrapper .Puck-rightSidebar--open {
     right: 0;
   }
 }
@@ -320,6 +320,6 @@
   }
 }
 
-.puck-editor-wrapper :global(.Puck-component--new) {
+.puck-editor-wrapper .Puck-component--new {
   animation: slideIn 0.3s ease;
 }
