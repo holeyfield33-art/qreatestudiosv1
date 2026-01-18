@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { resolvePageContent } from '@/lib/resolvePageContent';
 import { Render } from '@measured/puck';
 import '@measured/puck/puck.css';
-import puckConfig from '@/lib/puckConfig';
+import { puckRenderConfig } from '@/lib/puckConfig';
 
 interface RouteContext {
   params: Promise<{ slug: string }>;
@@ -82,8 +82,8 @@ export default async function PublicLandingPage({ params, searchParams }: RouteC
 
   return (
     <div className="min-h-screen">
-      <Render config={puckConfig} data={resolvedContent as any} />
-      
+      <Render config={puckRenderConfig} data={resolvedContent as any} />
+
       {/* Footer */}
       <footer className="py-8 text-center text-sm text-muted-foreground border-t bg-gray-50">
         <p>© {new Date().getFullYear()} {landingPage.name}. All rights reserved.</p>
