@@ -2,6 +2,34 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+export interface PrintOrder {
+  id: string;
+  orderNumber: string;
+  productType: string;
+  quantity: number;
+  totalPrice: number;
+  status: string;
+  customerEmail?: string;
+  shippingAddress: {
+    name: string;
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    phone: string;
+  };
+}
+
+export interface QRCodeData {
+  name: string;
+  shortCode: string;
+}
+
+export interface CustomerData {
+  name?: string;
+  email: string;
+}
+
 export async function sendEmail(
   to: string,
   subject: string,
@@ -21,13 +49,14 @@ export async function sendEmail(
     });
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Email send error:', error);
-    return { success: false, error: error.message };
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return { success: false, error: errorMessage };
   }
 }
 
-export async function sendPrintOrderAdminEmail(order: any, qrCode: any, customer: any) {
+export async function sendPrintOrderAdminEmail(order: PrintOrder, qrCode: QRCodeData, customer: CustomerData) {
   const html = `
     <!DOCTYPE html>
     <html>
@@ -85,7 +114,7 @@ export async function sendPrintOrderAdminEmail(order: any, qrCode: any, customer
   );
 }
 
-export async function sendPrintOrderCustomerEmail(order: any, customer: any) {
+export async function sendPrintOrderCustomerEmail(order: PrintOrder, customer: CustomerData) {
   const html = `
     <!DOCTYPE html>
     <html>
@@ -147,7 +176,7 @@ export async function sendPrintOrderCustomerEmail(order: any, customer: any) {
   );
 }
 
-export async function sendOrderShippedEmail(order: any, trackingNumber: string) {
+export async function sendOrderShippedEmail(order: PrintOrder, trackingNumber: string) {
   const html = `
     <!DOCTYPE html>
     <html>

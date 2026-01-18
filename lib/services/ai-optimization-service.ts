@@ -5,6 +5,38 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+export interface QRCodeMetadata {
+  appStoreUrl?: string;
+  playStoreUrl?: string;
+  websiteUrl?: string;
+  locationRedirects?: Record<string, string>;
+}
+
+export interface QRCodeOptimizationData {
+  type?: string;
+  size?: number;
+  foregroundColor?: string;
+  backgroundColor?: string;
+  errorCorrectionLevel?: 'L' | 'M' | 'Q' | 'H';
+  logo?: string;
+  logoSize?: number;
+  redirectUrl?: string;
+  hasCustomDesign?: boolean;
+  placement?: 'high-traffic' | 'medium-traffic' | 'low-traffic';
+}
+
+export interface HistoricalScanData {
+  date: string;
+  scans: number;
+}
+
+export interface OptimizationImprovements {
+  suggestedColors: { foreground: string; background: string } | null;
+  suggestedSize: number | null;
+  suggestedErrorCorrection: 'M' | 'H' | null;
+  suggestedLogoSize: number | null;
+}
+
 // Smart redirect based on device, browser, and location
 export async function getSmartRedirect(
   qrCodeId: string,
@@ -23,7 +55,10 @@ export async function getSmartRedirect(
 
   // Smart redirect for app download links
   // Note: metadata field would need to be added to schema for this to work
-  const metadata = (qrCode.style as any)?.metadata || null;
+  const style = qrCode.style as unknown;
+  const metadata = (style && typeof style === 'object' && 'metadata' in style
+    ? (style as { metadata?: QRCodeMetadata }).metadata
+    : null) || null;
   
   if (qrCode.type === 'APP_DOWNLOAD' && metadata) {
     if (isMobile) {
@@ -111,10 +146,10 @@ export async function translateContent(
 }
 
 // Optimize QR code design and provide recommendations
-export async function optimizeQRDesign(qrCodeData: any): Promise<{
+export async function optimizeQRDesign(qrCodeData: QRCodeOptimizationData): Promise<{
   recommendations: string[];
   score: number;
-  improvements: any;
+  improvements: OptimizationImprovements;
 }> {
   const recommendations: string[] = [];
   let score = 100;
@@ -246,7 +281,8 @@ export async function checkLinkHealth(url: string): Promise<{
       isHealthy: true,
       statusCode: response.status,
     };
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const suggestions = [
       '🔍 URL appears to be unreachable',
       '✏️ Check for typos in the URL',
@@ -263,7 +299,7 @@ export async function checkLinkHealth(url: string): Promise<{
 
     return {
       isHealthy: false,
-      error: error.message,
+      error: errorMessage,
       suggestions,
       alternativeUrl,
     };
@@ -355,8 +391,8 @@ export async function generateSEOOptimizations(
 
 // Predict scan rate based on QR code characteristics
 export async function predictScanRate(
-  qrCodeData: any,
-  historicalData?: any[]
+  qrCodeData: QRCodeOptimizationData,
+  historicalData?: HistoricalScanData[]
 ): Promise<{
   predictedScansPerDay: number;
   confidence: number;
@@ -445,7 +481,7 @@ export async function getPersonalizationRecommendations(
 ): Promise<{
   isReturningUser: boolean;
   recommendations: string[];
-  customContent?: any;
+  customContent?: Record<string, unknown>;
 }> {
   // Check if user has scanned this QR code before
   const previousScans = await prisma.analytics.findMany({
@@ -478,7 +514,7 @@ export async function getPersonalizationRecommendations(
 
 // A/B testing recommendations
 export async function generateABTestSuggestions(
-  qrCodeData: any
+  qrCodeData: QRCodeOptimizationData
 ): Promise<{
   testIdeas: Array<{
     name: string;

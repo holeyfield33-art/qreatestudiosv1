@@ -38,7 +38,11 @@ export async function GET(
     if (format === 'pdf') {
       // Generate PDF
       const analytics = await getAdvancedAnalytics(qrCodeId, startDate, endDate);
-      const pdf = exportAnalyticsToPDF(analytics, qrCode.name);
+      const analyticsData = {
+        ...analytics,
+        geoData: (analytics.geoData as Array<{ city: string; country: string; count: number }>),
+      };
+      const pdf = exportAnalyticsToPDF(analyticsData, qrCode.name);
       const pdfBuffer = Buffer.from(pdf.output('arraybuffer'));
 
       return new NextResponse(pdfBuffer, {
@@ -49,7 +53,10 @@ export async function GET(
       });
     } else if (format === 'csv') {
       // Generate CSV with raw scan data
-      const where: any = { qrCodeId };
+      const where: {
+        qrCodeId: string;
+        scannedAt?: { gte: Date; lte: Date };
+      } = { qrCodeId };
       if (startDate && endDate) {
         where.scannedAt = {
           gte: startDate,
@@ -73,7 +80,11 @@ export async function GET(
     } else if (format === 'csv-timeseries') {
       // Generate CSV with time series data
       const analytics = await getAdvancedAnalytics(qrCodeId, startDate, endDate);
-      const csv = exportTimeSeriesCSV(analytics.timeSeriesData);
+      const timeSeriesData = analytics.timeSeriesData.map((item) => ({
+        date: typeof item.date === 'string' ? item.date : item.date.toString(),
+        count: Number(item.count),
+      }));
+      const csv = exportTimeSeriesCSV(timeSeriesData);
 
       return new NextResponse(csv, {
         headers: {

@@ -35,8 +35,8 @@ export async function POST(req: Request) {
         },
       });
 
-      historicalData = analytics.map(day => ({
-        date: day.scannedAt,
+      historicalData = analytics.map((day: { scannedAt: Date; _count: { id: number } }) => ({
+        date: day.scannedAt.toISOString(),
         scans: day._count.id,
       }));
     }

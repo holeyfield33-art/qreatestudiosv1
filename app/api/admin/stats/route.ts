@@ -47,10 +47,10 @@ export async function GET(req: Request) {
       }),
     ]);
 
-    const subscriptionsByPlan = subscriptions.reduce((acc: any, sub) => {
+    const subscriptionsByPlan = subscriptions.reduce((acc: Record<string, number>, sub: { plan: string }) => {
       acc[sub.plan] = (acc[sub.plan] || 0) + 1;
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
 
     const planPrices: Record<string, number> = {
       PRO: 29,
@@ -58,7 +58,7 @@ export async function GET(req: Request) {
       AGENCY: 249,
     };
 
-    const totalRevenue = subscriptions.reduce((sum, sub) => {
+    const totalRevenue = subscriptions.reduce((sum: number, sub: { plan: string }) => {
       return sum + (planPrices[sub.plan] || 0);
     }, 0);
 

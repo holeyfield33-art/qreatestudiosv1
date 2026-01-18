@@ -60,19 +60,24 @@ export async function generateText(
       },
       cost: totalCost,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error('OpenAI API error:', error);
-    throw new Error(error.message || 'Failed to generate content');
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate content';
+    throw new Error(errorMessage);
   }
 }
 
 /**
  * Generate JSON-formatted content using OpenAI
  */
-export async function generateJSON<T = any>(
+export async function generateJSON<T = unknown>(
   prompt: string,
   options: AIGenerationOptions = {}
-): Promise<{ data: T; tokensUsed: any; cost: number }> {
+): Promise<{
+  data: T;
+  tokensUsed: { prompt: number; completion: number; total: number };
+  cost: number;
+}> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OpenAI API key not configured');
   }
@@ -105,8 +110,9 @@ export async function generateJSON<T = any>(
       },
       cost: inputCost + outputCost,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error('OpenAI JSON error:', error);
-    throw new Error(error.message || 'Failed to generate JSON');
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate JSON';
+    throw new Error(errorMessage);
   }
 }
