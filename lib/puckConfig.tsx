@@ -1,4 +1,4 @@
-import { Config } from '@measured/puck';
+import type { Config } from '@measured/puck';
 import { HeroSection } from '@/components/sections/HeroSection';
 import { FeaturesSection } from '@/components/sections/FeaturesSection';
 import { CTASection } from '@/components/sections/CTASection';
@@ -161,11 +161,6 @@ export const puckConfig: Config = {
 
     MenuSection: {
       fields: {
-        menu: {
-          type: 'external',
-          label: 'Menu Data',
-          placeholder: 'Menu will be loaded from database',
-        },
         displayStyle: {
           type: 'radio',
           label: 'Display Style',

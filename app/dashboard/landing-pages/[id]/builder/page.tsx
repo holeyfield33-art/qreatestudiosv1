@@ -131,6 +131,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
 
   // Handle Puck onChange - THIS IS THE CRITICAL FIX
   const handleChange = useCallback((newData: any) => {
+    console.log('Puck onChange triggered', newData);
     setData(newData);
     scheduleAutoSave(newData);
   }, [scheduleAutoSave]);
@@ -324,12 +325,14 @@ export default function BuilderPage({ params }: BuilderPageProps) {
 
       {/* Puck Editor with onChange handler */}
       <div className="flex-1 overflow-hidden puck-editor-wrapper">
-        <Puck
-          config={puckConfig}
-          data={data}
-          onChange={handleChange}
-          onPublish={handleManualSave}
-        />
+        {data && (
+          <Puck
+            config={puckConfig}
+            data={data}
+            onChange={handleChange}
+            onPublish={handleManualSave}
+          />
+        )}
       </div>
     </div>
   );

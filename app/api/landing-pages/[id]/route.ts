@@ -31,14 +31,8 @@ export async function GET(req: Request, context: RouteContext) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      landingPage: {
-        ...landingPage,
-        title: landingPage.name,
-        published: landingPage.isPublished
-      }
-    });
+    // Return the landing page with proper field mapping
+    return NextResponse.json(landingPage);
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error('Landing page fetch error:', error);
@@ -72,11 +66,13 @@ export async function PATCH(req: Request, context: RouteContext) {
     if (body.name !== undefined) updateData.name = body.name;
     if (body.isPublished !== undefined) updateData.isPublished = body.isPublished;
     if (body.content !== undefined) updateData.content = body.content;
+    if (body.draftContent !== undefined) updateData.draftContent = body.draftContent;
+    if (body.publishedContent !== undefined) updateData.publishedContent = body.publishedContent;
     if (body.qrCodeId !== undefined) updateData.qrCodeId = body.qrCodeId;
     if (body.customDomain !== undefined) updateData.customDomain = body.customDomain;
     if (body.metadata !== undefined) updateData.metadata = body.metadata;
     if (body.seo !== undefined) updateData.seo = body.seo;
-    
+
     // If publishing, set publishedAt timestamp
     if (body.isPublished === true && !landingPage.isPublished) {
       updateData.publishedAt = new Date();
@@ -87,13 +83,9 @@ export async function PATCH(req: Request, context: RouteContext) {
       data: updateData,
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      landingPage: {
-        ...updated,
-        title: updated.name,
-        published: updated.isPublished
-      }
+    return NextResponse.json({
+      success: true,
+      landingPage: updated
     });
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {

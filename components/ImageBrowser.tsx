@@ -70,7 +70,7 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
     }
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -86,14 +86,30 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
       return;
     }
 
-    // Create object URL for preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setUploadedImage(result);
+    // Upload to server
+    setIsSearching(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/images/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const data = await response.json();
+      setUploadedImage(data.url);
       toast.success('Image uploaded successfully');
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -101,7 +117,7 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
     e.stopPropagation();
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -120,14 +136,30 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
       return;
     }
 
-    // Create object URL for preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setUploadedImage(result);
+    // Upload to server
+    setIsSearching(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/images/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const data = await response.json();
+      setUploadedImage(data.url);
       toast.success('Image uploaded successfully');
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
@@ -231,7 +263,9 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
 
         <TabsContent value="upload" className="flex-1 mt-4">
           <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
+            className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors ${
+              isSearching ? 'cursor-not-allowed opacity-50' : 'hover:border-blue-400 cursor-pointer'
+            }`}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
@@ -241,16 +275,28 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
               onChange={handleFileUpload}
               className="hidden"
               id="image-upload"
+              disabled={isSearching}
             />
-            <label htmlFor="image-upload" className="cursor-pointer">
-              <UploadIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-lg font-medium text-gray-700 mb-2">
-                Drag and drop your image here
-              </p>
-              <p className="text-sm text-gray-500 mb-4">or click to browse</p>
-              <p className="text-xs text-gray-400">
-                Supports: JPG, PNG, GIF (Max 5MB)
-              </p>
+            <label htmlFor="image-upload" className={isSearching ? 'cursor-not-allowed' : 'cursor-pointer'}>
+              {isSearching ? (
+                <>
+                  <Loader2 className="w-12 h-12 mx-auto mb-4 text-blue-500 animate-spin" />
+                  <p className="text-lg font-medium text-gray-700 mb-2">
+                    Uploading your image...
+                  </p>
+                </>
+              ) : (
+                <>
+                  <UploadIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-lg font-medium text-gray-700 mb-2">
+                    Drag and drop your image here
+                  </p>
+                  <p className="text-sm text-gray-500 mb-4">or click to browse</p>
+                  <p className="text-xs text-gray-400">
+                    Supports: JPG, PNG, GIF (Max 5MB)
+                  </p>
+                </>
+              )}
             </label>
           </div>
 
