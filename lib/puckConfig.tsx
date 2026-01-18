@@ -543,6 +543,20 @@ export const puckRenderConfig: Config = {
       defaultProps: puckConfig.components.ContactSection.defaultProps,
       render: puckConfig.components.ContactSection.render,
     },
+    LegacyHTML: {
+      defaultProps: {
+        html: '',
+        templateId: undefined,
+      },
+      render: ({ html }: { html: string }) => {
+        return (
+          <div
+            dangerouslySetInnerHTML={{ __html: html }}
+            className="legacy-html-content"
+          />
+        );
+      },
+    },
   },
 };
 

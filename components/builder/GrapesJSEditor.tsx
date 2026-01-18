@@ -327,7 +327,26 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
     return (
       <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
         <div className="panel__basic-actions" style={{ padding: '10px', borderBottom: '1px solid #ddd', background: '#fff', display: 'flex', gap: '8px' }}></div>
-        <div id="gjs-editor" style={{ flex: 1, overflow: 'hidden' }}></div>
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          {/* Blocks Panel */}
+          <div id="blocks" style={{ width: '250px', borderRight: '1px solid #ddd', overflowY: 'auto', background: '#f8f9fa', padding: '10px' }}></div>
+
+          {/* Main Editor */}
+          <div id="gjs-editor" style={{ flex: 1, overflow: 'hidden' }}></div>
+
+          {/* Right Sidebar */}
+          <div style={{ width: '280px', borderLeft: '1px solid #ddd', background: '#fff', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ borderBottom: '1px solid #ddd', padding: '10px', background: '#f8f9fa' }}>
+              <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>Layers</h3>
+            </div>
+            <div id="layers-container" style={{ flex: '0 0 200px', overflowY: 'auto', padding: '10px' }}></div>
+
+            <div style={{ borderTop: '1px solid #ddd', borderBottom: '1px solid #ddd', padding: '10px', background: '#f8f9fa' }}>
+              <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>Styles</h3>
+            </div>
+            <div id="styles-container" style={{ flex: 1, overflowY: 'auto', padding: '10px' }}></div>
+          </div>
+        </div>
       </div>
     );
   }
