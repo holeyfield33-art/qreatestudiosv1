@@ -42,7 +42,10 @@ export async function getUserTokenUsage(userId: string, startDate?: Date): Promi
   totalCost: number;
   byFeature: Array<{ feature: string; tokens: number; cost: number }>;
 }> {
-  const where: any = { userId };
+  const where: {
+    userId: string;
+    createdAt?: { gte: Date };
+  } = { userId };
   if (startDate) {
     where.createdAt = { gte: startDate };
   }

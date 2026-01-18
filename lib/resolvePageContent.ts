@@ -3,15 +3,20 @@ import { PuckData } from './schemas/page';
 
 interface Template {
   id: string;
-  defaultSections: any;
-  defaultStyles?: any;
+  defaultSections: PuckData;
+  defaultStyles?: Record<string, unknown>;
+}
+
+interface LegacyContent {
+  html: string;
+  templateId?: string;
 }
 
 interface Page {
   templateId?: string;
-  draftContent?: any;
-  publishedContent?: any;
-  content?: any; // Legacy HTML content
+  draftContent?: PuckData;
+  publishedContent?: PuckData;
+  content?: LegacyContent; // Legacy HTML content
   isPublished: boolean;
 }
 
@@ -95,37 +100,43 @@ export function getEditableContent(page: Page, template?: Template | null): Puck
 /**
  * Prepare content for saving (validate structure)
  */
-export function prepareContentForSave(content: any): PuckData {
+export function prepareContentForSave(content: unknown): PuckData {
   if (!content || typeof content !== 'object') {
     throw new Error('Invalid content: must be an object');
   }
-  
-  if (!Array.isArray(content.content)) {
+
+  const contentObj = content as Record<string, unknown>;
+
+  if (!Array.isArray(contentObj.content)) {
     throw new Error('Invalid content: content.content must be an array');
   }
-  
+
   // Ensure all sections have required fields
-  const validatedContent = content.content.map((section: any, index: number) => {
-    if (!section.type) {
+  const validatedContent = contentObj.content.map((section: unknown, index: number) => {
+    if (typeof section !== 'object' || section === null) {
+      throw new Error(`Invalid content: section at index ${index} is not an object`);
+    }
+    const sectionObj = section as Record<string, unknown>;
+    if (!sectionObj.type) {
       throw new Error(`Invalid content: section at index ${index} missing type`);
     }
-    if (!section.props || typeof section.props !== 'object') {
+    if (!sectionObj.props || typeof sectionObj.props !== 'object') {
       throw new Error(`Invalid content: section at index ${index} missing or invalid props`);
     }
-    return section;
+    return section as { type: string; props: Record<string, unknown> };
   });
-  
+
   return {
     content: validatedContent,
-    root: content.root || {},
-    zones: content.zones,
+    root: (contentObj.root as Record<string, unknown> | undefined) || {},
+    zones: contentObj.zones as Record<string, Array<{ type: string; props: Record<string, unknown> }>> | undefined,
   };
 }
 
 /**
  * Check if content is in Puck format (vs legacy HTML)
  */
-export function isPuckContent(content: any): boolean {
+export function isPuckContent(content: unknown): content is PuckData {
   return !!(
     content &&
     typeof content === 'object' &&
@@ -137,12 +148,12 @@ export function isPuckContent(content: any): boolean {
 /**
  * Check if content is legacy HTML format
  */
-export function isLegacyContent(content: any): boolean {
+export function isLegacyContent(content: unknown): content is LegacyContent {
   return !!(
     content &&
     typeof content === 'object' &&
     'html' in content &&
-    typeof content.html === 'string'
+    typeof (content as { html?: unknown }).html === 'string'
   );
 }
 

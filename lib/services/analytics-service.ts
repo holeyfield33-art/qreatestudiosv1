@@ -3,9 +3,18 @@ import { prisma } from '@/lib/prisma';
 import { randomUUID } from 'crypto';
 
 // Make geoip optional in case data files are missing
-let geoip: any = null;
+interface GeoIPLookupResult {
+  country: string;
+  city?: string;
+}
+
+interface GeoIPModule {
+  lookup(ip: string): GeoIPLookupResult | null;
+}
+
+let geoip: GeoIPModule | null = null;
 try {
-  geoip = require('geoip-lite');
+  geoip = require('geoip-lite') as GeoIPModule;
 } catch (error) {
   console.warn('geoip-lite not available, geolocation features will be limited');
 }
@@ -76,7 +85,16 @@ export async function getQRAnalytics(
   startDate?: Date,
   endDate?: Date
 ) {
-  const where: any = { qrCodeId };
+  const where: {
+    qrCodeId: string;
+    scannedAt?: {
+      gte?: Date;
+      lte?: Date;
+    };
+    country?: {
+      not: null;
+    };
+  } = { qrCodeId };
   if (startDate || endDate) {
     where.scannedAt = {};
     if (startDate) where.scannedAt.gte = startDate;
@@ -126,8 +144,8 @@ export async function getQRAnalytics(
 
   // Process location data to include coordinates
   const locations = locationData
-    .filter((loc: any) => loc.country)
-    .map((loc: any) => {
+    .filter((loc) => loc.country)
+    .map((loc) => {
       // Get country code and coordinates
       const countryCode = getCountryCode(loc.country);
       const coords = getCountryCoordinates(countryCode);
@@ -157,15 +175,15 @@ export async function getQRAnalytics(
   return {
     totalScans: scans,
     uniqueScans: uniqueIPs.length,
-    deviceBreakdown: deviceStats.map((d: any) => ({
+    deviceBreakdown: deviceStats.map((d) => ({
       type: d.deviceType,
       count: d._count,
     })),
-    browserBreakdown: browserStats.map((b: any) => ({
+    browserBreakdown: browserStats.map((b) => ({
       browser: b.browser,
       count: b._count,
     })),
-    scansByDay: scansByDay.map((s: any) => ({
+    scansByDay: scansByDay.map((s) => ({
       date: s.date,
       count: Number(s.count),
     })),

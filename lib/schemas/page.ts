@@ -146,7 +146,7 @@ export type ColorScheme = z.infer<typeof ColorSchemeSchema>;
 export type Migration = {
   from: string;
   to: string;
-  migrate: (doc: any) => any;
+  migrate: (doc: Record<string, unknown>) => Record<string, unknown>;
 };
 
 /**
@@ -156,12 +156,14 @@ export const PAGE_MIGRATIONS: Migration[] = [
   {
     from: '1.0.0',
     to: '1.1.0',
-    migrate: (doc: any) => ({
+    migrate: (doc) => ({
       ...doc,
       schemaVersion: '1.1.0',
       meta: {
-        ...doc.meta,
-        locale: doc.meta.locale || 'en-US',
+        ...(typeof doc.meta === 'object' && doc.meta !== null ? doc.meta : {}),
+        locale: (typeof doc.meta === 'object' && doc.meta !== null && 'locale' in doc.meta
+          ? doc.meta.locale
+          : 'en-US'),
       },
     }),
   },
@@ -170,7 +172,7 @@ export const PAGE_MIGRATIONS: Migration[] = [
 /**
  * Apply migrations to bring schema to latest version
  */
-export function migratePageSchema(doc: any): any {
+export function migratePageSchema(doc: Record<string, unknown>): Record<string, unknown> {
   let current = doc;
   const currentVersion = current.schemaVersion || '1.0.0';
   

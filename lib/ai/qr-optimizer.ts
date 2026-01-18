@@ -13,6 +13,62 @@ export const AI_LIMITS = {
   agency: -1, // unlimited
 } as const;
 
+interface QRCodeBasic {
+  id: string;
+  name: string;
+  targetUrl: string;
+  redirectUrl: string;
+  type: string;
+  scanCount: number;
+  isActive: boolean;
+}
+
+interface Analytics {
+  totalScans: number;
+  uniqueScans: number;
+  deviceBreakdown: Array<{ type: string; count: number }>;
+  browserBreakdown: Array<{ browser: string; count: number }>;
+  locations: unknown[];
+  scansByDay: Array<{ date: Date; count: number }>;
+}
+
+interface AnalyticsData {
+  qrCode: {
+    id: string;
+    name: string;
+    url: string;
+    type: string;
+    scans: number;
+    isActive: boolean;
+  };
+  analytics: {
+    totalScans: number;
+    uniqueScans: number;
+    returnRate: number;
+    avgDailyScans: number;
+    deviceBreakdown: Array<{ type: string; count: number }>;
+    browserBreakdown: Array<{ browser: string; count: number }>;
+    locations: unknown[];
+    mobilePercentage: number;
+    hasRecentActivity: boolean;
+  };
+  issues: string[];
+}
+
+interface AIOptimizationResponse {
+  improvements: Array<{
+    issue: string;
+    suggestion: string;
+    impact: 'low' | 'medium' | 'high';
+    description: string;
+  }>;
+  estimatedIncrease?: string;
+  priority?: string[];
+  nextSteps?: string[];
+  beforeScore?: number;
+  afterScore?: number;
+}
+
 export interface OptimizationSuggestion {
   issue: string;
   suggestion: string;
@@ -69,8 +125,8 @@ export async function analyzeQRPerformance(qrCodeId: string) {
 
     // Analyze device breakdown
     const mobileScans = analytics.deviceBreakdown
-      .filter((d: any) => d.type === 'mobile' || d.type === 'tablet')
-      .reduce((sum: number, d: any) => sum + d.count, 0);
+      .filter((d) => d.type === 'mobile' || d.type === 'tablet')
+      .reduce((sum, d) => sum + d.count, 0);
     
     const mobilePercentage = analytics.totalScans > 0
       ? (mobileScans / analytics.totalScans) * 100
@@ -112,7 +168,7 @@ export async function analyzeQRPerformance(qrCodeId: string) {
 /**
  * Detect common issues with QR codes
  */
-function detectIssues(qrCode: any, analytics: any, mobilePercentage: number) {
+function detectIssues(qrCode: QRCodeBasic, analytics: Analytics, mobilePercentage: number) {
   const issues: string[] = [];
 
   // URL length issue
@@ -151,7 +207,7 @@ function detectIssues(qrCode: any, analytics: any, mobilePercentage: number) {
  * Generate AI-powered optimization suggestions
  */
 export async function generateOptimizations(
-  analyticsData: any,
+  analyticsData: AnalyticsData,
   userGoal: string
 ): Promise<OptimizationResult> {
   try {
@@ -242,7 +298,7 @@ Requirements:
 /**
  * Format AI suggestions with icons and better structure
  */
-export function formatSuggestions(aiResponse: any): OptimizationResult {
+export function formatSuggestions(aiResponse: AIOptimizationResponse): OptimizationResult {
   const iconMap: Record<string, string> = {
     url: '🔗',
     link: '🔗',
@@ -278,7 +334,7 @@ export function formatSuggestions(aiResponse: any): OptimizationResult {
   };
 
   return {
-    improvements: aiResponse.improvements.map((imp: any) => ({
+    improvements: aiResponse.improvements.map((imp) => ({
       ...imp,
       icon: getIcon(imp.issue + ' ' + imp.suggestion),
     })),
@@ -393,7 +449,11 @@ async function trackAIUsage(
  */
 export async function getAIUsageStats(userId: string, startDate?: Date) {
   try {
-    const where: any = { userId, feature: 'qr_optimization' };
+    const where: {
+      userId: string;
+      feature: string;
+      createdAt?: { gte: Date };
+    } = { userId, feature: 'qr_optimization' };
     if (startDate) {
       where.createdAt = { gte: startDate };
     }

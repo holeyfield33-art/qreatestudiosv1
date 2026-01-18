@@ -34,7 +34,7 @@ export async function getAdvancedAnalytics(
     count: scans.filter((s) => new Date(s.scannedAt).getDay() === day).length,
   }));
 
-  const scansByDate = scans.reduce((acc: any, scan) => {
+  const scansByDate = scans.reduce((acc: Record<string, number>, scan) => {
     const date = format(new Date(scan.scannedAt), 'yyyy-MM-dd');
     acc[date] = (acc[date] || 0) + 1;
     return acc;
@@ -45,19 +45,25 @@ export async function getAdvancedAnalytics(
     count,
   }));
 
-  const deviceStats = scans.reduce((acc: any, scan) => {
+  const deviceStats = scans.reduce((acc: Record<string, number>, scan) => {
     acc[scan.deviceType || 'unknown'] = (acc[scan.deviceType || 'unknown'] || 0) + 1;
     return acc;
   }, {});
 
-  const browserStats = scans.reduce((acc: any, scan) => {
+  const browserStats = scans.reduce((acc: Record<string, number>, scan) => {
     acc[scan.browser || 'unknown'] = (acc[scan.browser || 'unknown'] || 0) + 1;
     return acc;
   }, {});
 
+  interface GeoDataItem {
+    city: string | null;
+    country: string | null;
+    count: number;
+  }
+
   const geoData = scans
     .filter((s) => s.city && s.country)
-    .reduce((acc: any, scan) => {
+    .reduce((acc: Record<string, GeoDataItem>, scan) => {
       const key = `${scan.city}, ${scan.country}`;
       if (!acc[key]) {
         acc[key] = { city: scan.city, country: scan.country, count: 0 };

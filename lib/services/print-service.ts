@@ -18,6 +18,11 @@ export interface PrintProduct {
   maxQuantity: number;
 }
 
+export interface PrintSpecifications {
+  size: string;
+  material: string;
+}
+
 export const PRINT_PRODUCTS: Record<string, PrintProduct> = {
   sticker: {
     id: 'sticker',
@@ -99,7 +104,7 @@ export const PRINT_PRODUCTS: Record<string, PrintProduct> = {
 export function calculatePrintPrice(
   productType: string,
   quantity: number,
-  specifications: any
+  specifications: PrintSpecifications
 ): number {
   const product = PRINT_PRODUCTS[productType];
   if (!product) return 0;

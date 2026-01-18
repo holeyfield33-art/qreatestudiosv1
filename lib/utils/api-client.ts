@@ -7,7 +7,7 @@ export interface FetchOptions extends RequestInit {
   retries?: number;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success?: boolean;
   data?: T;
   error?: string;
@@ -23,7 +23,7 @@ export interface FetchResult<T> {
 /**
  * Safe fetch with timeout and retries
  */
-export async function safeFetch<T = any>(
+export async function safeFetch<T = unknown>(
   url: string,
   options: FetchOptions = {}
 ): Promise<FetchResult<T>> {
@@ -58,9 +58,9 @@ export async function safeFetch<T = any>(
 
       if (!response.ok) {
         const error = typeof data === 'object' && data !== null && 'error' in data
-          ? (data as any).error
+          ? String((data as { error?: unknown }).error || `Request failed with status ${response.status}`)
           : `Request failed with status ${response.status}`;
-        
+
         return {
           error,
           status: response.status,
@@ -103,7 +103,7 @@ export const apiClient = {
     return safeFetch<T>(url, { ...options, method: 'GET' });
   },
 
-  async post<T>(url: string, data?: any, options?: FetchOptions): Promise<FetchResult<T>> {
+  async post<T>(url: string, data?: unknown, options?: FetchOptions): Promise<FetchResult<T>> {
     return safeFetch<T>(url, {
       ...options,
       method: 'POST',
@@ -115,7 +115,7 @@ export const apiClient = {
     });
   },
 
-  async patch<T>(url: string, data?: any, options?: FetchOptions): Promise<FetchResult<T>> {
+  async patch<T>(url: string, data?: unknown, options?: FetchOptions): Promise<FetchResult<T>> {
     return safeFetch<T>(url, {
       ...options,
       method: 'PATCH',

@@ -1,5 +1,13 @@
 import QRCode from 'qrcode';
 import sharp from 'sharp';
+import type { PrismaClient } from '@prisma/client';
+
+export interface QRCodeStyle {
+  width?: number;
+  margin?: number;
+  darkColor?: string;
+  lightColor?: string;
+}
 
 export interface QRCodeOptions {
   errorCorrectionLevel?: 'L' | 'M' | 'Q' | 'H';
@@ -66,7 +74,7 @@ export async function generateQRCode(
 
 export async function generateStyledQRCode(
   data: string,
-  style: any,
+  style: QRCodeStyle,
   logoUrl?: string
 ): Promise<QRCodeResult> {
   const options: QRCodeOptions = {
@@ -108,14 +116,14 @@ export function generateShortCode(length: number = 6): string {
   return code;
 }
 
-export async function isShortCodeUnique(code: string, prisma: any): Promise<boolean> {
+export async function isShortCodeUnique(code: string, prisma: PrismaClient): Promise<boolean> {
   const existing = await prisma.qRCode.findUnique({
     where: { shortCode: code },
   });
   return !existing;
 }
 
-export async function generateUniqueShortCode(prisma: any): Promise<string> {
+export async function generateUniqueShortCode(prisma: PrismaClient): Promise<string> {
   let code = generateShortCode();
   let attempts = 0;
   while (!(await isShortCodeUnique(code, prisma)) && attempts < 10) {
