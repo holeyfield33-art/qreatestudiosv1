@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 import { randomUUID } from 'crypto';
 import { getLandingPageUrl } from '@/lib/utils/url-helpers';
+import { getFeatureAccess, type PlanType } from '@/lib/utils/feature-access';
 
 export async function POST(req: Request) {
   const { session, error } = await requireAuth();
@@ -33,6 +34,41 @@ export async function POST(req: Request) {
         error: 'User not found in database. Please sign out and sign in again.',
         code: 'USER_NOT_FOUND'
       }, { status: 400 });
+    }
+    
+    // Check if template is premium and user has access
+    if (templateId) {
+      const template = await prisma.template.findUnique({
+        where: { id: templateId },
+        select: { isPremium: true, isActive: true }
+      });
+      
+      if (!template) {
+        return NextResponse.json({ 
+          error: 'Template not found',
+          code: 'TEMPLATE_NOT_FOUND'
+        }, { status: 404 });
+      }
+      
+      if (!template.isActive) {
+        return NextResponse.json({ 
+          error: 'Template is not available',
+          code: 'TEMPLATE_INACTIVE'
+        }, { status: 400 });
+      }
+      
+      if (template.isPremium) {
+        const userPlan = (session.user.organization?.plan as PlanType) || 'FREE';
+        const featureAccess = getFeatureAccess(userPlan);
+        
+        if (!featureAccess.canAccessPremiumTemplates) {
+          return NextResponse.json({ 
+            error: 'Premium template requires Business or Agency plan',
+            code: 'PREMIUM_TEMPLATE_REQUIRED',
+            requiredPlan: 'BUSINESS'
+          }, { status: 403 });
+        }
+      }
     }
 
     // Check slug uniqueness

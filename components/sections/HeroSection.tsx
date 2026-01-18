@@ -33,7 +33,13 @@ export function HeroSection({
   textAlign = 'center',
   minHeight = '70vh',
 }: HeroSectionProps) {
-  console.log('🎬 HeroSection rendering:', { headline, backgroundImage, ctaText });
+  console.log('🎬 HeroSection rendering:', { 
+    headline, 
+    backgroundImage, 
+    backgroundImageType: typeof backgroundImage,
+    hasBackgroundImage: !!backgroundImage,
+    ctaText 
+  });
   
   const textAlignClass = {
     left: 'text-left items-start',
@@ -51,6 +57,8 @@ export function HeroSection({
   const bgImage = typeof backgroundImage === 'string' 
     ? { url: backgroundImage, alt: 'Background' }
     : backgroundImage;
+    
+  console.log('🖼️ HeroSection normalized bgImage:', bgImage);
 
   return (
     <section className="relative w-full overflow-hidden" style={{ minHeight }}>
@@ -109,9 +117,9 @@ export function HeroSection({
                 variant={buttonVariantMap[ctaStyle]}
                 className="text-lg px-8 py-6"
               >
-                <a href={ctaLink}>
+                <a href={ctaLink} className="inline-flex items-center gap-2">
                   {ctaText}
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="h-5 w-5" />
                 </a>
               </Button>
             </div>

@@ -59,13 +59,23 @@ export function QRCodeSection({
         <div className={`inline-block ${styles.container}`}>
           {/* QR Code Image */}
           <div className={`w-64 h-64 relative mx-auto ${styles.qr}`}>
-            <Image
-              src={qrCodeUrl}
-              alt={`QR code for ${destinationUrl}`}
-              fill
-              className="object-contain"
-              priority
-            />
+            {qrCodeUrl && qrCodeUrl.trim() !== "" ? (
+              <Image
+                src={qrCodeUrl}
+                alt={`QR code for ${destinationUrl}`}
+                fill
+                className="object-contain"
+                priority
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">📱</div>
+                  <p className="text-gray-500 text-sm">QR Code Preview</p>
+                  <p className="text-gray-400 text-xs mt-1">Will generate on publish</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Instructions */}

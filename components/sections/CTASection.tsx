@@ -75,9 +75,9 @@ export function CTASection({
             <div className="flex flex-col sm:flex-row gap-4">
               {primaryCta && (
                 <Button asChild size="lg">
-                  <a href={primaryCta.link}>
+                  <a href={primaryCta.link} className="inline-flex items-center gap-2">
                     {primaryCta.text}
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <ArrowRight className="h-5 w-5" />
                   </a>
                 </Button>
               )}
@@ -133,9 +133,9 @@ export function CTASection({
           <div className={`flex flex-col sm:flex-row gap-4 ${style === 'centered' ? 'justify-center' : ''}`}>
             {primaryCta && (
               <Button asChild size="lg" className="bg-white text-black hover:bg-gray-100">
-                <a href={primaryCta.link}>
+                <a href={primaryCta.link} className="inline-flex items-center gap-2">
                   {primaryCta.text}
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="h-5 w-5" />
                 </a>
               </Button>
             )}

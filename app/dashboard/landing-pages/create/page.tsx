@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,35 +10,84 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { PUCK_TEMPLATES, getTemplateCategories } from '@/lib/templates/puck-templates';
+import { type PuckTemplate } from '@/lib/templates/puck-templates';
+import { getFeatureAccess, type PlanType } from '@/lib/utils/feature-access';
 import Image from 'next/image';
-import { ArrowLeft, Sparkles, Loader2, Check, Eye } from 'lucide-react';
+import { ArrowLeft, Sparkles, Loader2, Check, Eye, Lock, Zap } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 export default function CreateLandingPagePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const qrId = searchParams.get('qrId');
+  const { data: session } = useSession();
   
   const [step, setStep] = useState(1);
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [pageName, setPageName] = useState('');
   const [slug, setSlug] = useState('');
   const [loading, setLoading] = useState(false);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
+  const [templates, setTemplates] = useState<PuckTemplate[]>([]);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [lockedTemplateId, setLockedTemplateId] = useState<string | null>(null);
 
-  const categories = ['all', ...getTemplateCategories()];
+  // Get user's plan and feature access
+  const userPlan = (session?.user?.organization?.plan as PlanType) || 'FREE';
+  const featureAccess = getFeatureAccess(userPlan);
+  const canAccessPremium = featureAccess.canAccessPremiumTemplates;
+
+  // Fetch templates from database
+  useEffect(() => {
+    async function fetchTemplates() {
+      try {
+        const res = await fetch('/api/templates');
+        const data = await res.json();
+        if (data.success) {
+          setTemplates(data.templates);
+        } else {
+          toast.error('Failed to load templates');
+        }
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+        toast.error('Failed to load templates');
+      } finally {
+        setTemplatesLoading(false);
+      }
+    }
+    fetchTemplates();
+  }, []);
+
+  // Get unique categories from templates
+  const categories = ['all', ...Array.from(new Set(templates.map(t => t.category)))];
 
   const filteredTemplates = categoryFilter === 'all' 
-    ? PUCK_TEMPLATES 
-    : PUCK_TEMPLATES.filter(t => t.category.toLowerCase() === categoryFilter.toLowerCase());
+    ? templates 
+    : templates.filter(t => t.category.toLowerCase() === categoryFilter.toLowerCase());
 
   function generateSlug(name: string) {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50);
   }
 
   function handleTemplateSelect(templateId: string) {
-    const template = PUCK_TEMPLATES.find(t => t.id === templateId);
+    const template = templates.find(t => t.id === templateId);
+    
+    // Check if template is premium and user doesn't have access
+    if (template?.isPremium && !canAccessPremium) {
+      setLockedTemplateId(templateId);
+      setShowUpgradeModal(true);
+      return;
+    }
+    
     setSelectedTemplate(templateId);
     setPageName(template?.name || '');
     setSlug(generateSlug(template?.name || ''));
@@ -50,7 +100,7 @@ export default function CreateLandingPagePage() {
       return;
     }
 
-    const template = PUCK_TEMPLATES.find(t => t.id === selectedTemplate);
+    const template = templates.find(t => t.id === selectedTemplate);
     if (!template) {
       toast.error('Template not found');
       return;
@@ -160,17 +210,60 @@ export default function CreateLandingPagePage() {
             </div>
             
             {/* Template Grid with Preview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-              {filteredTemplates.map(template => (
-                <Card
-                  key={template.id}
-                  className={`cursor-pointer transition-all hover:shadow-xl hover:scale-[1.02] overflow-hidden ${
-                    selectedTemplate === template.id ? 'ring-2 ring-blue-500 shadow-xl' : ''
-                  }`}
-                  onClick={() => handleTemplateSelect(template.id)}
-                >
-                  {/* Preview Image */}
-                  <div className="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+            {templatesLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Card key={i} className="overflow-hidden animate-pulse">
+                    <div className="aspect-video bg-gray-200" />
+                    <CardContent className="p-4">
+                      <div className="h-5 bg-gray-200 rounded mb-2" />
+                      <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                {filteredTemplates.map(template => {
+                const isPremiumLocked = template.isPremium && !canAccessPremium;
+                
+                return (
+                  <Card
+                    key={template.id}
+                    className={`cursor-pointer transition-all overflow-hidden ${
+                      selectedTemplate === template.id 
+                        ? 'ring-2 ring-blue-500 shadow-xl' 
+                        : isPremiumLocked
+                        ? 'opacity-60 hover:opacity-80'
+                        : 'hover:shadow-xl hover:scale-[1.02]'
+                    } ${isPremiumLocked ? 'relative' : ''}`}
+                    onClick={() => handleTemplateSelect(template.id)}
+                  >
+                    {/* Premium Lock Overlay */}
+                    {isPremiumLocked && (
+                      <div className="absolute inset-0 z-10 bg-black/40 flex items-center justify-center backdrop-blur-[2px]">
+                        <div className="text-center space-y-2">
+                          <Lock className="w-12 h-12 text-white mx-auto" />
+                          <p className="text-white font-semibold text-sm">Premium Template</p>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="bg-yellow-500 hover:bg-yellow-600 text-yellow-950 font-semibold"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setLockedTemplateId(template.id);
+                              setShowUpgradeModal(true);
+                            }}
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            Upgrade to Unlock
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  
+                    {/* Preview Image */}
+                    <div className="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                     <Image
                       src={template.thumbnail}
                       alt={template.name}
@@ -226,11 +319,13 @@ export default function CreateLandingPagePage() {
                     </p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
+              );
+            })}
+              </div>
+            )}
 
             {/* Empty State */}
-            {filteredTemplates.length === 0 && (
+            {!templatesLoading && filteredTemplates.length === 0 && (
               <Card className="p-12 text-center">
                 <p className="text-muted-foreground">No templates found in this category</p>
               </Card>
@@ -286,7 +381,7 @@ export default function CreateLandingPagePage() {
                   <div className="flex items-center gap-3">
                     <div className="relative w-20 h-14 rounded overflow-hidden border-2 border-gray-200">
                       <Image
-                        src={PUCK_TEMPLATES.find(t => t.id === selectedTemplate)?.thumbnail || ''}
+                        src={templates.find(t => t.id === selectedTemplate)?.thumbnail || ''}
                         alt="Template preview"
                         fill
                         className="object-cover"
@@ -294,10 +389,10 @@ export default function CreateLandingPagePage() {
                     </div>
                     <div>
                       <p className="font-semibold">
-                        {PUCK_TEMPLATES.find(t => t.id === selectedTemplate)?.name}
+                        {templates.find(t => t.id === selectedTemplate)?.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {PUCK_TEMPLATES.find(t => t.id === selectedTemplate)?.description}
+                        {templates.find(t => t.id === selectedTemplate)?.description}
                       </p>
                     </div>
                   </div>
@@ -384,6 +479,105 @@ export default function CreateLandingPagePage() {
           </div>
         )}
       </div>
+      
+      {/* Premium Upgrade Modal */}
+      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-2 bg-yellow-500/10 rounded-lg">
+                <Sparkles className="w-6 h-6 text-yellow-600" />
+              </div>
+              <DialogTitle className="text-2xl">Unlock Premium Templates</DialogTitle>
+            </div>
+            <DialogDescription className="text-base">
+              This is a premium template available on Business and Agency plans. Upgrade to access this and other advanced features.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {/* Preview of locked template */}
+            {lockedTemplateId && (
+              <div className="p-4 bg-gray-50 rounded-lg border">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-20 h-14 rounded overflow-hidden border-2 border-gray-200">
+                    <Image
+                      src={templates.find(t => t.id === lockedTemplateId)?.thumbnail || ''}
+                      alt="Template preview"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-semibold">
+                      {templates.find(t => t.id === lockedTemplateId)?.name}
+                    </p>
+                    <Badge className="mt-1 bg-yellow-500 text-yellow-950">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Premium
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Benefits list */}
+            <div className="space-y-3">
+              <p className="font-semibold text-sm text-gray-700">Premium template benefits:</p>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Access to exclusive, professionally designed templates</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Advanced layouts optimized for conversions</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Priority support and regular template updates</span>
+                </li>
+              </ul>
+            </div>
+            
+            {/* Current plan info */}
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-xs text-blue-700 mb-1 font-semibold">Your current plan:</p>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-blue-900">{userPlan}</span>
+                <Badge variant="outline" className="text-xs">
+                  {filteredTemplates.filter(t => !t.isPremium).length} free templates available
+                </Badge>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowUpgradeModal(false);
+                setLockedTemplateId(null);
+              }}
+              className="w-full sm:w-auto"
+            >
+              Browse Free Templates
+            </Button>
+            <Button
+              onClick={() => {
+                router.push('/dashboard/settings/billing');
+              }}
+              className="w-full sm:w-auto bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-yellow-950 font-semibold"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              Upgrade to Business
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

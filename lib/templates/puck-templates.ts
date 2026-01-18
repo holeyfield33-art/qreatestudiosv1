@@ -398,7 +398,7 @@ export const PUCK_TEMPLATES: PuckTemplate[] = [
     name: 'Property Listing',
     category: 'Real Estate',
     description: 'Professional property showcase with gallery and details',
-    isPremium: false,
+    isPremium: true,
     thumbnail: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop',
     previewImage: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200',
     defaultSections: {
@@ -526,7 +526,7 @@ export const PUCK_TEMPLATES: PuckTemplate[] = [
     name: 'Event & Conference',
     category: 'Events',
     description: 'Professional event page with registration and details',
-    isPremium: false,
+    isPremium: true,
     thumbnail: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop',
     previewImage: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200',
     defaultSections: {

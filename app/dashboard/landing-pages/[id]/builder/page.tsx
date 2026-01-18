@@ -1,20 +1,26 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import puckConfig from '@/lib/puckConfig';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Eye, Save, Sparkles, Undo2, Redo2, Clock } from 'lucide-react';
+import { Loader2, ArrowLeft, Eye, Save, Sparkles, Clock } from 'lucide-react';
 import { toast } from 'sonner';
-import '@measured/puck/puck.css';
 import './builder.css';
 
-// Lazy load Puck to avoid compilation timeout
-const Puck = dynamic(
-  () => import('@measured/puck').then((mod) => mod.Puck),
+// Lazy load GrapesJS editor to avoid SSR issues
+const GrapesJSEditor = dynamic(
+  () => import('@/components/builder/GrapesJSEditor'),
   {
     ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
+          <p className="text-muted-foreground">Loading editor...</p>
+        </div>
+      </div>
+    ),
   }
 );
 
@@ -22,9 +28,94 @@ interface BuilderPageProps {
   params: Promise<{ id: string }>;
 }
 
+// Helper function to convert Puck template format to GrapesJS HTML
+function convertPuckToHtml(puckData: any): string {
+  if (!puckData || !puckData.content || !Array.isArray(puckData.content)) {
+    return '';
+  }
+
+  let html = '';
+  
+  for (const component of puckData.content) {
+    const props = component.props || {};
+    
+    switch (component.type) {
+      case 'HeroSection':
+        const bgImage = typeof props.backgroundImage === 'string' 
+          ? props.backgroundImage 
+          : props.backgroundImage?.url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920';
+        
+        html += `
+          <section style="min-height: ${props.minHeight || '70vh'}; display: flex; align-items: center; justify-content: center; background: ${props.overlay ? 'linear-gradient(rgba(0,0,0,' + (props.overlayOpacity || 50) / 100 + '), rgba(0,0,0,' + (props.overlayOpacity || 50) / 100 + ')), ' : ''}url('${bgImage}') center/cover; color: white; text-align: ${props.textAlign || 'center'}; padding: 40px 20px;">
+            <div style="max-width: 800px;">
+              <h1 style="font-size: 56px; margin-bottom: 24px; font-weight: bold;">${props.headline || 'Welcome'}</h1>
+              ${props.subheadline ? `<p style="font-size: 20px; margin-bottom: 32px; line-height: 1.6;">${props.subheadline}</p>` : ''}
+              ${props.ctaText ? `<a href="${props.ctaLink || '#'}" style="display: inline-block; padding: 16px 32px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">${props.ctaText}</a>` : ''}
+            </div>
+          </section>
+        `;
+        break;
+        
+      case 'FeaturesSection':
+        html += `
+          <section style="padding: 80px 20px; background: #f9fafb;">
+            <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+              ${props.title ? `<h2 style="font-size: 42px; margin-bottom: 16px; font-weight: bold;">${props.title}</h2>` : ''}
+              ${props.subtitle ? `<p style="font-size: 18px; color: #6b7280; margin-bottom: 48px;">${props.subtitle}</p>` : ''}
+              <div style="display: grid; grid-template-columns: repeat(${props.columns || 3}, 1fr); gap: 32px;">
+                ${(props.features || []).map((feature: any) => `
+                  <div style="padding: 32px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <h3 style="font-size: 24px; margin-bottom: 12px; font-weight: 600;">${feature.title}</h3>
+                    <p style="color: #6b7280; line-height: 1.6;">${feature.description}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </section>
+        `;
+        break;
+        
+      case 'GallerySection':
+        html += `
+          <section style="padding: 80px 20px;">
+            <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+              ${props.title ? `<h2 style="font-size: 42px; margin-bottom: 16px; font-weight: bold;">${props.title}</h2>` : ''}
+              ${props.subtitle ? `<p style="font-size: 18px; color: #6b7280; margin-bottom: 48px;">${props.subtitle}</p>` : ''}
+              <div style="display: grid; grid-template-columns: repeat(${props.columns || 3}, 1fr); gap: 24px;">
+                ${(props.images || []).map((img: any) => `
+                  <div style="position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden;">
+                    <img src="${img.url}" alt="${img.alt || ''}" style="width: 100%; height: 100%; object-fit: cover;" />
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </section>
+        `;
+        break;
+        
+      case 'CTASection':
+        html += `
+          <section style="padding: 100px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+            <div style="max-width: 800px; margin: 0 auto;">
+              ${props.title ? `<h2 style="font-size: 48px; margin-bottom: 24px; font-weight: bold;">${props.title}</h2>` : ''}
+              ${props.description ? `<p style="font-size: 20px; margin-bottom: 40px; line-height: 1.6;">${props.description}</p>` : ''}
+              <div style="display: flex; gap: 16px; justify-content: center;">
+                ${props.primaryCta ? `<a href="${props.primaryCta.link || '#'}" style="display: inline-block; padding: 16px 32px; background: white; color: #667eea; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">${props.primaryCta.text}</a>` : ''}
+                ${props.secondaryCta ? `<a href="${props.secondaryCta.link || '#'}" style="display: inline-block; padding: 16px 32px; background: transparent; color: white; text-decoration: none; border: 2px solid white; border-radius: 8px; font-weight: 600; font-size: 16px;">${props.secondaryCta.text}</a>` : ''}
+              </div>
+            </div>
+          </section>
+        `;
+        break;
+    }
+  }
+  
+  return html;
+}
+
 export default function BuilderPage({ params }: BuilderPageProps) {
   const [pageId, setPageId] = useState<string>('');
-  const [data, setData] = useState<any>(null);
+  const [editorData, setEditorData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
@@ -34,7 +125,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const router = useRouter();
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const puckRef = useRef<any>(null);
+  const editorRef = useRef<any>(null);
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -64,52 +155,40 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       if (!res.ok) throw new Error('Failed to load page');
       
       const response = await res.json();
-      // Handle both direct page object and nested landingPage structure
       const page = response.landingPage || response;
       
       setPageName(page.name);
       setPageSlug(page.slug);
       
-      // Use draft content if available, otherwise published, otherwise template defaults
+      // Load content - prioritize draft, then published
       let content = page.draftContent || page.publishedContent;
       
-      // If content is empty or missing sections, try to load from template
-      if (!content || !content.content || content.content.length === 0) {
-        // Check if there's a template with defaultSections
-        if (page.Template && page.Template.defaultSections) {
-          content = page.Template.defaultSections;
-          console.log('Loading template default sections:', content);
-        } else if (!content || typeof content !== 'object') {
-          // Last resort: create empty structure
-          content = { content: [], root: { props: {} } };
-        }
+      // Convert template data to GrapesJS format if needed
+      if (content && content.content && Array.isArray(content.content)) {
+        // This is Puck format, convert to GrapesJS HTML
+        const html = convertPuckToHtml(content);
+        setEditorData({ html, css: '', json: null });
+      } else if (content && typeof content === 'object' && (content.html || content.json)) {
+        // Already in GrapesJS format
+        setEditorData(content);
+      } else if (page.Template && page.Template.defaultSections) {
+        // Load from template
+        const html = convertPuckToHtml(page.Template.defaultSections);
+        setEditorData({ html, css: '', json: null });
+      } else {
+        // Empty page - load default hero
+        const defaultHtml = `
+          <section style="min-height: 70vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920') center/cover; color: white; text-align: center; padding: 40px 20px;">
+            <div style="max-width: 800px;">
+              <h1 style="font-size: 56px; margin-bottom: 24px; font-weight: bold;">Welcome to Your Landing Page</h1>
+              <p style="font-size: 20px; margin-bottom: 32px; line-height: 1.6;">Start building your amazing page</p>
+              <a href="#" style="display: inline-block; padding: 16px 32px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Get Started</a>
+            </div>
+          </section>
+        `;
+        setEditorData({ html: defaultHtml, css: '', json: null });
       }
       
-      // Ensure content has proper Puck structure
-      if (!content.content) {
-        content.content = [];
-      }
-      if (!content.root) {
-        content.root = { props: {} };
-      }
-      
-      console.log('📊 Builder data loaded:', {
-        hasContent: !!content,
-        contentLength: content.content?.length || 0,
-        components: content.content?.map((c: any) => c.type) || [],
-        hasRoot: !!content.root,
-        firstComponent: content.content?.[0],
-        fullStructure: JSON.stringify(content, null, 2)
-      });
-      
-      // Ensure proper Puck data structure
-      const puckData = {
-        content: content.content || [],
-        root: content.root || { props: {} }
-      };
-      
-      console.log('🎨 Setting Puck data:', puckData);
-      setData(puckData);
       setLastSaved(page.updatedAt ? new Date(page.updatedAt) : null);
     } catch (error) {
       console.error('Error loading page:', error);
@@ -121,24 +200,28 @@ export default function BuilderPage({ params }: BuilderPageProps) {
     }
   };
 
-  const saveToAPI = async (newData: any, showToast = true) => {
+  const saveToAPI = async (showToast = true) => {
     try {
-      // Validate data structure before saving
-      if (!newData || typeof newData !== 'object') {
-        throw new Error('Invalid data structure');
+      if (!editorRef.current) {
+        throw new Error('Editor not initialized');
       }
-      
-      // Ensure required Puck structure
-      const validatedData = {
-        content: Array.isArray(newData.content) ? newData.content : [],
-        root: newData.root || { props: {} },
-        zones: newData.zones || {}
+
+      // Get HTML, CSS, and JSON from GrapesJS
+      const html = editorRef.current.getHtml();
+      const css = editorRef.current.getCss();
+      const json = editorRef.current.getJson();
+
+      const contentToSave = {
+        html,
+        css,
+        json,
+        timestamp: new Date().toISOString(),
       };
-      
+
       const res = await fetch(`/api/landing-pages/${pageId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ draftContent: validatedData }),
+        body: JSON.stringify({ draftContent: contentToSave }),
         credentials: 'include',
       });
 
@@ -148,30 +231,21 @@ export default function BuilderPage({ params }: BuilderPageProps) {
           const errorData = await res.json();
           errorMessage = errorData.error || errorMessage;
         } catch (e) {
-          // If response is not JSON, use status text
           errorMessage = res.statusText || errorMessage;
         }
         throw new Error(errorMessage);
       }
-      
-      // Parse successful response
-      try {
-        await res.json();
-      } catch (e) {
-        // If response body is empty or not JSON, that's okay for PATCH
-        console.log('Response parsed successfully (no body)');
-      }
-      
+
       setLastSaved(new Date());
       setHasUnsavedChanges(false);
-      
+
       if (showToast) {
         toast.success('Draft saved', {
           description: 'Your changes have been saved successfully.',
           duration: 2000
         });
       }
-      
+
       return true;
     } catch (error) {
       console.error('Error saving:', error);
@@ -185,46 +259,40 @@ export default function BuilderPage({ params }: BuilderPageProps) {
   };
 
   // Auto-save with debouncing
-  const scheduleAutoSave = useCallback((newData: any) => {
+  const scheduleAutoSave = useCallback(() => {
     setHasUnsavedChanges(true);
-    
+
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
     }
 
     autoSaveTimeoutRef.current = setTimeout(async () => {
       setAutoSaving(true);
-      await saveToAPI(newData, false);
+      await saveToAPI(false);
       setAutoSaving(false);
-    }, 2000); // Auto-save after 2 seconds of no changes
+    }, 3000); // Auto-save after 3 seconds of no changes
   }, [pageId]);
 
-  // Handle Puck onChange - THIS IS THE CRITICAL FIX
-  const handleChange = useCallback((newData: any) => {
-    setData(newData);
-    scheduleAutoSave(newData);
+  // Handle editor changes
+  const handleEditorChange = useCallback(() => {
+    scheduleAutoSave();
   }, [scheduleAutoSave]);
 
   const handleManualSave = async () => {
-    if (!data || saving) return;
-    
+    if (!editorRef.current || saving) return;
+
     setSaving(true);
-    const success = await saveToAPI(data, true);
+    const success = await saveToAPI(true);
     setSaving(false);
   };
 
   const handlePublish = async () => {
-    if (!data) return;
-    
+    if (!editorRef.current) return;
+
     setSaving(true);
     try {
       // First save current data as draft
-      await fetch(`/api/landing-pages/${pageId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ draftContent: data }),
-        credentials: 'include',
-      });
+      await saveToAPI(false);
 
       // Then publish
       const res = await fetch(`/api/landing-pages/${pageId}/publish`, {
@@ -233,14 +301,14 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       });
 
       if (!res.ok) throw new Error('Failed to publish');
-      
+
       toast.success('Page published!', {
         description: 'Your landing page is now live and visible to visitors.',
         duration: 3000
       });
-      
+
       setHasUnsavedChanges(false);
-      
+
       // Redirect after a short delay
       setTimeout(() => {
         router.push('/dashboard/landing-pages');
@@ -392,22 +460,15 @@ export default function BuilderPage({ params }: BuilderPageProps) {
         </div>
       </div>
 
-      {/* Puck Editor with onChange handler */}
-      <div className="flex-1 overflow-hidden puck-editor-wrapper">
-        {data ? (
-          <>
-            {console.log('🖼️ Rendering Puck with data:', {
-              contentCount: data.content?.length,
-              components: data.content?.map((c: any) => c.type),
-              hasRoot: !!data.root
-            })}
-            <Puck
-              config={puckConfig}
-              data={data}
-              onChange={handleChange}
-              onPublish={handleManualSave}
-            />
-          </>
+      {/* GrapesJS Editor */}
+      <div className="flex-1 overflow-hidden">
+        {editorData ? (
+          <GrapesJSEditor
+            ref={editorRef}
+            initialData={editorData}
+            onChange={handleEditorChange}
+            onLoad={() => console.log('✅ GrapesJS Editor loaded')}
+          />
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">

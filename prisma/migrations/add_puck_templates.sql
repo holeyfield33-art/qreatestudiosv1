@@ -30,7 +30,10 @@ INSERT INTO "Template" (
         "props": {
           "headline": "Fine Dining Excellence",
           "subheadline": "Experience culinary artistry with fresh, locally-sourced ingredients",
-          "backgroundImage": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920",
+          "backgroundImage": {
+            "url": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920",
+            "alt": "Restaurant interior with elegant dining"
+          },
           "ctaText": "View Our Menu",
           "ctaLink": "#menu",
           "ctaStyle": "primary",
@@ -79,23 +82,24 @@ INSERT INTO "Template" (
               "id": "1",
               "url": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800",
               "alt": "Gourmet appetizer",
-              "title": "Seasonal Appetizer"
+              "caption": "Seasonal Appetizer"
             },
             {
               "id": "2",
               "url": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800",
               "alt": "Signature main course",
-              "title": "Signature Entrée"
+              "caption": "Signature Entrée"
             },
             {
               "id": "3",
               "url": "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800",
               "alt": "Artisan dessert",
-              "title": "Artisan Dessert"
+              "caption": "Artisan Dessert"
             }
           ],
           "columns": 3,
-          "style": "grid"
+          "aspectRatio": "square",
+          "lightbox": true
         }
       },
       {
@@ -171,7 +175,10 @@ INSERT INTO "Template" (
         "props": {
           "headline": "Revolutionize Your Workflow",
           "subheadline": "The all-in-one platform that helps teams collaborate, automate, and grow faster",
-          "backgroundImage": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1920",
+          "backgroundImage": {
+            "url": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1920",
+            "alt": "Modern office workspace"
+          },
           "ctaText": "Start Free Trial",
           "ctaLink": "#signup",
           "ctaStyle": "primary",
@@ -280,7 +287,7 @@ INSERT INTO "Template" (
   'Product Showcase',
   'retail',
   'Modern e-commerce product display with gallery and features',
-  false,
+  true,
   'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop',
   '{
     "content": [
@@ -289,7 +296,10 @@ INSERT INTO "Template" (
         "props": {
           "headline": "Premium Collection 2026",
           "subheadline": "Discover our latest arrivals crafted with precision and passion",
-          "backgroundImage": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920",
+          "backgroundImage": {
+            "url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920",
+            "alt": "Retail store interior"
+          },
           "ctaText": "Shop Now",
           "ctaLink": "#products",
           "ctaStyle": "primary",
@@ -309,29 +319,30 @@ INSERT INTO "Template" (
               "id": "1",
               "url": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
               "alt": "Premium watch",
-              "title": "Luxury Timepiece"
+              "caption": "Luxury Timepiece"
             },
             {
               "id": "2",
               "url": "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800",
               "alt": "Designer sunglasses",
-              "title": "Designer Eyewear"
+              "caption": "Designer Eyewear"
             },
             {
               "id": "3",
               "url": "https://images.unsplash.com/photo-1624823183493-ed5832f48f18?w=800",
               "alt": "Leather bag",
-              "title": "Artisan Leather"
+              "caption": "Artisan Leather"
             },
             {
               "id": "4",
               "url": "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=800",
               "alt": "Premium sneakers",
-              "title": "Limited Edition"
+              "caption": "Limited Edition"
             }
           ],
           "columns": 4,
-          "style": "grid"
+          "aspectRatio": "square",
+          "lightbox": true
         }
       },
       {
