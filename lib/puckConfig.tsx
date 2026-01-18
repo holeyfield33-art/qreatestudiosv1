@@ -12,6 +12,10 @@ import { ImageArrayField } from '@/components/puck/ImageArrayField';
 /**
  * Puck configuration for restaurant landing page builder
  * Defines all available sections and their field schemas
+ *
+ * NOTE: This config includes custom field renderers and should ONLY be used
+ * in the editor (Client Components). For rendering published pages in Server Components,
+ * use `puckRenderConfig` instead.
  */
 export const puckConfig: Config = {
   components: {
@@ -491,6 +495,53 @@ export const puckConfig: Config = {
     conversion: {
       title: 'Actions',
       components: ['QRCodeSection', 'CTASection', 'ContactSection'],
+    },
+  },
+};
+
+/**
+ * Render-only configuration for Puck
+ *
+ * This config is safe to use in Server Components because it DOES NOT contain
+ * custom field render functions (which cannot be serialized). It only includes
+ * the component render functions needed to display the sections.
+ *
+ * Use this config for:
+ * - Rendering published landing pages in Server Components
+ * - SSR/SSG contexts
+ *
+ * Do NOT use this for:
+ * - The Puck editor (use puckConfig instead)
+ */
+export const puckRenderConfig: Config = {
+  components: {
+    HeroSection: {
+      defaultProps: puckConfig.components.HeroSection.defaultProps,
+      render: puckConfig.components.HeroSection.render,
+    },
+    FeaturesSection: {
+      defaultProps: puckConfig.components.FeaturesSection.defaultProps,
+      render: puckConfig.components.FeaturesSection.render,
+    },
+    MenuSection: {
+      defaultProps: puckConfig.components.MenuSection.defaultProps,
+      render: puckConfig.components.MenuSection.render,
+    },
+    QRCodeSection: {
+      defaultProps: puckConfig.components.QRCodeSection.defaultProps,
+      render: puckConfig.components.QRCodeSection.render,
+    },
+    GallerySection: {
+      defaultProps: puckConfig.components.GallerySection.defaultProps,
+      render: puckConfig.components.GallerySection.render,
+    },
+    CTASection: {
+      defaultProps: puckConfig.components.CTASection.defaultProps,
+      render: puckConfig.components.CTASection.render,
+    },
+    ContactSection: {
+      defaultProps: puckConfig.components.ContactSection.defaultProps,
+      render: puckConfig.components.ContactSection.render,
     },
   },
 };
