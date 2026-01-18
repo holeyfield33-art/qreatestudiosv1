@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { requireAuth } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 
 // PATCH update menu item
@@ -7,9 +7,10 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string; itemId: string }> }
 ) {
-  const session = await auth();
+  const { session, error } = await requireAuth();
+  if (error) return error;
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'No user ID' }, { status: 401 });
   }
 
   const { itemId } = await params;
@@ -38,9 +39,10 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string; itemId: string }> }
 ) {
-  const session = await auth();
+  const { session, error } = await requireAuth();
+  if (error) return error;
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'No user ID' }, { status: 401 });
   }
 
   const { itemId } = await params;
