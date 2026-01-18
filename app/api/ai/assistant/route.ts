@@ -42,8 +42,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: result.content,
-      usage: result.usage,
+      result: result.content,
+      tokensUsed: result.usage?.total_tokens,
       creditsRemaining: credits.remaining,
       creditsLimit: credits.limit,
       resetDate: credits.resetDate,
@@ -54,10 +54,10 @@ export async function POST(req: NextRequest) {
     // Handle specific errors
     if (error.message && error.message.includes('limit')) {
       return NextResponse.json(
-        { 
-          error: error.message, 
-          upgrade: true,
-          needsUpgrade: true,
+        {
+          error: error.message,
+          message: error.message,
+          upgradeRequired: true,
         },
         { status: 403 }
       );
@@ -65,10 +65,10 @@ export async function POST(req: NextRequest) {
 
     if (error.message && error.message.includes('not available')) {
       return NextResponse.json(
-        { 
-          error: error.message, 
-          upgrade: true,
-          needsUpgrade: true,
+        {
+          error: error.message,
+          message: error.message,
+          upgradeRequired: true,
         },
         { status: 403 }
       );

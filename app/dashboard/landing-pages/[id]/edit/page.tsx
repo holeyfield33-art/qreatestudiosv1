@@ -12,8 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Save, Image as ImageIcon, ArrowLeft, ExternalLink, Check, Eye, Printer, Globe, UtensilsCrossed, Copy, Edit3 } from 'lucide-react';
+import { Save, Image as ImageIcon, ArrowLeft, ExternalLink, Check, Eye, Printer, Globe, UtensilsCrossed, Copy, Edit3, Info, Undo, Redo, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface LandingPage {
   id: string;
@@ -44,6 +45,9 @@ export default function TemplateEditorPage() {
   const [published, setPublished] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [htmlHistory, setHtmlHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,6 +59,32 @@ export default function TemplateEditorPage() {
   useEffect(() => {
     loadLandingPage();
   }, [landingPageId]);
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    if (!editMode) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+Z or Cmd+Z for undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+      // Ctrl+Y or Cmd+Shift+Z for redo
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+      }
+      // Ctrl+S to save
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [editMode, historyIndex, htmlHistory]);
 
   async function loadLandingPage() {
     try {
@@ -129,10 +159,43 @@ export default function TemplateEditorPage() {
     setSelectedSlot(null);
   };
 
+  const saveToHistory = (newHtml: string) => {
+    const newHistory = htmlHistory.slice(0, historyIndex + 1);
+    newHistory.push(newHtml);
+    setHtmlHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  };
+
   const handleContentEdit = (e: React.FormEvent<HTMLDivElement>) => {
     if (editMode) {
-      setHtml(e.currentTarget.innerHTML);
+      const newHtml = e.currentTarget.innerHTML;
+      setHtml(newHtml);
+      setHasUnsavedChanges(true);
     }
+  };
+
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      setHistoryIndex(historyIndex - 1);
+      setHtml(htmlHistory[historyIndex - 1]);
+      setHasUnsavedChanges(true);
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyIndex < htmlHistory.length - 1) {
+      setHistoryIndex(historyIndex + 1);
+      setHtml(htmlHistory[historyIndex + 1]);
+      setHasUnsavedChanges(true);
+    }
+  };
+
+  const toggleEditMode = () => {
+    if (!editMode) {
+      // Entering edit mode - save current state to history
+      saveToHistory(html);
+    }
+    setEditMode(!editMode);
   };
 
   const handleSave = async () => {
@@ -160,6 +223,7 @@ export default function TemplateEditorPage() {
       if (result.success) {
         toast.success('Landing page saved successfully!');
         setLandingPage(result.landingPage);
+        setHasUnsavedChanges(false);
       } else {
         toast.error(result.error || 'Failed to save');
       }
@@ -265,61 +329,124 @@ export default function TemplateEditorPage() {
     : null;
 
   return (
-    <div className="flex flex-col h-screen">
-      {/* Top Header Bar */}
-      <div className="bg-white border-b px-4 py-3 flex justify-between items-center shrink-0">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push('/dashboard/landing-pages')}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h2 className="font-semibold text-lg">{title || 'Untitled Page'}</h2>
-            {landingPage && (
-              <p className="text-xs text-muted-foreground">
-                {window.location.origin}/l/{landingPage.slug}
-              </p>
+    <TooltipProvider>
+      <div className="flex flex-col h-screen">
+        {/* Top Header Bar */}
+        <div className="bg-white border-b px-4 py-3 flex justify-between items-center shrink-0 shadow-sm">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push('/dashboard/landing-pages')}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <div className="flex items-center gap-2">
+              <div>
+                <h2 className="font-semibold text-lg flex items-center gap-2">
+                  {title || 'Untitled Page'}
+                  {hasUnsavedChanges && (
+                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
+                      Unsaved
+                    </span>
+                  )}
+                </h2>
+                {landingPage && (
+                  <p className="text-xs text-muted-foreground">
+                    {window.location.origin}/l/{landingPage.slug}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {editMode && (
+              <div className="flex items-center gap-1 mr-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleUndo}
+                      disabled={historyIndex <= 0}
+                    >
+                      <Undo className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Undo (Ctrl+Z)</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRedo}
+                      disabled={historyIndex >= htmlHistory.length - 1}
+                    >
+                      <Redo className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Redo (Ctrl+Y)</TooltipContent>
+                </Tooltip>
+              </div>
             )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={editMode ? "default" : "outline"}
+                  onClick={toggleEditMode}
+                  size="sm"
+                  className={editMode ? "bg-gradient-to-r from-purple-600 to-blue-600" : ""}
+                >
+                  <Edit3 className="w-4 h-4 mr-2" />
+                  {editMode ? 'Editing Text' : 'Edit Text'}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {editMode ? 'Exit text editing mode' : 'Click to edit text directly on the page'}
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" onClick={handleSave} disabled={saving}>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Draft
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Save your changes as a draft</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={handlePublish}
+                  disabled={saving}
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  {saving ? 'Publishing...' : 'Publish →'}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Publish your page to make it live</TooltipContent>
+            </Tooltip>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button 
-            variant={editMode ? "default" : "outline"} 
-            onClick={() => setEditMode(!editMode)}
-            size="sm"
-          >
-            <Edit3 className="w-4 h-4 mr-2" />
-            {editMode ? 'Editing' : 'Edit Text'}
-          </Button>
-          <Button variant="outline" onClick={handleSave} disabled={saving}>
-            <Save className="w-4 h-4 mr-2" />
-            Save Draft
-          </Button>
-          <Button onClick={handlePublish} disabled={saving}>
-            {saving ? 'Publishing...' : 'Publish →'}
-          </Button>
-        </div>
-      </div>
 
       {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Controls */}
-        <div className="w-80 bg-white border-r overflow-y-auto">
+        <div className="w-80 bg-gradient-to-b from-white to-gray-50 border-r shadow-lg overflow-y-auto">
           <Tabs defaultValue="design" className="w-full">
-            <TabsList className="w-full grid grid-cols-3 p-1 m-2">
-              <TabsTrigger value="design" className="text-xs">
-                <ImageIcon className="w-3 h-3 mr-1" />
+            <TabsList className="w-full grid grid-cols-3 p-2 m-3 bg-gray-100">
+              <TabsTrigger value="design" className="text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <ImageIcon className="w-3.5 h-3.5 mr-1.5" />
                 Design
               </TabsTrigger>
-              <TabsTrigger value="menu" className="text-xs">
-                <UtensilsCrossed className="w-3 h-3 mr-1" />
+              <TabsTrigger value="menu" className="text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <UtensilsCrossed className="w-3.5 h-3.5 mr-1.5" />
                 Menu
               </TabsTrigger>
-              <TabsTrigger value="settings" className="text-xs">
+              <TabsTrigger value="settings" className="text-xs font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 Settings
               </TabsTrigger>
             </TabsList>
@@ -375,52 +502,70 @@ export default function TemplateEditorPage() {
               {/* Image Slots */}
               {template && template.metadata.imageSlots.length > 0 && (
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-sm text-gray-700 uppercase tracking-wide">
-                    Page Images
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm text-gray-700 uppercase tracking-wide">
+                      Page Images
+                    </h3>
+                    {!editMode && (
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                        {template.metadata.imageSlots.length} images
+                      </span>
+                    )}
+                  </div>
                   {editMode && (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-xs text-blue-800">
-                        💡 <strong>Edit Mode Active:</strong> Click any text in the preview to edit it directly.
-                        Turn off Edit Mode to change images.
+                    <div className="p-3 bg-amber-50 border-2 border-amber-200 rounded-lg shadow-sm">
+                      <p className="text-xs text-amber-900 flex items-center gap-2">
+                        <Info className="w-4 h-4 flex-shrink-0" />
+                        <span><strong>Edit Mode Active:</strong> Turn off Edit Mode to change images.</span>
                       </p>
                     </div>
                   )}
                   <div className="space-y-3">
                     {template.metadata.imageSlots.map((slot) => (
-                      <Card
-                        key={slot.id}
-                        className={`cursor-pointer transition-all ${
-                          editMode 
-                            ? 'opacity-50 pointer-events-none' 
-                            : 'hover:shadow-md hover:border-blue-300'
-                        }`}
-                        onClick={() => !editMode && handleSlotClick(slot.id)}
-                      >
-                        <CardContent className="p-3">
-                          <div className="flex items-center gap-3">
-                            <div className="relative w-16 h-16 rounded overflow-hidden border flex-shrink-0">
-                              {images[slot.id] ? (
-                                <img
-                                  src={images[slot.id]}
-                                  alt={slot.label}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                  <ImageIcon className="w-6 h-6 text-gray-400" />
+                      <Tooltip key={slot.id}>
+                        <TooltipTrigger asChild>
+                          <Card
+                            className={`cursor-pointer transition-all duration-200 ${
+                              editMode
+                                ? 'opacity-40 pointer-events-none grayscale'
+                                : 'hover:shadow-lg hover:border-blue-400 hover:scale-[1.02]'
+                            }`}
+                            onClick={() => !editMode && handleSlotClick(slot.id)}
+                          >
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-3">
+                                <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 flex-shrink-0 shadow-sm">
+                                  {images[slot.id] ? (
+                                    <img
+                                      src={images[slot.id]}
+                                      alt={slot.label}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                                      <ImageIcon className="w-8 h-8 text-gray-400" />
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm truncate">{slot.label}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {slot.aspectRatio} • Click to change
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-semibold text-sm truncate text-gray-900">{slot.label}</p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {slot.aspectRatio}
+                                  </p>
+                                  {!editMode && (
+                                    <p className="text-xs text-blue-600 font-medium mt-1">
+                                      Click to change →
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {editMode ? 'Exit edit mode to change images' : `Click to change ${slot.label}`}
+                        </TooltipContent>
+                      </Tooltip>
                     ))}
                   </div>
                 </div>
@@ -516,22 +661,55 @@ export default function TemplateEditorPage() {
         </div>
 
         {/* Center Preview Area */}
-        <div className="flex-1 bg-gray-100 p-8 overflow-auto">
+        <div className="flex-1 bg-gradient-to-br from-gray-50 to-gray-100 p-8 overflow-auto">
           <div className="max-w-5xl mx-auto">
-            <div className="bg-white shadow-xl rounded-lg overflow-hidden">
-              <div className="bg-gray-800 text-white px-4 py-2 flex items-center justify-between">
-                <span className="text-sm font-medium">Live Preview</span>
-                <span className="text-xs text-gray-400">
-                  {editMode ? 'Click text to edit' : 'Updates in real-time'}
+            {editMode && (
+              <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg shadow-sm">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-purple-900 mb-1">
+                      Text Editing Mode Active
+                    </p>
+                    <p className="text-xs text-purple-700">
+                      Click any text in the preview below to edit it. Use <kbd className="px-1.5 py-0.5 bg-white border border-purple-300 rounded text-xs font-mono">Ctrl+Z</kbd> to undo and <kbd className="px-1.5 py-0.5 bg-white border border-purple-300 rounded text-xs font-mono">Ctrl+Y</kbd> to redo. Changes are saved automatically to your draft.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className={`bg-white shadow-2xl rounded-lg overflow-hidden transition-all ${editMode ? 'ring-4 ring-purple-300' : ''}`}>
+              <div className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Eye className="w-4 h-4" />
+                  <span className="text-sm font-semibold">Live Preview</span>
+                </div>
+                <span className="text-xs text-gray-300 flex items-center gap-1">
+                  {editMode ? (
+                    <>
+                      <Edit3 className="w-3 h-3" />
+                      Click text to edit
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3 h-3" />
+                      Updates in real-time
+                    </>
+                  )}
                 </span>
               </div>
               <div
                 ref={previewRef}
-                className={`w-full min-h-[600px] ${editMode ? 'cursor-text outline-none' : ''}`}
+                className={`w-full min-h-[600px] transition-all ${
+                  editMode
+                    ? 'cursor-text outline-none'
+                    : ''
+                }`}
                 contentEditable={editMode}
                 onInput={handleContentEdit}
                 onBlur={handleContentEdit}
                 suppressContentEditableWarning={true}
+                style={editMode ? { minHeight: '600px' } : {}}
               />
             </div>
           </div>
@@ -636,5 +814,6 @@ export default function TemplateEditorPage() {
         </DialogContent>
       </Dialog>
     </div>
+    </TooltipProvider>
   );
 }
