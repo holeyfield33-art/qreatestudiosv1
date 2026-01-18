@@ -9,5 +9,5 @@ interface PageProps {
 export default async function PublicLandingPage({ params }: PageProps) {
   const { slug } = await params;
 
-  redirect(`/l/${slug}`);
+  redirect(`/l/${slug}`, 'replace');
 }
