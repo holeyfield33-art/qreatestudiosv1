@@ -8,10 +8,14 @@ import { z } from 'zod'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
-  session: { strategy: 'jwt' },
+  session: { 
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   pages: {
     signIn: '/auth/signin',
     signOut: '/',
+    error: '/auth/signin',
   },
   providers: [
     GitHub({
@@ -58,27 +62,34 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id
         token.role = user.role
         
-        // Fetch organization data through OrganizationMember
-        const userData = await prisma.user.findUnique({
-          where: { id: user.id },
-          include: {
-            OrganizationMember: {
-              include: {
-                Organization: {
-                  select: {
-                    id: true,
-                    plan: true,
-                    isWhiteLabel: true,
+        try {
+          // Fetch organization data through OrganizationMember
+          const userData = await prisma.user.findUnique({
+            where: { id: user.id },
+            include: {
+              OrganizationMember: {
+                include: {
+                  Organization: {
+                    select: {
+                      id: true,
+                      plan: true,
+                      isWhiteLabel: true,
+                    },
                   },
                 },
+                take: 1, // Get the first organization
               },
-              take: 1, // Get the first organization
             },
-          },
-        })
-        
-        if (userData?.OrganizationMember?.[0]?.Organization) {
-          token.organization = userData.OrganizationMember[0].Organization
+          })
+          
+          if (userData?.OrganizationMember?.[0]?.Organization) {
+            token.organization = userData.OrganizationMember[0].Organization
+          }
+        } catch (error) {
+          // Log error but don't fail the session
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Failed to fetch organization data:', error)
+          }
         }
       }
       return token
@@ -99,4 +110,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session
     },
   },
+  debug: process.env.NODE_ENV === 'development',
+  trustHost: true, // Important for Codespaces/proxied environments
 })

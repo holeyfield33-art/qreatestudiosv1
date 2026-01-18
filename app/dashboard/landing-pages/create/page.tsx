@@ -1,16 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { LANDING_PAGE_TEMPLATES } from '@/lib/templates/landing-page-templates';
+import { PUCK_TEMPLATES, getTemplateCategories } from '@/lib/templates/puck-templates';
 import Image from 'next/image';
-import { ArrowLeft, Sparkles, FileText, Package, Calendar, Rocket, Download, Home, Palette, Video, Lightbulb, Clock } from 'lucide-react';
-import { getLandingPageUrl } from '@/lib/utils/url-helpers';
+import { ArrowLeft, Sparkles, Loader2, Check, Eye } from 'lucide-react';
 
 export default function CreateLandingPagePage() {
   const router = useRouter();
@@ -22,16 +23,25 @@ export default function CreateLandingPagePage() {
   const [pageName, setPageName] = useState('');
   const [slug, setSlug] = useState('');
   const [loading, setLoading] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
+
+  const categories = ['all', ...getTemplateCategories()];
+
+  const filteredTemplates = categoryFilter === 'all' 
+    ? PUCK_TEMPLATES 
+    : PUCK_TEMPLATES.filter(t => t.category.toLowerCase() === categoryFilter.toLowerCase());
 
   function generateSlug(name: string) {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50);
   }
 
   function handleTemplateSelect(templateId: string) {
-    const template = LANDING_PAGE_TEMPLATES.find(t => t.id === templateId);
+    const template = PUCK_TEMPLATES.find(t => t.id === templateId);
     setSelectedTemplate(templateId);
     setPageName(template?.name || '');
     setSlug(generateSlug(template?.name || ''));
+    setStep(2);
   }
 
   async function createAndEdit() {
@@ -40,13 +50,17 @@ export default function CreateLandingPagePage() {
       return;
     }
 
-    const template = LANDING_PAGE_TEMPLATES.find(t => t.id === selectedTemplate);
-    if (!template) return;
+    const template = PUCK_TEMPLATES.find(t => t.id === selectedTemplate);
+    if (!template) {
+      toast.error('Template not found');
+      return;
+    }
 
     setLoading(true);
     try {
       const finalSlug = slug || generateSlug(pageName);
       
+      // Create landing page with Puck template structure
       const res = await fetch('/api/landing-pages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,12 +68,9 @@ export default function CreateLandingPagePage() {
         body: JSON.stringify({
           title: pageName,
           slug: finalSlug,
-          content: { 
-            html: template.html,
-            templateId: template.id,
-            metadata: template.metadata 
-          },
-          theme: template.metadata?.colorScheme || {},
+          templateId: template.id,
+          draftContent: template.defaultSections,
+          metadata: template.metadata,
         }),
       });
 
@@ -96,7 +107,7 @@ export default function CreateLandingPagePage() {
         } else {
           toast.success('Landing page created!');
         }
-        router.push(`/dashboard/landing-pages/${result.landingPage.id}/edit${qrId ? `?qrId=${qrId}` : ''}`);
+        router.push(`/dashboard/landing-pages/${result.landingPage.id}/builder${qrId ? `?qrId=${qrId}` : ''}`);
       } else {
         toast.error(result.error || 'Failed to create');
       }
@@ -128,46 +139,88 @@ export default function CreateLandingPagePage() {
           <div>
             <div className="mb-6 lg:mb-8">
               <h1 className="text-2xl lg:text-4xl font-bold mb-1 lg:mb-2">Choose a Template</h1>
-              <p className="text-sm text-muted-foreground">Pick a starting point for your landing page</p>
+              <p className="text-sm text-muted-foreground">Pick a professional template to get started instantly</p>
+            </div>
+
+            {/* Category Filters */}
+            <div className="mb-6">
+              <div className="flex flex-wrap gap-2">
+                {categories.map((cat) => (
+                  <Button
+                    key={cat}
+                    variant={categoryFilter === cat ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCategoryFilter(cat)}
+                    className="capitalize"
+                  >
+                    {cat === 'all' ? 'All Templates' : cat}
+                  </Button>
+                ))}
+              </div>
             </div>
             
+            {/* Template Grid with Preview */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-              {LANDING_PAGE_TEMPLATES.map(template => (
+              {filteredTemplates.map(template => (
                 <Card
                   key={template.id}
-                  className={`cursor-pointer transition-all hover:shadow-xl hover:scale-[1.02] ${
+                  className={`cursor-pointer transition-all hover:shadow-xl hover:scale-[1.02] overflow-hidden ${
                     selectedTemplate === template.id ? 'ring-2 ring-blue-500 shadow-xl' : ''
                   }`}
                   onClick={() => handleTemplateSelect(template.id)}
                 >
-                  <div className="relative aspect-video bg-gray-200 rounded-t-lg overflow-hidden">
-                    {template.previewImage ? (
-                      <Image
-                        src={template.previewImage}
-                        alt={template.name}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                          {getTemplateIcon(template.id)}
-                        </div>
-                      </div>
-                    )}
+                  {/* Preview Image */}
+                  <div className="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                    <Image
+                      src={template.thumbnail}
+                      alt={template.name}
+                      fill
+                      className="object-cover transition-transform duration-300 hover:scale-110"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                    
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-black/0 hover:bg-black/40 transition-colors duration-300 flex items-center justify-center opacity-0 hover:opacity-100">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="gap-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPreviewTemplate(template.id);
+                        }}
+                      >
+                        <Eye className="w-4 h-4" />
+                        Preview
+                      </Button>
+                    </div>
+                    
+                    {/* Selected Indicator */}
                     {selectedTemplate === template.id && (
                       <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
                         <div className="bg-blue-600 text-white rounded-full p-3">
-                          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
+                          <Check className="w-6 h-6" />
                         </div>
                       </div>
                     )}
+                    
+                    {/* Premium Badge */}
+                    {template.isPremium && (
+                      <Badge className="absolute top-3 right-3 bg-yellow-500 text-yellow-950">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Premium
+                      </Badge>
+                    )}
                   </div>
+                  
+                  {/* Template Info */}
                   <CardContent className="p-3 lg:p-4">
-                    <h3 className="font-semibold text-base lg:text-lg mb-1">{template.name}</h3>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="font-semibold text-base lg:text-lg">{template.name}</h3>
+                      <Badge variant="secondary" className="text-xs capitalize shrink-0">
+                        {template.category}
+                      </Badge>
+                    </div>
                     <p className="text-xs text-muted-foreground line-clamp-2">
                       {template.description}
                     </p>
@@ -175,6 +228,13 @@ export default function CreateLandingPagePage() {
                 </Card>
               ))}
             </div>
+
+            {/* Empty State */}
+            {filteredTemplates.length === 0 && (
+              <Card className="p-12 text-center">
+                <p className="text-muted-foreground">No templates found in this category</p>
+              </Card>
+            )}
 
             <div className="mt-6 lg:mt-8 flex flex-col sm:flex-row justify-end gap-3">
               <Button
@@ -224,15 +284,20 @@ export default function CreateLandingPagePage() {
                 <div className="p-4 bg-gray-50 rounded-lg border">
                   <p className="text-sm text-muted-foreground mb-2">Selected Template:</p>
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      {getTemplateIcon(selectedTemplate)}
+                    <div className="relative w-20 h-14 rounded overflow-hidden border-2 border-gray-200">
+                      <Image
+                        src={PUCK_TEMPLATES.find(t => t.id === selectedTemplate)?.thumbnail || ''}
+                        alt="Template preview"
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                     <div>
                       <p className="font-semibold">
-                        {LANDING_PAGE_TEMPLATES.find(t => t.id === selectedTemplate)?.name}
+                        {PUCK_TEMPLATES.find(t => t.id === selectedTemplate)?.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {LANDING_PAGE_TEMPLATES.find(t => t.id === selectedTemplate)?.description}
+                        {PUCK_TEMPLATES.find(t => t.id === selectedTemplate)?.description}
                       </p>
                     </div>
                   </div>
@@ -310,7 +375,8 @@ export default function CreateLandingPagePage() {
                     disabled={loading || !pageName || !slug}
                     className="w-full sm:flex-1"
                   >
-                    {loading ? 'Creating...' : 'Create & Edit Page →'}
+                    {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    {loading ? 'Creating...' : 'Create & Open Visual Editor →'}
                   </Button>
                 </div>
               </CardContent>
@@ -320,20 +386,4 @@ export default function CreateLandingPagePage() {
       </div>
     </div>
   );
-}
-
-function getTemplateIcon(templateId: string): React.ReactElement {
-  const iconMap: Record<string, React.ReactElement> = {
-    'modern-saas': <FileText className="w-8 h-8" />,
-    'restaurant-menu': <Package className="w-8 h-8" />,
-    'event-registration': <Calendar className="w-8 h-8" />,
-    'product-launch': <Rocket className="w-8 h-8" />,
-    'lead-generation': <Download className="w-8 h-8" />,
-    'real-estate': <Home className="w-8 h-8" />,
-    'portfolio': <Palette className="w-8 h-8" />,
-    'webinar': <Video className="w-8 h-8" />,
-    'service-business': <Lightbulb className="w-8 h-8" />,
-    'coming-soon': <Clock className="w-8 h-8" />,
-  };
-  return iconMap[templateId] || <FileText className="w-8 h-8" />;
 }

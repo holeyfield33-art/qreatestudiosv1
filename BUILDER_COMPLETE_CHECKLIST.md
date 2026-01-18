@@ -204,35 +204,35 @@ Then navigate to: `http://localhost:3000/dashboard/landing-pages/[id]/builder`
 #### Test Every Button:
 
 1. **Left Panel - Components**
-   - [ ] Click "HeroSection" → Adds to canvas ✅
-   - [ ] Click "FeaturesSection" → Adds to canvas ✅
-   - [ ] Click any component → Adds to canvas ✅
+   - [x] Click "HeroSection" → Adds to canvas ✅
+   - [x] Click "FeaturesSection" → Adds to canvas ✅
+   - [x] Click any component → Adds to canvas ✅
 
 2. **Canvas - Component Interactions**
-   - [ ] Click component → Selects (blue outline) ✅
-   - [ ] Drag component → Reorders ✅
-   - [ ] Click component menu → Opens actions ✅
-   - [ ] Click delete → Removes component ✅
+   - [x] Click component → Selects (blue outline) ✅
+   - [x] Drag component → Reorders ✅
+   - [x] Click component menu → Opens actions ✅
+   - [x] Click delete → Removes component ✅
 
 3. **Right Panel - Properties**
-   - [ ] Edit text field → Updates immediately ✅
-   - [ ] Change select → Updates immediately ✅
-   - [ ] Toggle switch → Updates immediately ✅
+   - [x] Edit text field → Updates immediately ✅
+   - [x] Change select → Updates immediately ✅
+   - [x] Toggle switch → Updates immediately ✅
 
 4. **Header Buttons**
-   - [ ] Back → Returns to list (warns if unsaved) ✅
-   - [ ] Preview → Opens in new tab ✅
-   - [ ] Save Draft → Shows toast ✅
-   - [ ] Publish → Shows toast + redirects ✅
+   - [x] Back → Returns to list (warns if unsaved) ✅
+   - [x] Preview → Opens in new tab ✅
+   - [x] Save Draft → Shows toast ✅
+   - [x] Publish → Shows toast + redirects ✅
 
 5. **Auto-Save**
-   - [ ] Make change → See "Unsaved changes" ✅
-   - [ ] Wait 2 seconds → See "Saving..." ✅
-   - [ ] After save → See "Saved just now" ✅
+   - [x] Make change → See "Unsaved changes" ✅
+   - [x] Wait 2 seconds → See "Saving..." ✅
+   - [x] After save → See "Saved just now" ✅
 
 6. **Error Handling**
-   - [ ] No crashes on errors ✅
-   - [ ] Friendly error messages ✅
+   - [x] No crashes on errors ✅
+   - [x] Friendly error messages ✅
 
 ---
 

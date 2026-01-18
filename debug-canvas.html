@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Debug Inspector</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-left: 4px solid #2196f3;
+            margin: 10px 0;
+        }
+        .error {
+            background: #ffebee;
+            padding: 10px;
+            border-left: 4px solid #f44336;
+            margin: 10px 0;
+        }
+        .success {
+            background: #e8f5e9;
+            padding: 10px;
+            border-left: 4px solid #4caf50;
+            margin: 10px 0;
+        }
+        code {
+            background: #263238;
+            color: #aed581;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1976d2;
+        }
+        pre {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Canvas & React Error Inspector</h1>
+        <p>This tool helps debug canvas rendering issues and React errors in the QR code creator.</p>
+
+        <div class="section">
+            <h2>Step 1: Load QR Creator Page</h2>
+            <button onclick="loadPage()">Load QR Creator Page in iFrame</button>
+            <button onclick="inspectDOM()">Inspect Canvas Elements</button>
+            <div id="status"></div>
+        </div>
+
+        <div class="section">
+            <h2>Step 2: Page Preview</h2>
+            <iframe id="appFrame" src="" style="display:none;"></iframe>
+        </div>
+
+        <div class="section">
+            <h2>Step 3: Canvas Inspection Results</h2>
+            <pre id="canvasInspection">Click "Inspect Canvas Elements" to see results...</pre>
+        </div>
+
+        <div class="section">
+            <h2>Step 4: Console Errors</h2>
+            <pre id="consoleErrors">No errors captured yet...</pre>
+        </div>
+
+        <div class="section">
+            <h2>Step 5: React Error Boundaries</h2>
+            <pre id="reactErrors">Monitoring for React errors...</pre>
+        </div>
+    </div>
+
+    <script>
+        let consoleErrors = [];
+        let consoleWarnings = [];
+
+        // Capture console errors
+        const originalError = console.error;
+        console.error = function(...args) {
+            consoleErrors.push({
+                type: 'error',
+                message: args.join(' '),
+                timestamp: new Date().toISOString()
+            });
+            updateConsoleDisplay();
+            originalError.apply(console, args);
+        };
+
+        const originalWarn = console.warn;
+        console.warn = function(...args) {
+            consoleWarnings.push({
+                type: 'warning',
+                message: args.join(' '),
+                timestamp: new Date().toISOString()
+            });
+            updateConsoleDisplay();
+            originalWarn.apply(console, args);
+        };
+
+        function updateConsoleDisplay() {
+            const consoleDisplay = document.getElementById('consoleErrors');
+            let output = '';
+            
+            if (consoleErrors.length > 0) {
+                output += '🔴 ERRORS:\n';
+                consoleErrors.forEach(err => {
+                    output += `[${err.timestamp}] ${err.message}\n`;
+                });
+                output += '\n';
+            }
+            
+            if (consoleWarnings.length > 0) {
+                output += '⚠️  WARNINGS:\n';
+                consoleWarnings.forEach(warn => {
+                    output += `[${warn.timestamp}] ${warn.message}\n`;
+                });
+            }
+            
+            if (consoleErrors.length === 0 && consoleWarnings.length === 0) {
+                output = '✅ No console errors or warnings detected';
+            }
+            
+            consoleDisplay.textContent = output;
+        }
+
+        function loadPage() {
+            const frame = document.getElementById('appFrame');
+            const status = document.getElementById('status');
+            
+            frame.style.display = 'block';
+            frame.src = 'http://localhost:3000/dashboard/qr-codes/create';
+            
+            status.innerHTML = '<div class="info">Loading page... Check the iframe below.</div>';
+            
+            frame.onload = function() {
+                status.innerHTML = '<div class="success">✅ Page loaded successfully. Now click "Inspect Canvas Elements"</div>';
+                
+                // Try to capture errors from iframe
+                try {
+                    const iframeWindow = frame.contentWindow;
+                    const iframeDocument = frame.contentDocument;
+                    
+                    // Monitor iframe console
+                    if (iframeWindow.console) {
+                        const iframeError = iframeWindow.console.error;
+                        iframeWindow.console.error = function(...args) {
+                            consoleErrors.push({
+                                type: 'error',
+                                source: 'iframe',
+                                message: args.join(' '),
+                                timestamp: new Date().toISOString()
+                            });
+                            updateConsoleDisplay();
+                            iframeError.apply(iframeWindow.console, args);
+                        };
+                    }
+                } catch (e) {
+                    console.warn('Cannot access iframe due to CORS:', e);
+                }
+            };
+            
+            frame.onerror = function(e) {
+                status.innerHTML = '<div class="error">❌ Error loading page: ' + e + '</div>';
+            };
+        }
+
+        function inspectDOM() {
+            const frame = document.getElementById('appFrame');
+            const display = document.getElementById('canvasInspection');
+            
+            if (!frame.src) {
+                display.textContent = '⚠️  Please load the page first by clicking "Load QR Creator Page"';
+                return;
+            }
+
+            try {
+                const iframeDocument = frame.contentDocument || frame.contentWindow.document;
+                
+                // Find all canvas elements
+                const canvases = iframeDocument.querySelectorAll('canvas');
+                const qrRefs = iframeDocument.querySelectorAll('[class*="qr"], [id*="qr"]');
+                const qrContainers = iframeDocument.querySelectorAll('.qr-code-container');
+                
+                let report = '';
+                report += '=== CANVAS ELEMENTS ===\n\n';
+                report += `Total canvas elements found: ${canvases.length}\n\n`;
+                
+                if (canvases.length === 0) {
+                    report += '⚠️  NO CANVAS ELEMENTS FOUND!\n\n';
+                    report += 'This could indicate:\n';
+                    report += '1. QR code library failed to render\n';
+                    report += '2. Component hasn\'t mounted yet\n';
+                    report += '3. Error in React component lifecycle\n\n';
+                } else {
+                    canvases.forEach((canvas, index) => {
+                        report += `Canvas #${index + 1}:\n`;
+                        report += `  - Width: ${canvas.width}\n`;
+                        report += `  - Height: ${canvas.height}\n`;
+                        report += `  - Visible: ${canvas.offsetWidth > 0 && canvas.offsetHeight > 0}\n`;
+                        report += `  - Display: ${window.getComputedStyle(canvas).display}\n`;
+                        report += `  - Visibility: ${window.getComputedStyle(canvas).visibility}\n`;
+                        report += `  - Opacity: ${window.getComputedStyle(canvas).opacity}\n`;
+                        report += `  - Parent: ${canvas.parentElement?.className || 'unknown'}\n`;
+                        report += `  - Has content: ${canvas.getContext('2d')?.getImageData(0, 0, 1, 1) ? 'yes' : 'no'}\n`;
+                        report += '\n';
+                    });
+                }
+                
+                report += '\n=== QR CONTAINER DIVS ===\n\n';
+                report += `QR containers found: ${qrContainers.length}\n\n`;
+                
+                qrContainers.forEach((container, index) => {
+                    report += `Container #${index + 1}:\n`;
+                    report += `  - Class: ${container.className}\n`;
+                    report += `  - Children: ${container.children.length}\n`;
+                    report += `  - InnerHTML length: ${container.innerHTML.length}\n`;
+                    report += `  - Display: ${window.getComputedStyle(container).display}\n`;
+                    report += `  - Width: ${container.offsetWidth}px\n`;
+                    report += `  - Height: ${container.offsetHeight}px\n`;
+                    if (container.children.length > 0) {
+                        report += `  - Child elements:\n`;
+                        Array.from(container.children).forEach(child => {
+                            report += `    * ${child.tagName} (${child.className})\n`;
+                        });
+                    } else {
+                        report += `  - ⚠️  CONTAINER IS EMPTY!\n`;
+                    }
+                    report += '\n';
+                });
+                
+                report += '\n=== QR-RELATED ELEMENTS ===\n\n';
+                report += `Elements with QR in class/id: ${qrRefs.length}\n\n`;
+                
+                qrRefs.forEach((el, index) => {
+                    report += `Element #${index + 1}:\n`;
+                    report += `  - Tag: ${el.tagName}\n`;
+                    report += `  - Class: ${el.className}\n`;
+                    report += `  - ID: ${el.id}\n`;
+                    report += `  - Has children: ${el.children.length}\n`;
+                    report += '\n';
+                });
+                
+                // Check for SVG elements (qr-code-styling uses SVG by default)
+                const svgs = iframeDocument.querySelectorAll('svg');
+                report += '\n=== SVG ELEMENTS (QR codes may render as SVG) ===\n\n';
+                report += `Total SVG elements: ${svgs.length}\n\n`;
+                
+                svgs.forEach((svg, index) => {
+                    const parent = svg.parentElement;
+                    if (parent && (parent.className.includes('qr') || parent.getAttribute('data-qr'))) {
+                        report += `QR-related SVG #${index + 1}:\n`;
+                        report += `  - ViewBox: ${svg.getAttribute('viewBox')}\n`;
+                        report += `  - Width: ${svg.getAttribute('width')}\n`;
+                        report += `  - Height: ${svg.getAttribute('height')}\n`;
+                        report += `  - Children: ${svg.children.length}\n`;
+                        report += `  - Visible: ${svg.offsetWidth > 0 && svg.offsetHeight > 0}\n`;
+                        report += `  - Parent: ${parent.className}\n`;
+                        report += '\n';
+                    }
+                });
+                
+                display.textContent = report;
+                
+            } catch (e) {
+                display.textContent = '❌ Error inspecting DOM:\n\n' + e.message + '\n\n' +
+                    'This might be due to CORS restrictions.\n' +
+                    'Try opening the browser DevTools directly (F12) and run:\n\n' +
+                    'document.querySelectorAll("canvas")\n' +
+                    'document.querySelectorAll(".qr-code-container")';
+            }
+        }
+
+        // Monitor for React errors
+        window.addEventListener('error', function(e) {
+            const reactErrors = document.getElementById('reactErrors');
+            reactErrors.textContent += `\n[${new Date().toISOString()}] Error: ${e.message}\n`;
+            reactErrors.textContent += `  File: ${e.filename}\n`;
+            reactErrors.textContent += `  Line: ${e.lineno}:${e.colno}\n`;
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            const reactErrors = document.getElementById('reactErrors');
+            reactErrors.textContent += `\n[${new Date().toISOString()}] Unhandled Promise Rejection: ${e.reason}\n`;
+        });
+    </script>
+</body>
+</html>

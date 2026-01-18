@@ -19,7 +19,7 @@ export interface CTASectionProps {
     url: string;
     alt: string;
     blurhash?: string;
-  };
+  } | string; // Support both object and string formats
   backgroundColor?: string;
   style?: 'default' | 'centered' | 'split';
 }
@@ -33,17 +33,22 @@ export function CTASection({
   backgroundColor = '#000000',
   style = 'centered',
 }: CTASectionProps) {
+  // Normalize backgroundImage to object format
+  const bgImage = typeof backgroundImage === 'string' 
+    ? { url: backgroundImage, alt: 'Background' }
+    : backgroundImage;
+
   if (style === 'split') {
     return (
       <section className="relative w-full overflow-hidden">
         <div className="grid md:grid-cols-2">
           {/* Image Side */}
           <div className="relative h-64 md:h-auto min-h-[400px]">
-            {backgroundImage?.url ? (
+            {bgImage?.url ? (
               <SmartImage
-                src={backgroundImage.url}
-                alt={backgroundImage.alt}
-                blurhash={backgroundImage.blurhash}
+                src={bgImage.url}
+                alt={bgImage.alt}
+                blurhash={bgImage.blurhash}
                 category="restaurant"
                 fill
                 objectFit="cover"
@@ -93,12 +98,12 @@ export function CTASection({
   return (
     <section className="relative w-full overflow-hidden">
       {/* Background */}
-      {backgroundImage?.url ? (
+      {bgImage?.url ? (
         <>
           <SmartImage
-            src={backgroundImage.url}
-            alt={backgroundImage.alt}
-            blurhash={backgroundImage.blurhash}
+            src={bgImage.url}
+            alt={bgImage.alt}
+            blurhash={bgImage.blurhash}
             category="restaurant"
             fill
             objectFit="cover"

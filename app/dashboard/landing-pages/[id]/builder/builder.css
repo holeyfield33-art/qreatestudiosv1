@@ -16,12 +16,17 @@
 /* Puck wrapper enhancements */
 .puck-editor-wrapper {
   position: relative;
+  height: 100%;
+  width: 100%;
 }
 
 /* Override Puck's default styles with premium aesthetics */
 .puck-editor-wrapper .Puck {
   font-family: inherit;
   background: var(--puck-color-background);
+  height: 100%;
+  width: 100%;
+  display: flex;
 }
 
 /* Left panel (components) */

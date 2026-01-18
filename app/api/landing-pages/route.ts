@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { title, slug, content, theme, qrCodeId, clientId } = body;
+  const { title, slug, content, theme, qrCodeId, clientId, templateId, draftContent, metadata } = body;
 
   if (!title || !slug) {
     return NextResponse.json(
@@ -46,12 +46,12 @@ export async function POST(req: Request) {
         id: randomUUID(),
         userId: session.user.id,
         qrCodeId: qrCodeId || null,
-        templateId: null, // Legacy pages don't have templates
+        templateId: templateId || null, // Support for Puck templates
         name: title,
         slug,
         content: content || {},
-        draftContent: content || {}, // Initialize draft content
-        metadata: theme || {},
+        draftContent: draftContent || content || {}, // Use template's defaultSections
+        metadata: metadata || theme || {},
         isPublished: false,
         updatedAt: new Date(),
       },

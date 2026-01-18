@@ -63,13 +63,53 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       });
       if (!res.ok) throw new Error('Failed to load page');
       
-      const page = await res.json();
+      const response = await res.json();
+      // Handle both direct page object and nested landingPage structure
+      const page = response.landingPage || response;
+      
       setPageName(page.name);
       setPageSlug(page.slug);
       
-      // Use draft content if available, otherwise published, otherwise empty
-      const content = page.draftContent || page.publishedContent || { content: [], root: {} };
-      setData(content);
+      // Use draft content if available, otherwise published, otherwise template defaults
+      let content = page.draftContent || page.publishedContent;
+      
+      // If content is empty or missing sections, try to load from template
+      if (!content || !content.content || content.content.length === 0) {
+        // Check if there's a template with defaultSections
+        if (page.Template && page.Template.defaultSections) {
+          content = page.Template.defaultSections;
+          console.log('Loading template default sections:', content);
+        } else if (!content || typeof content !== 'object') {
+          // Last resort: create empty structure
+          content = { content: [], root: { props: {} } };
+        }
+      }
+      
+      // Ensure content has proper Puck structure
+      if (!content.content) {
+        content.content = [];
+      }
+      if (!content.root) {
+        content.root = { props: {} };
+      }
+      
+      console.log('📊 Builder data loaded:', {
+        hasContent: !!content,
+        contentLength: content.content?.length || 0,
+        components: content.content?.map((c: any) => c.type) || [],
+        hasRoot: !!content.root,
+        firstComponent: content.content?.[0],
+        fullStructure: JSON.stringify(content, null, 2)
+      });
+      
+      // Ensure proper Puck data structure
+      const puckData = {
+        content: content.content || [],
+        root: content.root || { props: {} }
+      };
+      
+      console.log('🎨 Setting Puck data:', puckData);
+      setData(puckData);
       setLastSaved(page.updatedAt ? new Date(page.updatedAt) : null);
     } catch (error) {
       console.error('Error loading page:', error);
@@ -83,14 +123,44 @@ export default function BuilderPage({ params }: BuilderPageProps) {
 
   const saveToAPI = async (newData: any, showToast = true) => {
     try {
+      // Validate data structure before saving
+      if (!newData || typeof newData !== 'object') {
+        throw new Error('Invalid data structure');
+      }
+      
+      // Ensure required Puck structure
+      const validatedData = {
+        content: Array.isArray(newData.content) ? newData.content : [],
+        root: newData.root || { props: {} },
+        zones: newData.zones || {}
+      };
+      
       const res = await fetch(`/api/landing-pages/${pageId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ draftContent: newData }),
+        body: JSON.stringify({ draftContent: validatedData }),
         credentials: 'include',
       });
 
-      if (!res.ok) throw new Error('Failed to save');
+      if (!res.ok) {
+        let errorMessage = 'Failed to save';
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // If response is not JSON, use status text
+          errorMessage = res.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      // Parse successful response
+      try {
+        await res.json();
+      } catch (e) {
+        // If response body is empty or not JSON, that's okay for PATCH
+        console.log('Response parsed successfully (no body)');
+      }
       
       setLastSaved(new Date());
       setHasUnsavedChanges(false);
@@ -107,7 +177,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       console.error('Error saving:', error);
       if (showToast) {
         toast.error('Failed to save draft', {
-          description: 'Your changes are stored locally. Try again or contact support.',
+          description: error instanceof Error ? error.message : 'Your changes are stored locally. Try again or contact support.',
         });
       }
       return false;
@@ -324,12 +394,28 @@ export default function BuilderPage({ params }: BuilderPageProps) {
 
       {/* Puck Editor with onChange handler */}
       <div className="flex-1 overflow-hidden puck-editor-wrapper">
-        <Puck
-          config={puckConfig}
-          data={data}
-          onChange={handleChange}
-          onPublish={handleManualSave}
-        />
+        {data ? (
+          <>
+            {console.log('🖼️ Rendering Puck with data:', {
+              contentCount: data.content?.length,
+              components: data.content?.map((c: any) => c.type),
+              hasRoot: !!data.root
+            })}
+            <Puck
+              config={puckConfig}
+              data={data}
+              onChange={handleChange}
+              onPublish={handleManualSave}
+            />
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
+              <p className="text-muted-foreground">Loading editor...</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

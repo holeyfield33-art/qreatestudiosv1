@@ -70,7 +70,7 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
     }
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -86,14 +86,28 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
       return;
     }
 
-    // Create object URL for preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setUploadedImage(result);
+    // Upload to Vercel Blob via API
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('category', category);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      setUploadedImage(data.url);
       toast.success('Image uploaded successfully');
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload image. Please try again.');
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -101,7 +115,7 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
     e.stopPropagation();
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -120,14 +134,28 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
       return;
     }
 
-    // Create object URL for preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setUploadedImage(result);
+    // Upload to Vercel Blob via API
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('category', category);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      setUploadedImage(data.url);
       toast.success('Image uploaded successfully');
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload image. Please try again.');
+    }
   };
 
   return (

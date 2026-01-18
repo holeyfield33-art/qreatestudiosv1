@@ -97,6 +97,7 @@ export function SmartImage({
         }`}
         priority={priority}
         sizes={sizes}
+        unoptimized
         onLoad={() => setIsLoading(false)}
         onError={() => {
           setIsLoading(false);
@@ -143,6 +144,7 @@ export function SimpleImage({
       width={fill ? undefined : width}
       height={fill ? undefined : height}
       className={`${className} object-${objectFit}`}
+      unoptimized
       onError={() => setHasError(true)}
     />
   );

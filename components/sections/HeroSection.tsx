@@ -11,7 +11,7 @@ export interface HeroSectionProps {
     url: string;
     alt: string;
     blurhash?: string;
-  };
+  } | string; // Support both object and string formats
   ctaText?: string;
   ctaLink?: string;
   ctaStyle?: 'primary' | 'secondary' | 'outline';
@@ -33,6 +33,8 @@ export function HeroSection({
   textAlign = 'center',
   minHeight = '70vh',
 }: HeroSectionProps) {
+  console.log('🎬 HeroSection rendering:', { headline, backgroundImage, ctaText });
+  
   const textAlignClass = {
     left: 'text-left items-start',
     center: 'text-center items-center',
@@ -45,22 +47,28 @@ export function HeroSection({
     outline: 'outline',
   } as const;
 
+  // Normalize backgroundImage to object format
+  const bgImage = typeof backgroundImage === 'string' 
+    ? { url: backgroundImage, alt: 'Background' }
+    : backgroundImage;
+
   return (
     <section className="relative w-full overflow-hidden" style={{ minHeight }}>
       {/* Background Image */}
-      {backgroundImage?.url ? (
+      {bgImage?.url ? (
         <>
-          <SmartImage
-            src={backgroundImage.url}
-            alt={backgroundImage.alt}
-            blurhash={backgroundImage.blurhash}
-            category="restaurant"
-            fill
-            objectFit="cover"
-            priority
-            sizes="100vw"
-            className="absolute inset-0 z-0"
-          />
+          <div className="absolute inset-0 z-0">
+            <SmartImage
+              src={bgImage.url}
+              alt={bgImage.alt}
+              blurhash={bgImage.blurhash}
+              category="restaurant"
+              fill
+              objectFit="cover"
+              priority
+              sizes="100vw"
+            />
+          </div>
           {overlay && (
             <div
               className="absolute inset-0 z-10 bg-black"
@@ -77,7 +85,7 @@ export function HeroSection({
         <div className="max-w-4xl space-y-6">
           <h1
             className={`text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight ${
-              backgroundImage?.url ? 'text-white' : 'text-gray-900'
+              bgImage?.url ? 'text-white' : 'text-gray-900'
             }`}
           >
             {headline}
@@ -86,7 +94,7 @@ export function HeroSection({
           {subheadline && (
             <p
               className={`text-lg md:text-xl lg:text-2xl max-w-2xl ${
-                backgroundImage?.url ? 'text-gray-100' : 'text-gray-600'
+                bgImage?.url ? 'text-gray-100' : 'text-gray-600'
               } ${textAlign === 'center' ? 'mx-auto' : ''}`}
             >
               {subheadline}

@@ -80,6 +80,10 @@ export const puckConfig: Config = {
       defaultProps: {
         headline: 'Welcome to Our Restaurant',
         subheadline: 'Fresh ingredients, unforgettable flavors',
+        backgroundImage: {
+          url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&q=80',
+          alt: 'Restaurant interior',
+        },
         ctaText: 'View Our Menu',
         ctaLink: '#menu',
         ctaStyle: 'primary',
@@ -88,7 +92,10 @@ export const puckConfig: Config = {
         textAlign: 'center',
         minHeight: '70vh',
       },
-      render: (props) => <HeroSection {...props} />,
+      render: (props) => {
+        console.log('🎯 puckConfig: HeroSection render called with props:', props);
+        return <HeroSection {...props} />;
+      },
     },
 
     FeaturesSection: {
@@ -282,7 +289,26 @@ export const puckConfig: Config = {
       defaultProps: {
         title: 'Our Gallery',
         subtitle: 'A glimpse into our culinary creations',
-        images: [],
+        images: [
+          {
+            id: '1',
+            url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80',
+            alt: 'Gourmet appetizer',
+            title: 'Seasonal Appetizer',
+          },
+          {
+            id: '2',
+            url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80',
+            alt: 'Signature main course',
+            title: 'Signature Entrée',
+          },
+          {
+            id: '3',
+            url: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800&q=80',
+            alt: 'Artisan dessert',
+            title: 'Artisan Dessert',
+          },
+        ],
         columns: 3,
         aspectRatio: 'square',
         lightbox: true,
@@ -347,6 +373,10 @@ export const puckConfig: Config = {
         secondaryCta: {
           text: 'View Menu',
           link: '#menu',
+        },
+        backgroundImage: {
+          url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920&q=80',
+          alt: 'Restaurant ambiance',
         },
         backgroundColor: '#000000',
         style: 'centered',
