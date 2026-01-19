@@ -99,6 +99,7 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
             uploadFile: (async (e: any) => {
               const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
               const formData = new FormData();
+              const uploadedUrls: string[] = [];
 
               for (let i = 0; i < files.length; i++) {
                 formData.append('file', files[i]);
@@ -116,10 +117,19 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
                 }
 
                 const data = await response.json();
-                // Add the uploaded image to the asset manager
-                editorRef.current?.AssetManager.add(data.url);
+
+                // Collect the uploaded URL(s)
+                if (data.url) {
+                  uploadedUrls.push(data.url);
+                } else if (data.urls && Array.isArray(data.urls)) {
+                  uploadedUrls.push(...data.urls);
+                }
+
+                // Return in the format GrapesJS expects
+                return { data: uploadedUrls };
               } catch (error) {
                 console.error('Upload error:', error);
+                return { data: [] };
               }
             }) as any,
           },
