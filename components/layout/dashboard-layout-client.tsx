@@ -27,16 +27,19 @@ export function DashboardLayoutClient({ children, user }: DashboardLayoutClientP
 
   return (
     <>
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+        {/* Animated background gradient overlay */}
+        <div className="fixed inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-pink-600/5 animate-gradient pointer-events-none" />
+
         {/* Desktop Sidebar - Hidden on mobile */}
-        <div className="hidden lg:block">
+        <div className="hidden lg:block relative z-10">
           <DashboardNav user={user} />
         </div>
-        
-        <div className="flex flex-1 flex-col overflow-hidden">
+
+        <div className="flex flex-1 flex-col overflow-hidden relative z-10">
           <DashboardHeader title="Dashboard" user={user} />
-          <main 
-            className="flex-1 overflow-y-auto p-4 lg:p-6 pb-20 lg:pb-6" 
+          <main
+            className="flex-1 overflow-y-auto p-4 lg:p-6 pb-20 lg:pb-6"
             id="main-content"
           >
             <PageTransition>
@@ -44,16 +47,16 @@ export function DashboardLayoutClient({ children, user }: DashboardLayoutClientP
             </PageTransition>
           </main>
         </div>
-        
+
         <AIChatInterface />
       </div>
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav onMoreClick={() => setMobileMenuOpen(true)} />
-      
+
       {/* Mobile Menu Modal */}
-      <MobileMenuModal 
-        open={mobileMenuOpen} 
+      <MobileMenuModal
+        open={mobileMenuOpen}
         onOpenChange={setMobileMenuOpen}
         user={user}
       />
