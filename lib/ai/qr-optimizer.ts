@@ -16,7 +16,7 @@ export const AI_LIMITS = {
 interface QRCodeBasic {
   id: string;
   name: string;
-  targetUrl: string;
+  data: string;
   redirectUrl: string;
   type: string;
   scanCount: number;
@@ -26,8 +26,8 @@ interface QRCodeBasic {
 interface Analytics {
   totalScans: number;
   uniqueScans: number;
-  deviceBreakdown: Array<{ type: string; count: number }>;
-  browserBreakdown: Array<{ browser: string; count: number }>;
+  deviceBreakdown: Array<{ type: string | null; count: number }>;
+  browserBreakdown: Array<{ browser: string | null; count: number }>;
   locations: unknown[];
   scansByDay: Array<{ date: Date; count: number }>;
 }
@@ -151,8 +151,14 @@ export async function analyzeQRPerformance(qrCodeId: string) {
         uniqueScans: analytics.uniqueScans,
         returnRate: Math.round(returnRate),
         avgDailyScans: Math.round(avgDailyScans),
-        deviceBreakdown: analytics.deviceBreakdown,
-        browserBreakdown: analytics.browserBreakdown,
+        deviceBreakdown: analytics.deviceBreakdown.map(d => ({
+          type: d.type || 'unknown',
+          count: d.count
+        })),
+        browserBreakdown: analytics.browserBreakdown.map(b => ({
+          browser: b.browser || 'unknown',
+          count: b.count
+        })),
         locations: analytics.locations || [],
         mobilePercentage: Math.round(mobilePercentage),
         hasRecentActivity,
@@ -172,7 +178,7 @@ function detectIssues(qrCode: QRCodeBasic, analytics: Analytics, mobilePercentag
   const issues: string[] = [];
 
   // URL length issue
-  if (qrCode.targetUrl.length > 60) {
+  if (qrCode.redirectUrl.length > 60) {
     issues.push('long_url');
   }
 
@@ -182,7 +188,7 @@ function detectIssues(qrCode: QRCodeBasic, analytics: Analytics, mobilePercentag
   }
 
   // Poor mobile optimization
-  if (mobilePercentage > 70 && !qrCode.targetUrl.includes('mobile')) {
+  if (mobilePercentage > 70 && !qrCode.redirectUrl.includes('mobile')) {
     issues.push('mobile_unfriendly');
   }
 

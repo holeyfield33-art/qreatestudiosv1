@@ -548,10 +548,10 @@ export const puckRenderConfig: Config = {
         html: '',
         templateId: undefined,
       },
-      render: ({ html }: { html: string }) => {
+      render: (props: any) => {
         return (
           <div
-            dangerouslySetInnerHTML={{ __html: html }}
+            dangerouslySetInnerHTML={{ __html: props.html || '' }}
             className="legacy-html-content"
           />
         );

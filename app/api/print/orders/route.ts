@@ -78,9 +78,25 @@ export async function POST(req: Request) {
 
     // Send notification emails
     try {
+      const orderForEmail = {
+        ...order,
+        customerEmail: order.customerEmail || undefined,
+        shippingAddress: order.shippingAddress as {
+          name: string;
+          street: string;
+          city: string;
+          state: string;
+          zip: string;
+          phone: string;
+        },
+      };
+      const customerData = {
+        email: order.User.email,
+        name: order.User.name || undefined,
+      };
       await Promise.all([
-        sendPrintOrderAdminEmail(order, qrCode, order.User),
-        sendPrintOrderCustomerEmail(order, order.User),
+        sendPrintOrderAdminEmail(orderForEmail, qrCode, customerData),
+        sendPrintOrderCustomerEmail(orderForEmail, customerData),
       ]);
       
       // Update notification flags

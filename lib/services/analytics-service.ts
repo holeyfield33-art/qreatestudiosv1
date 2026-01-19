@@ -147,7 +147,7 @@ export async function getQRAnalytics(
     .filter((loc) => loc.country)
     .map((loc) => {
       // Get country code and coordinates
-      const countryCode = getCountryCode(loc.country);
+      const countryCode = getCountryCode(loc.country || '');
       const coords = getCountryCoordinates(countryCode);
       
       // If city exists, try to get city coordinates

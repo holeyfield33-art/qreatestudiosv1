@@ -191,10 +191,10 @@ export function migratePageSchema(doc: Record<string, unknown>): Record<string, 
 export function validatePageContent(content: unknown): Page {
   try {
     // First migrate if needed
-    const migrated = typeof content === 'object' && content !== null 
-      ? migratePageSchema(content)
+    const migrated = typeof content === 'object' && content !== null
+      ? migratePageSchema(content as Record<string, unknown>)
       : content;
-    
+
     // Then validate
     return PageSchema.parse(migrated);
   } catch (error) {

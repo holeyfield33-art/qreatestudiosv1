@@ -80,8 +80,8 @@ export async function GET(
     } else if (format === 'csv-timeseries') {
       // Generate CSV with time series data
       const analytics = await getAdvancedAnalytics(qrCodeId, startDate, endDate);
-      const timeSeriesData = analytics.timeSeriesData.map((item) => ({
-        date: typeof item.date === 'string' ? item.date : item.date.toString(),
+      const timeSeriesData = analytics.timeSeriesData.map((item: { date: string | Date; count: number | bigint }) => ({
+        date: typeof item.date === 'string' ? item.date : new Date(item.date).toISOString().split('T')[0],
         count: Number(item.count),
       }));
       const csv = exportTimeSeriesCSV(timeSeriesData);

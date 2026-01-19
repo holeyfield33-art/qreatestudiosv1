@@ -35,23 +35,11 @@ export async function executeAIAction(
         };
 
       case AI_FEATURES.optimizeQR:
-        // If context includes a QR code ID, update it with optimization suggestions
-        if (context?.qrCodeId && parsedResponse.improvements) {
-          await prisma.qRCode.update({
-            where: { id: context.qrCodeId },
-            data: {
-              // Store optimization suggestions in metadata
-              metadata: {
-                aiOptimizations: parsedResponse.improvements,
-                optimizedAt: new Date().toISOString(),
-              },
-            },
-          });
-        }
+        // Return optimization suggestions (AI optimizations are tracked in AIUsage table)
         return {
           type: 'none',
           data: parsedResponse,
-          message: 'QR code optimization suggestions applied',
+          message: 'QR code optimization suggestions generated',
         };
 
       case AI_FEATURES.suggestQRDesign:
@@ -68,7 +56,7 @@ export async function executeAIAction(
             data: {
               userId,
               slug: `ai-generated-${Date.now()}`,
-              title: parsedResponse.headline || 'AI Generated Page',
+              name: parsedResponse.headline || 'AI Generated Page',
               content: {
                 root: {
                   props: {
@@ -177,19 +165,21 @@ export async function performQuickAction(
   try {
     switch (actionType) {
       case 'create_qr_code':
+        const shortCode = Math.random().toString(36).substring(2, 8);
         const qrCode = await prisma.qRCode.create({
           data: {
+            id: `qr_${Date.now()}_${shortCode}`,
             userId,
             name: actionData.name || 'AI Generated QR Code',
-            type: actionData.type || 'url',
+            type: actionData.type || 'URL',
             data: actionData.url || '',
-            fgColor: actionData.fgColor || '#000000',
-            bgColor: actionData.bgColor || '#FFFFFF',
-            style: actionData.style || 'squares',
-            metadata: {
-              generatedByAI: true,
-              aiSuggestions: actionData.suggestions,
+            shortCode,
+            redirectUrl: actionData.url || '',
+            style: {
+              darkColor: actionData.fgColor || '#000000',
+              lightColor: actionData.bgColor || '#FFFFFF',
             },
+            updatedAt: new Date(),
           },
         });
 
@@ -207,7 +197,7 @@ export async function performQuickAction(
           data: {
             userId,
             slug: actionData.slug || `ai-page-${Date.now()}`,
-            title: actionData.title || 'AI Generated Page',
+            name: actionData.title || 'AI Generated Page',
             content: actionData.content || {},
             isPublished: false,
             metadata: {
@@ -227,12 +217,9 @@ export async function performQuickAction(
 
       case 'analyze_qr_performance':
         // Get QR code analytics
-        const qrAnalytics = await prisma.scan.groupBy({
+        const qrAnalytics = await prisma.analytics.groupBy({
           by: ['qrCodeId'],
           where: {
-            qrCode: {
-              userId,
-            },
             scannedAt: {
               gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
             },

@@ -176,7 +176,7 @@ export async function optimizeQRDesign(qrCodeData: QRCodeOptimizationData): Prom
   }
 
   // Check if logo exists and is appropriate size
-  if (qrCodeData.logo && qrCodeData.logoSize > 30) {
+  if (qrCodeData.logo && qrCodeData.logoSize && qrCodeData.logoSize > 30) {
     recommendations.push('🖼️ Logo is too large. Keep logo size under 30% of QR code to maintain scannability.');
     score -= 12;
   }
@@ -226,13 +226,13 @@ export async function optimizeQRDesign(qrCodeData: QRCodeOptimizationData): Prom
     recommendations: recommendations.slice(0, 8), // Max 8 recommendations
     score: Math.max(score, 0),
     improvements: {
-      suggestedColors: score < 85 ? { 
-        foreground: '#000000', 
-        background: '#FFFFFF' 
+      suggestedColors: score < 85 ? {
+        foreground: '#000000',
+        background: '#FFFFFF'
       } : null,
-      suggestedSize: qrCodeData.size < 200 ? 300 : null,
+      suggestedSize: qrCodeData.size && qrCodeData.size < 200 ? 300 : null,
       suggestedErrorCorrection: qrCodeData.errorCorrectionLevel === 'L' ? 'H' : null,
-      suggestedLogoSize: qrCodeData.logoSize > 30 ? 25 : null,
+      suggestedLogoSize: qrCodeData.logoSize && qrCodeData.logoSize > 30 ? 25 : null,
     },
   };
 }
@@ -421,12 +421,14 @@ export async function predictScanRate(
   }
 
   // Factor 3: QR code size
-  if (qrCodeData.size >= 300) {
-    predictedScans *= 1.3;
-    factors.push('📏 Optimal size for scanning (+30%)');
-  } else if (qrCodeData.size < 200) {
-    predictedScans *= 0.8;
-    factors.push('⚠️ Small size may reduce scans (-20%)');
+  if (qrCodeData.size) {
+    if (qrCodeData.size >= 300) {
+      predictedScans *= 1.3;
+      factors.push('📏 Optimal size for scanning (+30%)');
+    } else if (qrCodeData.size < 200) {
+      predictedScans *= 0.8;
+      factors.push('⚠️ Small size may reduce scans (-20%)');
+    }
   }
 
   // Factor 4: Type of content
