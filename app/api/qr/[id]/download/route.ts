@@ -24,7 +24,8 @@ export async function GET(
   }
 
   const qrData = getShortUrl(qrCode.shortCode);
-  const result = await generateStyledQRCode(qrData, qrCode.style, qrCode.logoUrl || undefined);
+  const style = (qrCode.style || {}) as { width?: number; margin?: number; darkColor?: string; lightColor?: string };
+  const result = await generateStyledQRCode(qrData, style, qrCode.logoUrl || undefined);
 
   const contentType = format === 'svg' ? 'image/svg+xml' : 'image/png';
   const extension = format === 'svg' ? 'svg' : 'png';

@@ -55,12 +55,16 @@ export default async function PublicLandingPage({ params, searchParams }: RouteC
   const resolvedContent = resolvePageContent(
     {
       templateId: landingPage.templateId ?? undefined,
-      draftContent: landingPage.draftContent,
-      publishedContent: landingPage.publishedContent,
-      content: landingPage.content,
+      draftContent: landingPage.draftContent as any,
+      publishedContent: landingPage.publishedContent as any,
+      content: landingPage.content as any,
       isPublished: landingPage.isPublished,
     },
-    landingPage.Template,
+    landingPage.Template ? {
+      ...landingPage.Template,
+      defaultSections: landingPage.Template.defaultSections as any,
+      defaultStyles: landingPage.Template.defaultStyles as any,
+    } : null,
     'published'
   );
 

@@ -83,7 +83,19 @@ export async function PATCH(
     // Send shipped notification email
     if (status === 'shipped' && trackingNumber) {
       try {
-        await sendOrderShippedEmail(updated, trackingNumber);
+        const orderForEmail = {
+          ...updated,
+          customerEmail: updated.customerEmail || undefined,
+          shippingAddress: updated.shippingAddress as {
+            name: string;
+            street: string;
+            city: string;
+            state: string;
+            zip: string;
+            phone: string;
+          },
+        };
+        await sendOrderShippedEmail(orderForEmail, trackingNumber);
       } catch (emailError) {
         if (process.env.NODE_ENV === 'development') {
           console.error('Failed to send shipped email:', emailError);

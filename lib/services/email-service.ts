@@ -210,6 +210,10 @@ export async function sendOrderShippedEmail(order: PrintOrder, trackingNumber: s
     </html>
   `;
 
+  if (!order.customerEmail) {
+    return { success: false, error: 'No customer email provided' };
+  }
+
   return sendEmail(
     order.customerEmail,
     `Your order #${order.orderNumber} has shipped! 📦`,
