@@ -45,7 +45,7 @@ export function ImageField({ value, onChange, category = 'restaurant' }: ImageFi
             alt={value.alt || 'Selected image'}
             className="w-full h-48 object-cover rounded-lg border"
           />
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2 z-10">
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" variant="secondary">
