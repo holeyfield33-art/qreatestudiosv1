@@ -25,10 +25,14 @@ const QR_TYPES = [
   { id: 'SMS', name: 'SMS', icon: '', description: 'Text message' },
   { id: 'PHONE', name: 'Phone', icon: '', description: 'Phone number' },
   { id: 'TEXT', name: 'Text', icon: '', description: 'Plain text' },
+  { id: 'EVENT', name: 'Event', icon: '', description: 'Calendar event' },
   { id: 'PAYMENT_LINK', name: 'Payment', icon: '', description: 'Payment link' },
   { id: 'MENU', name: 'Menu', icon: '', description: 'Digital menu' },
   { id: 'LANDING_PAGE', name: 'Landing', icon: '', description: 'Landing page' },
   { id: 'LOCATION', name: 'Location', icon: '', description: 'GPS coordinates' },
+  { id: 'PRODUCT', name: 'Product', icon: '', description: 'Product details' },
+  { id: 'FILE_DOWNLOAD', name: 'File', icon: '', description: 'Download file' },
+  { id: 'APP_DOWNLOAD', name: 'App', icon: '', description: 'Download app' },
 ];
 
 const PAYMENT_PLATFORMS = [
@@ -99,6 +103,29 @@ export default function CreateQRCodePage() {
     locationAddress: '',
     redirectUrl: '',
     maxScans: '',
+    // Event fields
+    eventTitle: '',
+    eventLocation: '',
+    eventStartDate: '',
+    eventStartTime: '',
+    eventEndDate: '',
+    eventEndTime: '',
+    eventDescription: '',
+    // Product fields
+    productName: '',
+    productDescription: '',
+    productPrice: '',
+    productUrl: '',
+    productSku: '',
+    // File download fields
+    fileUrl: '',
+    fileName: '',
+    fileSize: '',
+    // App download fields
+    appName: '',
+    appStoreUrl: '',
+    playStoreUrl: '',
+    appPlatform: 'both',
   });
   
   const [qrValue, setQrValue] = useState('');
@@ -137,29 +164,37 @@ export default function CreateQRCodePage() {
     switch (qrType) {
       case 'URL':
         return data.url;
-      
+
       case 'VCARD':
         if (!data.fullName) return '';
         return `BEGIN:VCARD\nVERSION:3.0\nFN:${data.fullName}\nTEL:${data.phone}\nEMAIL:${data.email}\nORG:${data.company}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`;
-      
+
       case 'WIFI':
         if (!data.ssid) return '';
         return `WIFI:T:${data.encryption};S:${data.ssid};P:${data.password};;`;
-      
+
       case 'EMAIL':
         if (!data.email) return '';
         return `mailto:${data.email}?subject=${encodeURIComponent(data.emailSubject)}&body=${encodeURIComponent(data.emailBody)}`;
-      
+
       case 'SMS':
         if (!data.phone) return '';
         return `sms:${data.phone}?body=${encodeURIComponent(data.smsMessage)}`;
-      
+
       case 'PHONE':
         return `tel:${data.phone}`;
-      
+
       case 'TEXT':
         return data.textContent;
-      
+
+      case 'EVENT':
+        if (!data.eventTitle || !data.eventStartDate) return '';
+        const startDateTime = `${data.eventStartDate}${data.eventStartTime ? 'T' + data.eventStartTime : ''}`;
+        const endDateTime = data.eventEndDate
+          ? `${data.eventEndDate}${data.eventEndTime ? 'T' + data.eventEndTime : ''}`
+          : startDateTime;
+        return `BEGIN:VEVENT\nSUMMARY:${data.eventTitle}\nLOCATION:${data.eventLocation}\nDTSTART:${startDateTime.replace(/[-:]/g, '')}\nDTEND:${endDateTime.replace(/[-:]/g, '')}\nDESCRIPTION:${data.eventDescription}\nEND:VEVENT`;
+
       case 'PAYMENT_LINK':
         const platform = PAYMENT_PLATFORMS.find(p => p.id === data.paymentPlatform);
         if (!data.paymentHandle) return '';
@@ -169,15 +204,32 @@ export default function CreateQRCodePage() {
           return `ethereum:${data.paymentHandle}${data.paymentAmount ? `?value=${data.paymentAmount}` : ''}`;
         }
         return `${platform?.prefix || ''}${data.paymentHandle}`;
-      
+
       case 'LOCATION':
         if (!data.locationLat || !data.locationLng) return '';
         return `geo:${data.locationLat},${data.locationLng}${data.locationAddress ? `?q=${encodeURIComponent(data.locationAddress)}` : ''}`;
-      
+
+      case 'PRODUCT':
+        if (!data.productName) return '';
+        return data.productUrl || `Product: ${data.productName}\nPrice: ${data.productPrice}\nSKU: ${data.productSku}\n${data.productDescription}`;
+
+      case 'FILE_DOWNLOAD':
+        return data.fileUrl;
+
+      case 'APP_DOWNLOAD':
+        if (data.appPlatform === 'both' && data.appStoreUrl && data.playStoreUrl) {
+          return data.appStoreUrl; // Default to iOS, or create a landing page
+        } else if (data.appPlatform === 'ios') {
+          return data.appStoreUrl;
+        } else if (data.appPlatform === 'android') {
+          return data.playStoreUrl;
+        }
+        return data.appStoreUrl || data.playStoreUrl || '';
+
       case 'MENU':
       case 'LANDING_PAGE':
         return data.redirectUrl;
-      
+
       default:
         return data.url;
     }
@@ -716,6 +768,226 @@ export default function CreateQRCodePage() {
                         onChange={(e) => handleInputChange('locationAddress', e.target.value)}
                       />
                     </div>
+                  </>
+                )}
+
+                {/* Event Type */}
+                {qrType === 'EVENT' && (
+                  <>
+                    <div>
+                      <Label htmlFor="eventTitle">Event Title *</Label>
+                      <Input
+                        id="eventTitle"
+                        placeholder="Conference 2024"
+                        value={formData.eventTitle}
+                        onChange={(e) => handleInputChange('eventTitle', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="eventLocation">Location</Label>
+                      <Input
+                        id="eventLocation"
+                        placeholder="123 Main St, City"
+                        value={formData.eventLocation}
+                        onChange={(e) => handleInputChange('eventLocation', e.target.value)}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label htmlFor="eventStartDate">Start Date *</Label>
+                        <Input
+                          id="eventStartDate"
+                          type="date"
+                          value={formData.eventStartDate}
+                          onChange={(e) => handleInputChange('eventStartDate', e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="eventStartTime">Start Time</Label>
+                        <Input
+                          id="eventStartTime"
+                          type="time"
+                          value={formData.eventStartTime}
+                          onChange={(e) => handleInputChange('eventStartTime', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label htmlFor="eventEndDate">End Date</Label>
+                        <Input
+                          id="eventEndDate"
+                          type="date"
+                          value={formData.eventEndDate}
+                          onChange={(e) => handleInputChange('eventEndDate', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="eventEndTime">End Time</Label>
+                        <Input
+                          id="eventEndTime"
+                          type="time"
+                          value={formData.eventEndTime}
+                          onChange={(e) => handleInputChange('eventEndTime', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="eventDescription">Description</Label>
+                      <Textarea
+                        id="eventDescription"
+                        placeholder="Event details and agenda"
+                        value={formData.eventDescription}
+                        onChange={(e) => handleInputChange('eventDescription', e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Product Type */}
+                {qrType === 'PRODUCT' && (
+                  <>
+                    <div>
+                      <Label htmlFor="productName">Product Name *</Label>
+                      <Input
+                        id="productName"
+                        placeholder="Premium Widget"
+                        value={formData.productName}
+                        onChange={(e) => handleInputChange('productName', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="productDescription">Description</Label>
+                      <Textarea
+                        id="productDescription"
+                        placeholder="Product features and benefits"
+                        value={formData.productDescription}
+                        onChange={(e) => handleInputChange('productDescription', e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="productPrice">Price</Label>
+                      <Input
+                        id="productPrice"
+                        placeholder="$99.99"
+                        value={formData.productPrice}
+                        onChange={(e) => handleInputChange('productPrice', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="productSku">SKU / Product Code</Label>
+                      <Input
+                        id="productSku"
+                        placeholder="PROD-12345"
+                        value={formData.productSku}
+                        onChange={(e) => handleInputChange('productSku', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="productUrl">Product URL</Label>
+                      <Input
+                        id="productUrl"
+                        type="url"
+                        placeholder="https://example.com/product"
+                        value={formData.productUrl}
+                        onChange={(e) => handleInputChange('productUrl', e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* File Download Type */}
+                {qrType === 'FILE_DOWNLOAD' && (
+                  <>
+                    <div>
+                      <Label htmlFor="fileUrl">File URL *</Label>
+                      <Input
+                        id="fileUrl"
+                        type="url"
+                        placeholder="https://example.com/file.pdf"
+                        value={formData.fileUrl}
+                        onChange={(e) => handleInputChange('fileUrl', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="fileName">File Name (Optional)</Label>
+                      <Input
+                        id="fileName"
+                        placeholder="document.pdf"
+                        value={formData.fileName}
+                        onChange={(e) => handleInputChange('fileName', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="fileSize">File Size (Optional)</Label>
+                      <Input
+                        id="fileSize"
+                        placeholder="2.5 MB"
+                        value={formData.fileSize}
+                        onChange={(e) => handleInputChange('fileSize', e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* App Download Type */}
+                {qrType === 'APP_DOWNLOAD' && (
+                  <>
+                    <div>
+                      <Label htmlFor="appName">App Name *</Label>
+                      <Input
+                        id="appName"
+                        placeholder="My Awesome App"
+                        value={formData.appName}
+                        onChange={(e) => handleInputChange('appName', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="appPlatform">Platform</Label>
+                      <Select value={formData.appPlatform} onValueChange={(value) => handleInputChange('appPlatform', value)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="both">iOS & Android</SelectItem>
+                          <SelectItem value="ios">iOS only</SelectItem>
+                          <SelectItem value="android">Android only</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {(formData.appPlatform === 'both' || formData.appPlatform === 'ios') && (
+                      <div>
+                        <Label htmlFor="appStoreUrl">App Store URL *</Label>
+                        <Input
+                          id="appStoreUrl"
+                          type="url"
+                          placeholder="https://apps.apple.com/..."
+                          value={formData.appStoreUrl}
+                          onChange={(e) => handleInputChange('appStoreUrl', e.target.value)}
+                          required={formData.appPlatform === 'ios'}
+                        />
+                      </div>
+                    )}
+                    {(formData.appPlatform === 'both' || formData.appPlatform === 'android') && (
+                      <div>
+                        <Label htmlFor="playStoreUrl">Google Play URL *</Label>
+                        <Input
+                          id="playStoreUrl"
+                          type="url"
+                          placeholder="https://play.google.com/..."
+                          value={formData.playStoreUrl}
+                          onChange={(e) => handleInputChange('playStoreUrl', e.target.value)}
+                          required={formData.appPlatform === 'android'}
+                        />
+                      </div>
+                    )}
                   </>
                 )}
 
