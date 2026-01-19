@@ -1,8 +1,16 @@
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization to avoid build-time errors
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || 'sk-placeholder',
+    });
+  }
+  return openai;
+}
 
 export interface AIGenerationOptions {
   maxTokens?: number;
@@ -36,7 +44,7 @@ export async function generateText(
   const temperature = options.temperature || 0.7;
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model,
       messages: [{ role: 'user', content: prompt }],
       max_tokens: maxTokens,
@@ -86,7 +94,7 @@ export async function generateJSON<T = unknown>(
   const maxTokens = options.maxTokens || 2000;
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model,
       messages: [{ role: 'user', content: prompt }],
       max_tokens: maxTokens,

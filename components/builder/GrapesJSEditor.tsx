@@ -96,7 +96,7 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
               'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800',
               'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800',
             ],
-            uploadFile: async (e: any) => {
+            uploadFile: (async (e: any) => {
               const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
               const formData = new FormData();
 
@@ -116,12 +116,12 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
                 }
 
                 const data = await response.json();
-                return { data: [data.url] };
+                // Add the uploaded image to the asset manager
+                editorRef.current?.AssetManager.add(data.url);
               } catch (error) {
                 console.error('Upload error:', error);
-                return { data: [] };
               }
-            },
+            }) as any,
           },
           panels: {
             defaults: [

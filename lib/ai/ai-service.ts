@@ -1,9 +1,17 @@
 import OpenAI from 'openai';
 import { prisma } from '@/lib/prisma';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization to avoid build-time errors
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || 'sk-placeholder',
+    });
+  }
+  return openai;
+}
 
 export const AI_FEATURES = {
   // QR Code AI
@@ -89,7 +97,7 @@ export async function callAI({
   const systemPrompt = getSystemPrompt(feature, context);
 
   // Call OpenAI
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model,
     messages: [
       { role: 'system', content: systemPrompt },

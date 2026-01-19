@@ -1,9 +1,17 @@
 import OpenAI from 'openai';
 import { prisma } from '@/lib/prisma';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization to avoid build-time errors
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || 'sk-placeholder',
+    });
+  }
+  return openai;
+}
 
 export interface QRCodeMetadata {
   appStoreUrl?: string;
@@ -93,7 +101,7 @@ export async function getSmartRedirect(
 // Detect language of text using AI
 export async function detectLanguage(text: string): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
@@ -122,7 +130,7 @@ export async function translateContent(
   targetLanguage: string
 ): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
@@ -189,7 +197,7 @@ export async function optimizeQRDesign(qrCodeData: QRCodeOptimizationData): Prom
 
   // Get AI-powered recommendations
   try {
-    const aiResponse = await openai.chat.completions.create({
+    const aiResponse = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
@@ -344,7 +352,7 @@ export async function generateSEOOptimizations(
   score: number;
 }> {
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {

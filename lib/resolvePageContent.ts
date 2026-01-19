@@ -23,7 +23,7 @@ interface Page {
 /**
  * Resolves page content by merging user customizations over template defaults
  * This ensures pages never render blank - template defaults always display
- * 
+ *
  * Priority order:
  * 1. User's published content (if published)
  * 2. User's draft content (if editing)
@@ -36,18 +36,35 @@ export function resolvePageContent(
 ): PuckData {
   // Start with template defaults if available
   const baseContent = template?.defaultSections || { content: [], root: {} };
-  
+
   // Determine which user content to use
   const userContent = mode === 'published' && page.isPublished
     ? page.publishedContent
     : page.draftContent;
-  
-  // If user has Puck content, deep merge over defaults
-  if (userContent && typeof userContent === 'object' && 'content' in userContent) {
+
+  // If user has Puck content (array-based sections), deep merge over defaults
+  if (userContent && typeof userContent === 'object' && 'content' in userContent && Array.isArray((userContent as any).content)) {
     return merge({}, baseContent, userContent);
   }
-  
-  // If no Puck content but has legacy HTML content, return it in Puck format
+
+  // If userContent is GrapesJS format { html, css, json }, convert to Puck format
+  if (userContent && typeof userContent === 'object' && 'html' in userContent) {
+    return {
+      content: [
+        {
+          type: 'GrapesJSSection',
+          props: {
+            html: (userContent as any).html || '',
+            css: (userContent as any).css || '',
+            json: (userContent as any).json,
+          },
+        },
+      ],
+      root: {},
+    };
+  }
+
+  // If no Puck/GrapesJS content but has legacy HTML content in page.content field
   if (page.content && typeof page.content === 'object' && 'html' in page.content) {
     // Legacy format - convert to Puck structure with single HTML section
     return {
@@ -63,7 +80,7 @@ export function resolvePageContent(
       root: {},
     };
   }
-  
+
   // Fallback: return template defaults (ensures never blank)
   return baseContent;
 }

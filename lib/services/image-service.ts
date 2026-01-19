@@ -32,10 +32,24 @@ export interface ImageResult {
   photographerUsername: string;
 }
 
-// Initialize Unsplash API
-const unsplash = createApi({
-  accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY || '',
-});
+// Lazy initialization to avoid build-time errors
+let unsplash: ReturnType<typeof createApi> | null = null;
+
+function getUnsplash() {
+  if (!unsplash && process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY) {
+    unsplash = createApi({
+      accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY,
+    });
+  }
+  // Return a minimal mock if no key is available (e.g., during build)
+  if (!unsplash) {
+    return {
+      search: { getPhotos: async () => ({ errors: ['No API key'], response: null }) },
+      photos: { getRandom: async () => ({ errors: ['No API key'], response: null }) },
+    } as any;
+  }
+  return unsplash;
+}
 
 // Curated stock image library with high-quality Unsplash images
 export const STOCK_IMAGE_LIBRARY = {
@@ -272,7 +286,7 @@ export async function searchImages(
   }
 
   try {
-    const response = await unsplash.search.getPhotos({
+    const response = await getUnsplash().search.getPhotos({
       query,
       page: 1,
       perPage: count,
@@ -314,7 +328,7 @@ export async function getRandomImage(query?: string): Promise<ImageResult | null
   }
 
   try {
-    const response = await unsplash.photos.getRandom({
+    const response = await getUnsplash().photos.getRandom({
       query: query || undefined,
       count: 1,
     });
