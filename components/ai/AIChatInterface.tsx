@@ -52,7 +52,7 @@ export function AIChatInterface({ initialContext }: AIChatInterfaceProps) {
           {
             id: 'welcome',
             role: 'assistant',
-            content: `Hi! I'm your AI assistant. I can help you with:\n\n• QR code optimization and design\n• Landing page creation and copywriting\n• Branding (names, logos, colors, taglines)\n• Content creation (blogs, social, emails)\n• Analytics insights and recommendations\n\nWhat can I help you with today?`,
+            content: `Hi! I'm your AI assistant. I can help you with:\n\n• QR code optimization and design\n• Landing page creation and copywriting\n• Branding (names, logos, colors, taglines)\n• Content creation (blogs, social, emails)\n• Analytics insights and recommendations\n\n💡 I can also perform actions like:\n• Create QR codes\n• Generate landing pages\n• Analyze your performance data\n\nWhat can I help you with today?`,
             timestamp: new Date(),
           },
         ]);
@@ -130,16 +130,30 @@ export function AIChatInterface({ initialContext }: AIChatInterfaceProps) {
         throw new Error(data.error || 'Failed to get response');
       }
 
+      // Add action information to the message if available
+      let messageContent = data.result;
+      if (data.action && data.action.type !== 'none') {
+        messageContent += `\n\n✨ ${data.action.message}`;
+        if (data.action.data?.url) {
+          messageContent += `\n\n[View here](${data.action.data.url})`;
+        }
+      }
+
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content: data.result,
+        content: messageContent,
         timestamp: new Date(),
         tokensUsed: data.tokensUsed,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
       setCredits(data.creditsRemaining);
+
+      // Show success toast if action was performed
+      if (data.action && data.action.type !== 'none') {
+        toast.success(data.action.message);
+      }
     } catch (error) {
       console.error('Chat error:', error);
       toast.error('Failed to get AI response');
