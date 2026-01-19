@@ -481,6 +481,42 @@ export const puckConfig: Config = {
       },
       render: ({ id, ...props }) => <ContactSection {...props} />,
     },
+    LegacyHTML: {
+      fields: {},
+      defaultProps: {
+        html: '',
+        templateId: undefined,
+      },
+      render: (props: any) => {
+        return (
+          <div
+            dangerouslySetInnerHTML={{ __html: props.html || '' }}
+            className="legacy-html-content"
+          />
+        );
+      },
+    },
+    GrapesJSSection: {
+      fields: {},
+      defaultProps: {
+        html: '',
+        css: '',
+        json: null,
+      },
+      render: (props: any) => {
+        return (
+          <>
+            {props.css && (
+              <style dangerouslySetInnerHTML={{ __html: props.css }} />
+            )}
+            <div
+              dangerouslySetInnerHTML={{ __html: props.html || '' }}
+              className="grapesjs-content"
+            />
+          </>
+        );
+      },
+    },
   },
 
   categories: {
@@ -554,6 +590,26 @@ export const puckRenderConfig: Config = {
             dangerouslySetInnerHTML={{ __html: props.html || '' }}
             className="legacy-html-content"
           />
+        );
+      },
+    },
+    GrapesJSSection: {
+      defaultProps: {
+        html: '',
+        css: '',
+        json: null,
+      },
+      render: (props: any) => {
+        return (
+          <>
+            {props.css && (
+              <style dangerouslySetInnerHTML={{ __html: props.css }} />
+            )}
+            <div
+              dangerouslySetInnerHTML={{ __html: props.html || '' }}
+              className="grapesjs-content"
+            />
+          </>
         );
       },
     },
