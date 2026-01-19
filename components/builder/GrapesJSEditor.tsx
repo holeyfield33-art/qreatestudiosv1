@@ -85,8 +85,10 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
           },
           // Asset Manager for image uploads and selection
           assetManager: {
-            upload: false,
+            upload: '/api/upload',
             uploadText: 'Drop files here or click to upload',
+            multiUpload: true,
+            autoAdd: true as any,
             assets: [
               'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920',
               'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920',
@@ -94,7 +96,32 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
               'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800',
               'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800',
             ],
-            autoAdd: true as any,
+            uploadFile: async (e: any) => {
+              const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+              const formData = new FormData();
+
+              for (let i = 0; i < files.length; i++) {
+                formData.append('file', files[i]);
+              }
+
+              try {
+                const response = await fetch('/api/upload', {
+                  method: 'POST',
+                  body: formData,
+                  credentials: 'include',
+                });
+
+                if (!response.ok) {
+                  throw new Error('Upload failed');
+                }
+
+                const data = await response.json();
+                return { data: [data.url] };
+              } catch (error) {
+                console.error('Upload error:', error);
+                return { data: [] };
+              }
+            },
           },
           panels: {
             defaults: [
@@ -701,8 +728,10 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
           {/* Blocks Panel */}
           <div id="blocks" style={{ width: '250px', borderRight: '1px solid #ddd', overflowY: 'auto', background: '#f8f9fa', padding: '10px' }}></div>
 
-          {/* Main Editor */}
-          <div id="gjs-editor" style={{ flex: 1, overflow: 'hidden' }}></div>
+          {/* Main Editor - Centered Canvas */}
+          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px', background: 'linear-gradient(to bottom, hsl(210 40% 98%), hsl(214.3 31.8% 96%))' }}>
+            <div id="gjs-editor" style={{ width: '100%', maxWidth: '1400px', height: '100%', overflow: 'auto' }}></div>
+          </div>
 
           {/* Right Sidebar */}
           <div style={{ width: '300px', borderLeft: '1px solid #ddd', background: '#fff', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>

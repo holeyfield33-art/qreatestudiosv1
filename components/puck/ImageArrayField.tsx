@@ -88,7 +88,7 @@ export function ImageArrayField({ value = [], onChange, category = 'restaurant' 
                 alt={image.alt || `Image ${index + 1}`}
                 className="w-full h-32 object-cover rounded-lg border"
               />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2 z-10">
                 <Button
                   size="sm"
                   variant="secondary"
