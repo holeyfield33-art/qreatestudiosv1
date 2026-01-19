@@ -1,13 +1,10 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { requireAdmin } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(req: Request) {
-  const session = await auth();
-
-  if (!session?.user?.id || session.user.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const { session, error } = await requireAdmin();
+  if (error) return error;
 
   try {
     const now = new Date();

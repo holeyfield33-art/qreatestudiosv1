@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { generateText, generateJSON } from '@/lib/services/ai-adapter';
 import { trackAIUsage, checkTokenLimit } from '@/lib/services/ai-usage-service';
+import { sanitizeAIContext, containsExecutableCode } from '@/lib/utils/ai-sanitization';
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -23,6 +24,23 @@ export async function POST(req: Request) {
   if (!feature || !context) {
     return NextResponse.json(
       { error: 'Missing feature or context' },
+      { status: 400 }
+    );
+  }
+
+  // Sanitize context to prevent prompt injection
+  const { sanitized: sanitizedContext, warnings } = sanitizeAIContext(context);
+
+  // Log warnings in development
+  if (warnings.length > 0 && process.env.NODE_ENV === 'development') {
+    console.warn('AI input sanitization warnings:', warnings);
+  }
+
+  // Check for executable code patterns
+  const contextString = JSON.stringify(context);
+  if (containsExecutableCode(contextString)) {
+    return NextResponse.json(
+      { error: 'Invalid input: Potential security risk detected' },
       { status: 400 }
     );
   }
@@ -54,9 +72,9 @@ export async function POST(req: Request) {
     switch (feature) {
       case 'design-assistant':
         prompt = `You are a professional graphic designer. Generate design suggestions for:
-Business: ${context.businessType}
-Industry: ${context.industry}
-Target Audience: ${context.targetAudience}
+Business: ${sanitizedContext.businessType}
+Industry: ${sanitizedContext.industry}
+Target Audience: ${sanitizedContext.targetAudience}
 
 Provide 3 complete design concepts with:
 1. Color palette (5 colors with hex codes)
@@ -70,10 +88,10 @@ Format as JSON with keys: concepts (array of { name, colors (array), typography,
 
       case 'webpage-designer':
         prompt = `Create a complete landing page design and copy for:
-Business: ${context.businessName}
-Industry: ${context.industry}
-Target Audience: ${context.targetAudience}
-Key Message: ${context.keyMessage}
+Business: ${sanitizedContext.businessName}
+Industry: ${sanitizedContext.industry}
+Target Audience: ${sanitizedContext.targetAudience}
+Key Message: ${sanitizedContext.keyMessage}
 
 Generate:
 1. Hero section (headline, subheadline, CTA button text)

@@ -5,6 +5,7 @@ import { generateUniqueShortCode } from '@/lib/services/qr-service';
 import { getBaseUrl } from '@/lib/utils/urls';
 import { canCreateQR } from '@/lib/services/usage-enforcement';
 import { randomUUID } from 'crypto';
+import { hashQRPassword } from '@/lib/utils/qr-password';
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -54,6 +55,12 @@ export async function POST(req: Request) {
     const baseUrl = getBaseUrl();
     const shortUrl = `${baseUrl}/${shortCode}`;
 
+    // Hash password if provided and QR is secure
+    let hashedPassword = null;
+    if (isSecure && password) {
+      hashedPassword = await hashQRPassword(password);
+    }
+
     const qrCode = await prisma.qRCode.create({
       data: {
         id: randomUUID(),
@@ -68,7 +75,7 @@ export async function POST(req: Request) {
         style: style || null,
         logoUrl: logoUrl || null,
         isSecure: isSecure || false,
-        password: password || null,
+        password: hashedPassword, // Store hashed password
         expiresAt: expiresAt ? new Date(expiresAt) : null,
         maxScans: maxScans || null,
         updatedAt: new Date(),

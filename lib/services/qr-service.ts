@@ -1,6 +1,7 @@
 import QRCode from 'qrcode';
 import sharp from 'sharp';
 import type { PrismaClient } from '@prisma/client';
+import { randomBytes } from 'crypto';
 
 export interface QRCodeStyle {
   width?: number;
@@ -110,8 +111,9 @@ export async function generateStyledQRCode(
 export function generateShortCode(length: number = 6): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let code = '';
+  const bytes = randomBytes(length);
   for (let i = 0; i < length; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
+    code += chars[bytes[i] % chars.length];
   }
   return code;
 }

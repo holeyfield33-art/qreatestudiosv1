@@ -37,6 +37,19 @@ export async function GET(
     return new Response('QR Code scan limit reached', { status: 429 });
   }
 
+  // Check if QR code is password protected
+  if (qrCode.isSecure && qrCode.password) {
+    // Check if password was provided and verified
+    const url = new URL(req.url);
+    const hasValidPassword = url.searchParams.get('verified') === 'true';
+
+    if (!hasValidPassword) {
+      // Redirect to password entry page
+      const passwordUrl = `${getBaseUrl()}/qr/password?code=${shortCode}`;
+      return Response.redirect(passwordUrl, 307);
+    }
+  }
+
   // Get scan metadata
   const userAgent = req.headers.get('user-agent') || '';
   const ipAddress =

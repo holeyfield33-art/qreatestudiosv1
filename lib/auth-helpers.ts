@@ -20,7 +20,7 @@ export async function getAuthSession() {
  */
 export async function requireAuth() {
   const session = await getAuthSession();
-  
+
   if (!session?.user?.id) {
     return {
       session: null,
@@ -30,6 +30,35 @@ export async function requireAuth() {
       ),
     };
   }
-  
+
+  return { session, error: null };
+}
+
+/**
+ * Check if user is authenticated and has admin role
+ */
+export async function requireAdmin() {
+  const session = await getAuthSession();
+
+  if (!session?.user?.id) {
+    return {
+      session: null,
+      error: NextResponse.json(
+        { error: 'Unauthorized - Please sign in' },
+        { status: 401 }
+      ),
+    };
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    return {
+      session: null,
+      error: NextResponse.json(
+        { error: 'Forbidden - Admin access required' },
+        { status: 403 }
+      ),
+    };
+  }
+
   return { session, error: null };
 }
