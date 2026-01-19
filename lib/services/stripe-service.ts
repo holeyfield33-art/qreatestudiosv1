@@ -1,8 +1,19 @@
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-12-15.clover',
-});
+// Lazy initialization to avoid build-time errors
+export const stripe = (() => {
+  let instance: Stripe | null = null;
+  return new Proxy({} as Stripe, {
+    get(_, prop) {
+      if (!instance) {
+        instance = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
+          apiVersion: '2025-12-15.clover',
+        });
+      }
+      return (instance as any)[prop];
+    }
+  });
+})();
 
 export interface PlanLimits {
   qrCodes: number;
@@ -100,5 +111,3 @@ export async function reactivateSubscription(subscriptionId: string): Promise<vo
     cancel_at_period_end: false,
   });
 }
-
-export { stripe };

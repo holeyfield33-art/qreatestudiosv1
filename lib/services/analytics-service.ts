@@ -130,17 +130,53 @@ export async function getQRAnalytics(
   ]);
 
   // Get scans by day for chart
-  const scansByDay = await prisma.$queryRaw<Array<{ date: Date; count: bigint }>>`
-    SELECT 
-      DATE("scannedAt") as date,
-      COUNT(*) as count
-    FROM "Analytics"
-    WHERE "qrCodeId" = ${qrCodeId}
-    ${startDate ? prisma.$queryRaw`AND "scannedAt" >= ${startDate}` : prisma.$queryRaw``}
-    ${endDate ? prisma.$queryRaw`AND "scannedAt" <= ${endDate}` : prisma.$queryRaw``}
-    GROUP BY DATE("scannedAt")
-    ORDER BY DATE("scannedAt") ASC
-  `;
+  let scansByDay: Array<{ date: Date; count: bigint }>;
+
+  if (startDate && endDate) {
+    scansByDay = await prisma.$queryRaw<Array<{ date: Date; count: bigint }>>`
+      SELECT
+        DATE("scannedAt") as date,
+        COUNT(*) as count
+      FROM "Analytics"
+      WHERE "qrCodeId" = ${qrCodeId}
+        AND "scannedAt" >= ${startDate}
+        AND "scannedAt" <= ${endDate}
+      GROUP BY DATE("scannedAt")
+      ORDER BY DATE("scannedAt") ASC
+    `;
+  } else if (startDate) {
+    scansByDay = await prisma.$queryRaw<Array<{ date: Date; count: bigint }>>`
+      SELECT
+        DATE("scannedAt") as date,
+        COUNT(*) as count
+      FROM "Analytics"
+      WHERE "qrCodeId" = ${qrCodeId}
+        AND "scannedAt" >= ${startDate}
+      GROUP BY DATE("scannedAt")
+      ORDER BY DATE("scannedAt") ASC
+    `;
+  } else if (endDate) {
+    scansByDay = await prisma.$queryRaw<Array<{ date: Date; count: bigint }>>`
+      SELECT
+        DATE("scannedAt") as date,
+        COUNT(*) as count
+      FROM "Analytics"
+      WHERE "qrCodeId" = ${qrCodeId}
+        AND "scannedAt" <= ${endDate}
+      GROUP BY DATE("scannedAt")
+      ORDER BY DATE("scannedAt") ASC
+    `;
+  } else {
+    scansByDay = await prisma.$queryRaw<Array<{ date: Date; count: bigint }>>`
+      SELECT
+        DATE("scannedAt") as date,
+        COUNT(*) as count
+      FROM "Analytics"
+      WHERE "qrCodeId" = ${qrCodeId}
+      GROUP BY DATE("scannedAt")
+      ORDER BY DATE("scannedAt") ASC
+    `;
+  }
 
   // Process location data to include coordinates
   const locations = locationData

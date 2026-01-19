@@ -1,7 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+
+// Prevent static optimization for this page
+export const dynamic = 'force-dynamic';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertCircle, Lock } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-export default function QRPasswordPage() {
+function PasswordForm() {
   const searchParams = useSearchParams();
   const shortCode = searchParams.get('code');
   const [password, setPassword] = useState('');
@@ -108,5 +111,20 @@ export default function QRPasswordPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function QRPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
+      <PasswordForm />
+    </Suspense>
   );
 }

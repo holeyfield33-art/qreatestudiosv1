@@ -1,6 +1,14 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization to avoid build-time errors
+let resend: Resend | null = null;
+
+function getResend(): Resend {
+  if (!resend) {
+    resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder');
+  }
+  return resend;
+}
 
 export interface PrintOrder {
   id: string;
@@ -41,7 +49,7 @@ export async function sendEmail(
   }
 
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: process.env.FROM_EMAIL || 'orders@qreatestudios.com',
       to,
       subject,

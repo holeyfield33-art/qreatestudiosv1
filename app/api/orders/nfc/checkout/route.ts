@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import Stripe from 'stripe';
+import { stripe } from '@/lib/services/stripe-service';
+import type Stripe from 'stripe';
 import {
   type NFCOrderItem,
   calculateOrderTotal,
   getProductById,
   formatPrice,
 } from '@/lib/types/nfc-products';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-12-15.clover',
-});
 
 export async function POST(req: Request) {
   try {

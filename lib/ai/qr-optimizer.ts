@@ -2,9 +2,17 @@ import { prisma } from '@/lib/prisma';
 import { getQRAnalytics } from '@/lib/services/analytics-service';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization to avoid build-time errors
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || 'sk-placeholder',
+    });
+  }
+  return openai;
+}
 
 export const AI_LIMITS = {
   free: 0,
@@ -261,7 +269,7 @@ Requirements:
 - Assign performance scores (0-100) before and after
 - Be encouraging but realistic`;
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4-turbo-preview',
       messages: [
         {
