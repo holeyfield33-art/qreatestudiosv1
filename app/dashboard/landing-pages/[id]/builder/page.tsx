@@ -13,14 +13,6 @@ const GrapesJSEditor = dynamic(
   () => import('@/components/builder/GrapesJSEditor'),
   {
     ssr: false,
-    loading: () => (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
-          <p className="text-muted-foreground">Loading editor...</p>
-        </div>
-      </div>
-    ),
   }
 );
 
