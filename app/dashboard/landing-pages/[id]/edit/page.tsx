@@ -525,10 +525,10 @@ export default function TemplateEditorPage() {
                       <Tooltip key={slot.id}>
                         <TooltipTrigger asChild>
                           <Card
-                            className={`cursor-pointer transition-all duration-200 ${
+                            className={`transition-all duration-200 ${
                               editMode
-                                ? 'opacity-40 pointer-events-none grayscale'
-                                : 'hover:shadow-lg hover:border-blue-400 hover:scale-[1.02]'
+                                ? 'opacity-50 grayscale cursor-not-allowed'
+                                : 'cursor-pointer hover:shadow-lg hover:border-blue-400 hover:scale-[1.02]'
                             }`}
                             onClick={() => !editMode && handleSlotClick(slot.id)}
                           >

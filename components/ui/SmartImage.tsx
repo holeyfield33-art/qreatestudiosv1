@@ -21,6 +21,18 @@ interface SmartImageProps {
 }
 
 /**
+ * Maps objectFit prop to Tailwind CSS classes
+ * This mapping is required because Tailwind JIT doesn't support dynamic class names
+ */
+const OBJECT_FIT_CLASSES: Record<string, string> = {
+  contain: 'object-contain',
+  cover: 'object-cover',
+  fill: 'object-fill',
+  none: 'object-none',
+  'scale-down': 'object-scale-down',
+};
+
+/**
  * Category-specific placeholder SVGs
  */
 const CATEGORY_PLACEHOLDERS: Record<ImageCategory, string> = {
@@ -55,14 +67,17 @@ export function SmartImage({
   // No source or error: show category placeholder
   if (!src || hasError) {
     return (
-      <div className={`relative ${className}`} style={fill ? undefined : { width, height }}>
+      <div
+        className={`relative ${fill ? 'w-full h-full' : ''} ${className}`}
+        style={fill ? undefined : { width, height }}
+      >
         <Image
           src={CATEGORY_PLACEHOLDERS[category]}
           alt={alt}
           fill={fill}
           width={fill ? undefined : width}
           height={fill ? undefined : height}
-          className={`object-${objectFit}`}
+          className={OBJECT_FIT_CLASSES[objectFit]}
           sizes={sizes}
         />
       </div>
@@ -70,9 +85,12 @@ export function SmartImage({
   }
 
   return (
-    <div className={`relative ${className}`} style={fill ? undefined : { width, height }}>
+    <div
+      className={`relative ${fill ? 'w-full h-full' : ''} ${className}`}
+      style={fill ? undefined : { width, height }}
+    >
       {/* Blurhash shows while loading */}
-      {isLoading && blurhash && width && height && (
+      {isLoading && blurhash && (
         <div className="absolute inset-0 z-10">
           <Blurhash
             hash={blurhash}
@@ -92,7 +110,7 @@ export function SmartImage({
         fill={fill}
         width={fill ? undefined : width}
         height={fill ? undefined : height}
-        className={`object-${objectFit} transition-opacity duration-300 ${
+        className={`${OBJECT_FIT_CLASSES[objectFit]} transition-opacity duration-300 ${
           isLoading ? 'opacity-0' : 'opacity-100'
         }`}
         priority={priority}
@@ -131,7 +149,7 @@ export function SimpleImage({
         fill={fill}
         width={fill ? undefined : width}
         height={fill ? undefined : height}
-        className={`${className} object-${objectFit}`}
+        className={`${className} ${OBJECT_FIT_CLASSES[objectFit]}`}
       />
     );
   }
@@ -143,7 +161,7 @@ export function SimpleImage({
       fill={fill}
       width={fill ? undefined : width}
       height={fill ? undefined : height}
-      className={`${className} object-${objectFit}`}
+      className={`${className} ${OBJECT_FIT_CLASSES[objectFit]}`}
       unoptimized
       onError={() => setHasError(true)}
     />
