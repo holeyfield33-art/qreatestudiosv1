@@ -1,26 +1,27 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: 0 0% 100%;
-  --color-foreground: 222.2 84% 4.9%;
-  --color-card: 0 0% 100%;
-  --color-card-foreground: 222.2 84% 4.9%;
-  --color-popover: 0 0% 100%;
-  --color-popover-foreground: 222.2 84% 4.9%;
-  --color-primary: 221.2 83.2% 53.3%;
-  --color-primary-foreground: 210 40% 98%;
-  --color-secondary: 210 40% 96.1%;
-  --color-secondary-foreground: 222.2 47.4% 11.2%;
-  --color-muted: 210 40% 96.1%;
-  --color-muted-foreground: 215.4 16.3% 46.9%;
-  --color-accent: 210 40% 96.1%;
-  --color-accent-foreground: 222.2 47.4% 11.2%;
-  --color-destructive: 0 84.2% 60.2%;
+  /* Dark premium theme */
+  --color-background: 222 47% 7%;
+  --color-foreground: 210 40% 98%;
+  --color-card: 222 47% 10%;
+  --color-card-foreground: 210 40% 98%;
+  --color-popover: 222 47% 10%;
+  --color-popover-foreground: 210 40% 98%;
+  --color-primary: 217 91% 60%;
+  --color-primary-foreground: 222 47% 11%;
+  --color-secondary: 217 33% 17%;
+  --color-secondary-foreground: 210 40% 98%;
+  --color-muted: 215 28% 17%;
+  --color-muted-foreground: 217 10% 65%;
+  --color-accent: 217 33% 17%;
+  --color-accent-foreground: 210 40% 98%;
+  --color-destructive: 0 63% 51%;
   --color-destructive-foreground: 210 40% 98%;
-  --color-border: 214.3 31.8% 91.4%;
-  --color-input: 214.3 31.8% 91.4%;
-  --color-ring: 221.2 83.2% 53.3%;
-  
+  --color-border: 217 33% 17%;
+  --color-input: 217 33% 17%;
+  --color-ring: 217 91% 60%;
+
   --radius: 0.5rem;
 }
 
@@ -74,6 +75,14 @@
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
 }
 
+.gradient-hero {
+  background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #db2777 100%);
+}
+
+.gradient-dark {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%);
+}
+
 /* Premium shadows */
 .shadow-premium {
   box-shadow: 0 10px 40px -10px rgba(102, 126, 234, 0.3);
@@ -125,6 +134,42 @@
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
 .animate-in {
   animation-duration: 300ms;
   animation-fill-mode: both;
@@ -136,4 +181,23 @@
 
 .slide-in-from-bottom-4 {
   animation-name: slide-in-from-bottom;
+}
+
+.animate-shimmer {
+  animation: shimmer 3s infinite linear;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background-size: 1000px 100%;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+.animate-gradient {
+  animation: gradient-shift 8s ease infinite;
+  background-size: 200% 200%;
 }

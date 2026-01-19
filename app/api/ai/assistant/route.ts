@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { callAI, AI_FEATURES, getRemainingCredits, type AIFeature } from '@/lib/ai/ai-service';
+import { executeAIAction } from '@/lib/ai/ai-action-handler';
 
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -37,12 +38,21 @@ export async function POST(req: NextRequest) {
       model: model || 'gpt-4o-mini',
     });
 
+    // Execute actual actions based on AI response
+    const action = await executeAIAction(
+      session.user.id,
+      feature,
+      result.content,
+      { ...context, prompt }
+    );
+
     // Get remaining credits
     const credits = await getRemainingCredits(session.user.id);
 
     return NextResponse.json({
       success: true,
       result: result.content,
+      action: action,
       tokensUsed: result.usage?.total_tokens,
       creditsRemaining: credits.remaining,
       creditsLimit: credits.limit,

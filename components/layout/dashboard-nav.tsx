@@ -21,6 +21,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { signOut } from 'next-auth/react'
+import { motion } from 'framer-motion'
 
 interface DashboardNavProps {
   user: {
@@ -99,15 +100,22 @@ export function DashboardNav({ user }: DashboardNavProps) {
   }
 
   return (
-    <nav
+    <motion.nav
       className="h-full w-64 flex-col border-r bg-muted/40 hidden lg:flex"
       aria-label="Main navigation"
+      initial={{ x: -264 }}
+      animate={{ x: 0 }}
+      transition={{ type: 'spring', stiffness: 100, damping: 20 }}
     >
       <div className="flex items-center justify-center px-6 py-6 border-b">
         <Link href="/dashboard" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all">
+          <motion.div
+            className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all"
+            whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.05 }}
+            transition={{ duration: 0.5 }}
+          >
             <QrCode className="w-6 h-6 text-white" />
-          </div>
+          </motion.div>
           <div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Qreate Studios
@@ -128,7 +136,12 @@ export function DashboardNav({ user }: DashboardNavProps) {
             const isLocked = item.requiresPlan && !hasAccess
             
             return (
-              <li key={item.name}>
+              <motion.li
+                key={item.name}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: navigation.indexOf(item) * 0.05 }}
+              >
                 <Link
                   href={item.href}
                   onClick={(e) => handleNavClick(e, item)}
@@ -149,43 +162,57 @@ export function DashboardNav({ user }: DashboardNavProps) {
                     <span>{item.name}</span>
                   </div>
                   {isLocked && item.badge && (
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200">
+                    <motion.div
+                      className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
+                    >
                       <Crown className="w-3 h-3 text-amber-600" />
                       <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">
                         {item.badge}
                       </span>
-                    </div>
+                    </motion.div>
                   )}
                 </Link>
-              </li>
+              </motion.li>
             )
           })}
         </ul>
       </div>
 
-      <div className="border-t p-4">
+      <motion.div
+        className="border-t p-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.5 }}
+      >
         <div className="flex items-center space-x-3 mb-3 cursor-default">
-          <Avatar className="ring-2 ring-offset-2 ring-transparent hover:ring-blue-500 transition-all duration-200">
-            <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
-            <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-          </Avatar>
+          <motion.div whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>
+            <Avatar className="ring-2 ring-offset-2 ring-transparent hover:ring-blue-500 transition-all duration-200">
+              <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
+              <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+            </Avatar>
+          </motion.div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{user.name || 'User'}</p>
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
             <p className="text-xs text-purple-500 font-semibold mt-0.5">{userPlan} Plan</p>
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full justify-start min-h-[44px]"
-          onClick={() => signOut({ callbackUrl: '/' })}
-          aria-label="Sign out"
-        >
-          <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
-          Sign Out
-        </Button>
-      </div>
-    </nav>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start min-h-[44px]"
+            onClick={() => signOut({ callbackUrl: '/' })}
+            aria-label="Sign out"
+          >
+            <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+            Sign Out
+          </Button>
+        </motion.div>
+      </motion.div>
+    </motion.nav>
   )
 }

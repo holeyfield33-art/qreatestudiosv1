@@ -14,6 +14,7 @@ import { Settings, User, LogOut } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { AICreditsWidget } from '@/components/ai/AICreditsWidget'
+import { motion } from 'framer-motion'
 
 interface DashboardHeaderProps {
   title: string
@@ -36,29 +37,51 @@ export function DashboardHeader({ title, user }: DashboardHeaderProps) {
   }
 
   return (
-    <header className="border-b bg-background">
+    <motion.header
+      className="border-b bg-background/95 backdrop-blur-md sticky top-0 z-40"
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+    >
       <div className="flex h-14 lg:h-16 items-center justify-between px-4 lg:px-6">
-        <h1 id="main-content" className="text-lg lg:text-2xl font-bold truncate max-w-[50%]" tabIndex={-1}>
+        <motion.h1
+          id="main-content"
+          className="text-lg lg:text-2xl font-bold truncate max-w-[50%]"
+          tabIndex={-1}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           {title}
-        </h1>
+        </motion.h1>
 
         <div className="flex items-center gap-2 lg:gap-4">
-          <div className="hidden sm:block">
+          <motion.div
+            className="hidden sm:block"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
             <AICreditsWidget />
-          </div>
-          
+          </motion.div>
+
           <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="relative h-10 w-10 rounded-full focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              aria-label="User menu"
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Avatar>
-                <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
-                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-              </Avatar>
-            </Button>
+              <Button
+                variant="ghost"
+                className="relative h-10 w-10 rounded-full focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                aria-label="User menu"
+              >
+                <Avatar>
+                  <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
+                  <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                </Avatar>
+              </Button>
+            </motion.div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
@@ -92,6 +115,6 @@ export function DashboardHeader({ title, user }: DashboardHeaderProps) {
         </DropdownMenu>
         </div>
       </div>
-    </header>
+    </motion.header>
   )
 }
