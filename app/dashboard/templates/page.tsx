@@ -13,11 +13,6 @@ import { ArrowLeft } from 'lucide-react';
 // Dynamically import QRPreview for better performance
 const QRPreview = dynamic(() => import('@/components/qr-preview'), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 animate-pulse">
-      <span className="text-4xl">⏳</span>
-    </div>
-  ),
 });
 
 export default function TemplatesPage() {
