@@ -16,8 +16,8 @@ export interface FeatureAccess {
 export function getFeatureAccess(plan: PlanType): FeatureAccess {
   const features: Record<PlanType, FeatureAccess> = {
     FREE: {
-      canAccessAdvancedAnalytics: false,
-      canExportReports: false,
+      canAccessAdvancedAnalytics: true,
+      canExportReports: true,
       canAccessTemplates: true,
       canAccessPremiumTemplates: false,
       canAccessWhiteLabel: false,
