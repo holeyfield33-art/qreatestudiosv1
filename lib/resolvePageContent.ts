@@ -44,12 +44,13 @@ export function resolvePageContent(
 
   // If user has Puck content (array-based sections), deep merge over defaults
   if (userContent && typeof userContent === 'object' && 'content' in userContent && Array.isArray((userContent as any).content)) {
-    return merge({}, baseContent, userContent);
+    const merged = merge({}, baseContent, userContent);
+    return ensureSectionIds(merged);
   }
 
   // If userContent is GrapesJS format { html, css, json }, convert to Puck format
   if (userContent && typeof userContent === 'object' && 'html' in userContent) {
-    return {
+    return ensureSectionIds({
       content: [
         {
           type: 'GrapesJSSection',
@@ -61,13 +62,13 @@ export function resolvePageContent(
         },
       ],
       root: {},
-    };
+    });
   }
 
   // If no Puck/GrapesJS content but has legacy HTML content in page.content field
   if (page.content && typeof page.content === 'object' && 'html' in page.content) {
     // Legacy format - convert to Puck structure with single HTML section
-    return {
+    return ensureSectionIds({
       content: [
         {
           type: 'LegacyHTML',
@@ -78,11 +79,21 @@ export function resolvePageContent(
         },
       ],
       root: {},
-    };
+    });
   }
 
   // Fallback: return template defaults (ensures never blank)
-  return baseContent;
+  return ensureSectionIds(baseContent);
+}
+
+function ensureSectionIds(content: PuckData): PuckData {
+  return {
+    ...content,
+    content: (content.content || []).map((section: any, index: number) => ({
+      id: section.id ?? `section-${index}`,
+      ...section,
+    })),
+  };
 }
 
 /**
