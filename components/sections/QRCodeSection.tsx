@@ -9,7 +9,7 @@ export interface QRCodeSectionProps {
   qrCodeUrl?: string; // URL to generated QR code image
   destinationUrl?: string; // Where the QR code points to
   qrStyle?: 'minimal' | 'framed' | 'branded';
-  instructions?: string[];
+  instructions?: (string | { text: string })[];
   showDeviceIcons?: boolean;
 }
 
@@ -81,11 +81,14 @@ export function QRCodeSection({
           {/* Instructions */}
           <div className="mt-6 space-y-3">
             {instructions && instructions.length > 0 ? (
-              instructions.map((instruction, idx) => (
-                <p key={idx} className={`text-sm font-medium ${styles.text}`}>
-                  {instruction}
-                </p>
-              ))
+              instructions.map((instruction, idx) => {
+                const text = typeof instruction === 'string' ? instruction : instruction.text;
+                return (
+                  <p key={`instruction-${idx}-${text}`} className={`text-sm font-medium ${styles.text}`}>
+                    {text}
+                  </p>
+                );
+              })
             ) : (
               <p className={`text-sm font-medium ${styles.text}`}>
                 Point your camera to scan

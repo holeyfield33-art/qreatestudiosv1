@@ -749,12 +749,6 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
                   label: 'Alt Text',
                   name: 'alt',
                 },
-                {
-                  type: 'button',
-                  label: 'Select Image',
-                  text: 'Open Image Library',
-                  command: 'open-assets',
-                },
               ],
             },
           },
@@ -784,26 +778,6 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
               ...textType.model.prototype.defaults,
               editable: true,
             },
-          },
-        });
-
-        // Add custom command for opening asset manager
-        editorRef.current.Commands.add('open-assets', {
-          run(editor: any, sender: any) {
-            const selected = editor.getSelected();
-            const assetManager = editor.AssetManager;
-
-            // Open asset manager
-            assetManager.open({
-              types: ['image'],
-              select(asset: any) {
-                if (selected && selected.is('image')) {
-                  selected.addAttributes({ src: asset.getSrc() });
-                  selected.set('src', asset.getSrc());
-                }
-                assetManager.close();
-              },
-            });
           },
         });
 

@@ -213,8 +213,8 @@ function MenuItemCard({
           <div className="mt-3 pt-3 border-t border-gray-200">
             <p className="text-xs font-medium text-gray-700 mb-1">Sizes:</p>
             <div className="space-y-1">
-              {item.priceVariants.map((variant, idx) => (
-                <div key={idx} className="flex justify-between text-sm">
+              {item.priceVariants.map((variant) => (
+                <div key={`${item.id}-variant-${variant.name}`} className="flex justify-between text-sm">
                   <span className="text-gray-600">{variant.name}</span>
                   <span className="font-medium">
                     {currencySymbol}{variant.price.toFixed(2)}
@@ -315,8 +315,8 @@ function MenuItemRow({
         {/* Price Variants */}
         {item.priceVariants && item.priceVariants.length > 0 && (
           <div className="mt-2 flex gap-4 flex-wrap">
-            {item.priceVariants.map((variant, idx) => (
-              <span key={idx} className="text-sm text-gray-600">
+            {item.priceVariants.map((variant) => (
+              <span key={`${item.id}-variant-${variant.name}`} className="text-sm text-gray-600">
                 {variant.name}: {currencySymbol}{variant.price.toFixed(2)}
               </span>
             ))}
