@@ -238,13 +238,7 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
                   </svg>
                   <div style="font-size: 11px; margin-top: 4px;">Image</div>
                 `,
-                content: {
-                  type: 'image',
-                  attributes: { 
-                    src: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
-                    style: 'max-width: 100%; height: auto; border-radius: 8px;'
-                  },
-                },
+                content: `<img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800" alt="Image" style="max-width: 100%; height: auto; display: block; border-radius: 8px;" />`,
                 category: 'Media',
               },
               {
@@ -305,6 +299,89 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
                   </div>
                 `,
                 category: 'Layout',
+              },
+              {
+                id: 'features-grid',
+                label: `
+                  <svg viewBox="0 0 24 24" width="32" height="32">
+                    <path fill="currentColor" d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/>
+                  </svg>
+                  <div style="font-size: 11px; margin-top: 4px;">Features</div>
+                `,
+                content: `
+                  <section style="padding: 80px 20px; background: #f9fafb;">
+                    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+                      <h2 style="font-size: 42px; margin-bottom: 16px; font-weight: bold;">Our Features</h2>
+                      <p style="font-size: 18px; color: #6b7280; margin-bottom: 48px;">Everything you need to succeed</p>
+                      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
+                        <div style="padding: 32px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                          <h3 style="font-size: 24px; margin-bottom: 12px; font-weight: 600;">Fast</h3>
+                          <p style="color: #6b7280; line-height: 1.6;">Lightning fast performance</p>
+                        </div>
+                        <div style="padding: 32px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                          <h3 style="font-size: 24px; margin-bottom: 12px; font-weight: 600;">Secure</h3>
+                          <p style="color: #6b7280; line-height: 1.6;">Enterprise-grade security</p>
+                        </div>
+                        <div style="padding: 32px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                          <h3 style="font-size: 24px; margin-bottom: 12px; font-weight: 600;">Reliable</h3>
+                          <p style="color: #6b7280; line-height: 1.6;">99.9% uptime guarantee</p>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                `,
+                category: 'Sections',
+              },
+              {
+                id: 'gallery',
+                label: `
+                  <svg viewBox="0 0 24 24" width="32" height="32">
+                    <path fill="currentColor" d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"/>
+                  </svg>
+                  <div style="font-size: 11px; margin-top: 4px;">Gallery</div>
+                `,
+                content: `
+                  <section style="padding: 80px 20px; background: white;">
+                    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+                      <h2 style="font-size: 42px; margin-bottom: 16px; font-weight: bold;">Gallery</h2>
+                      <p style="font-size: 18px; color: #6b7280; margin-bottom: 48px;">Browse our collection</p>
+                      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+                        <div style="position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden;">
+                          <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800" alt="Gallery 1" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                        </div>
+                        <div style="position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden;">
+                          <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800" alt="Gallery 2" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                        </div>
+                        <div style="position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden;">
+                          <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800" alt="Gallery 3" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                `,
+                category: 'Sections',
+              },
+              {
+                id: 'cta',
+                label: `
+                  <svg viewBox="0 0 24 24" width="32" height="32">
+                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <div style="font-size: 11px; margin-top: 4px;">Call to Action</div>
+                `,
+                content: `
+                  <section style="padding: 100px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+                    <div style="max-width: 800px; margin: 0 auto;">
+                      <h2 style="font-size: 48px; margin-bottom: 24px; font-weight: bold;">Ready to Get Started?</h2>
+                      <p style="font-size: 20px; margin-bottom: 40px; line-height: 1.6;">Join thousands of satisfied customers today</p>
+                      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                        <a href="#" style="display: inline-block; padding: 16px 32px; background: white; color: #667eea; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Get Started</a>
+                        <a href="#" style="display: inline-block; padding: 16px 32px; background: transparent; color: white; text-decoration: none; border: 2px solid white; border-radius: 8px; font-weight: 600; font-size: 16px;">Learn More</a>
+                      </div>
+                    </div>
+                  </section>
+                `,
+                category: 'Sections',
               },
             ],
           },
@@ -648,11 +725,24 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
           model: {
             defaults: {
               ...imageType.model.prototype.defaults,
+              // Ensure images are always visible and draggable
+              draggable: true,
+              droppable: false,
+              stylable: true,
+              resizable: true,
+              editable: false,
+              // Add default styles to ensure visibility
+              style: {
+                'max-width': '100%',
+                'height': 'auto',
+                'display': 'block',
+              },
               traits: [
                 {
                   type: 'text',
                   label: 'Source (URL)',
                   name: 'src',
+                  changeProp: 1,
                 },
                 {
                   type: 'text',
@@ -663,17 +753,25 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
                   type: 'button',
                   label: 'Select Image',
                   text: 'Open Image Library',
-                  command: (editor: any) => {
-                    const selected = editor.getSelected();
-                    editor.runCommand('open-assets', {
-                      target: selected,
-                      onSelect(asset: any) {
-                        selected.addAttributes({ src: asset.getSrc() });
-                      },
-                    });
-                  },
+                  command: 'open-assets',
                 },
               ],
+            },
+          },
+          view: {
+            onRender() {
+              // Ensure the image element has proper attributes
+              const imgEl = this.el;
+              if (imgEl && imgEl.tagName === 'IMG') {
+                const src = this.model.get('src') || this.model.getAttributes().src;
+                if (src && !imgEl.src.includes(src)) {
+                  imgEl.src = src;
+                }
+                // Ensure image is visible
+                imgEl.style.display = 'block';
+                imgEl.style.maxWidth = '100%';
+                imgEl.style.height = 'auto';
+              }
             },
           },
         });
@@ -686,6 +784,26 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
               ...textType.model.prototype.defaults,
               editable: true,
             },
+          },
+        });
+
+        // Add custom command for opening asset manager
+        editorRef.current.Commands.add('open-assets', {
+          run(editor: any, sender: any) {
+            const selected = editor.getSelected();
+            const assetManager = editor.AssetManager;
+
+            // Open asset manager
+            assetManager.open({
+              types: ['image'],
+              select(asset: any) {
+                if (selected && selected.is('image')) {
+                  selected.addAttributes({ src: asset.getSrc() });
+                  selected.set('src', asset.getSrc());
+                }
+                assetManager.close();
+              },
+            });
           },
         });
 

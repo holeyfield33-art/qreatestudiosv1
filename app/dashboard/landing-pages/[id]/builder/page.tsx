@@ -148,8 +148,8 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       
       const response = await res.json();
       const page = response.landingPage || response;
-      
-      setPageName(page.name);
+
+      setPageName(page.title || page.name);
       setPageSlug(page.slug);
       
       // Load content - prioritize draft, then published
