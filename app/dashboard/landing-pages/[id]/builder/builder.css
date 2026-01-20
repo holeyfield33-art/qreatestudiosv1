@@ -443,3 +443,111 @@ section[style*="background"] {
   background: hsl(221.2 83.2% 53.3% / 0.1) !important;
   border-left: 3px solid var(--puck-color-primary, #3b82f6) !important;
 }
+
+/* Toolbar button styling */
+.panel__basic-actions .gjs-pn-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 6px !important;
+  background: white !important;
+  border: 1px solid #e5e7eb !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  padding: 0 !important;
+}
+
+.panel__basic-actions .gjs-pn-btn:hover {
+  background: #f3f4f6 !important;
+  border-color: var(--puck-color-primary, #3b82f6) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.panel__basic-actions .gjs-pn-btn.gjs-pn-active {
+  background: hsl(221.2 83.2% 53.3% / 0.1) !important;
+  border-color: var(--puck-color-primary, #3b82f6) !important;
+  color: var(--puck-color-primary, #3b82f6) !important;
+}
+
+.panel__basic-actions .gjs-pn-btn svg {
+  fill: currentColor !important;
+}
+
+/* Blocks panel styling */
+#blocks .gjs-block {
+  min-height: 80px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px !important;
+  background: white !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  cursor: grab !important;
+  transition: all 0.2s ease !important;
+  margin-bottom: 8px !important;
+}
+
+#blocks .gjs-block:hover {
+  border-color: var(--puck-color-primary, #3b82f6) !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+  transform: translateY(-2px) !important;
+}
+
+#blocks .gjs-block:active {
+  cursor: grabbing !important;
+}
+
+#blocks .gjs-block svg {
+  margin-bottom: 4px !important;
+}
+
+/* Style inputs and controls */
+#styles-container input[type="text"],
+#styles-container input[type="number"],
+#styles-container select {
+  width: 100% !important;
+  padding: 6px 8px !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 4px !important;
+  font-size: 0.875rem !important;
+  transition: border-color 0.2s ease !important;
+}
+
+#styles-container input[type="text"]:focus,
+#styles-container input[type="number"]:focus,
+#styles-container select:focus {
+  outline: none !important;
+  border-color: var(--puck-color-primary, #3b82f6) !important;
+  box-shadow: 0 0 0 3px hsl(221.2 83.2% 53.3% / 0.1) !important;
+}
+
+/* Traits panel inputs */
+#traits-container input[type="text"],
+#traits-container input[type="url"],
+#traits-container textarea {
+  width: 100% !important;
+  padding: 6px 8px !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 4px !important;
+  font-size: 0.875rem !important;
+  transition: border-color 0.2s ease !important;
+}
+
+#traits-container input[type="text"]:focus,
+#traits-container input[type="url"]:focus,
+#traits-container textarea:focus {
+  outline: none !important;
+  border-color: var(--puck-color-primary, #3b82f6) !important;
+  box-shadow: 0 0 0 3px hsl(221.2 83.2% 53.3% / 0.1) !important;
+}
+
+/* Ensure editable text has visual feedback */
+.gjs-editable:focus {
+  outline: 2px solid var(--puck-color-primary, #3b82f6) !important;
+  outline-offset: 2px !important;
+}
