@@ -98,39 +98,41 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
             ],
             uploadFile: (async (e: any) => {
               const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
-              const formData = new FormData();
-              const uploadedUrls: string[] = [];
+              const uploads = await Promise.all(
+                Array.from(files).map(async (file: File) => {
+                  try {
+                    const formData = new FormData();
+                    formData.append('file', file);
 
-              for (let i = 0; i < files.length; i++) {
-                formData.append('file', files[i]);
-              }
+                    const response = await fetch('/api/upload', {
+                      method: 'POST',
+                      body: formData,
+                      credentials: 'include',
+                    });
 
-              try {
-                const response = await fetch('/api/upload', {
-                  method: 'POST',
-                  body: formData,
-                  credentials: 'include',
-                });
+                    if (!response.ok) {
+                      throw new Error('Upload failed');
+                    }
 
-                if (!response.ok) {
-                  throw new Error('Upload failed');
-                }
+                    const data = await response.json();
+                    if (!data.url) {
+                      return null;
+                    }
 
-                const data = await response.json();
+                    return {
+                      src: data.url,
+                      name: file.name,
+                      type: file.type,
+                    };
+                  } catch (error) {
+                    console.error('Upload error:', error);
+                    return null;
+                  }
+                })
+              );
 
-                // Collect the uploaded URL(s)
-                if (data.url) {
-                  uploadedUrls.push(data.url);
-                } else if (data.urls && Array.isArray(data.urls)) {
-                  uploadedUrls.push(...data.urls);
-                }
-
-                // Return in the format GrapesJS expects
-                return { data: uploadedUrls };
-              } catch (error) {
-                console.error('Upload error:', error);
-                return { data: [] };
-              }
+              const assets = uploads.filter(Boolean);
+              return { data: assets };
             }) as any,
           },
           panels: {

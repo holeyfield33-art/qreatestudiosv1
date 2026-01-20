@@ -2,14 +2,18 @@ import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { resolvePageContent } from '@/lib/resolvePageContent';
-import { Render } from '@measured/puck';
+import dynamic from 'next/dynamic';
 import '@measured/puck/puck.css';
-import { puckRenderConfig } from '@/lib/puckConfig';
 
 interface RouteContext {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ table?: string; preview?: string }>;
 }
+
+const PublicLandingPageRender = dynamic(
+  () => import('@/components/landing/PublicLandingPageRender'),
+  { ssr: false }
+);
 
 export default async function PublicLandingPage({ params, searchParams }: RouteContext) {
   const { slug } = await params;
@@ -129,7 +133,7 @@ export default async function PublicLandingPage({ params, searchParams }: RouteC
 
   return (
     <div className="min-h-screen">
-      <Render config={puckRenderConfig} data={resolvedContent as any} />
+      <PublicLandingPageRender data={resolvedContent as any} />
 
       {/* Footer */}
       <footer className="py-8 text-center text-sm text-muted-foreground border-t bg-gray-50">
