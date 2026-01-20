@@ -64,6 +64,14 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
             scripts: [],
             styles: [],
           },
+          // Enable protectedCss to ensure images and styles work properly
+          protectedCss: '',
+          // Allow all tags and attributes for proper rendering
+          allowScripts: 1,
+          // Improve selection and hover behavior
+          multipleSelection: true,
+          // Enable select on hover for easier editing
+          selectOnHover: false,
           // Improve selection behavior
           deviceManager: {
             devices: [
@@ -240,7 +248,7 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
                   </svg>
                   <div style="font-size: 11px; margin-top: 4px;">Image</div>
                 `,
-                content: `<img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800" alt="Image" style="max-width: 100%; height: auto; display: block; border-radius: 8px;" />`,
+                content: `<img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800" alt="Image" style="max-width: 100%; height: auto; display: block; border-radius: 8px;" data-gjs-type="image" />`,
                 category: 'Media',
               },
               {
@@ -349,13 +357,13 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
                       <p style="font-size: 18px; color: #6b7280; margin-bottom: 48px;">Browse our collection</p>
                       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
                         <div style="position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden;">
-                          <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800" alt="Gallery 1" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                          <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800" alt="Gallery 1" style="width: 100%; height: 100%; object-fit: cover; display: block;" data-gjs-type="image" />
                         </div>
                         <div style="position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden;">
-                          <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800" alt="Gallery 2" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                          <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800" alt="Gallery 2" style="width: 100%; height: 100%; object-fit: cover; display: block;" data-gjs-type="image" />
                         </div>
                         <div style="position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden;">
-                          <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800" alt="Gallery 3" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+                          <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800" alt="Gallery 3" style="width: 100%; height: 100%; object-fit: cover; display: block;" data-gjs-type="image" />
                         </div>
                       </div>
                     </div>
@@ -760,10 +768,14 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
               const imgEl = this.el;
               if (imgEl && imgEl.tagName === 'IMG') {
                 const src = this.model.get('src') || this.model.getAttributes().src;
-                if (src && !imgEl.src.includes(src)) {
+                if (src) {
+                  // Force reload if not loaded properly
                   imgEl.src = src;
+                  imgEl.onerror = function() {
+                    console.error('Failed to load image:', src);
+                  };
                 }
-                // Ensure image is visible
+                // Ensure image is visible with explicit styles
                 imgEl.style.display = 'block';
                 imgEl.style.maxWidth = '100%';
                 imgEl.style.height = 'auto';
@@ -792,6 +804,18 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
             editorRef.current.setStyle(initialData.css);
           }
         }
+
+        // Enable click to select any component in the canvas
+        editorRef.current.on('load', () => {
+          const canvas = editorRef.current.Canvas;
+          const frameEl = canvas.getFrameEl();
+          
+          if (frameEl && frameEl.contentDocument) {
+            frameEl.contentDocument.addEventListener('click', (e: any) => {
+              e.stopPropagation();
+            });
+          }
+        });
 
         // Auto-open style manager when component is selected
         editorRef.current.on('component:selected', (component: any) => {

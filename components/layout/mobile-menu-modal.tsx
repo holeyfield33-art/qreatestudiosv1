@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Settings, CreditCard, ShoppingBag, LogOut, Crown } from 'lucide-react'
 import Link from 'next/link'
-import { signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { type PlanType } from '@/lib/utils/feature-access'
 
@@ -30,7 +30,23 @@ const menuItems = [
 ]
 
 export function MobileMenuModal({ open, onOpenChange, user }: MobileMenuModalProps) {
+  const router = useRouter()
   const userPlan = (user?.plan || user?.organization?.plan || 'FREE') as PlanType
+
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth/signout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      onOpenChange(false)
+      router.push('/')
+      router.refresh()
+    } catch (error) {
+      console.error('Sign out error:', error)
+      router.push('/')
+    }
+  }
 
   const getInitials = (name?: string | null) => {
     if (!name) return 'U'
@@ -91,7 +107,7 @@ export function MobileMenuModal({ open, onOpenChange, user }: MobileMenuModalPro
         <Button
           variant="outline"
           className="w-full justify-start min-h-[44px] text-base mt-4"
-          onClick={() => signOut({ callbackUrl: '/' })}
+          onClick={handleSignOut}
         >
           <LogOut className="mr-3 h-5 w-5" aria-hidden="true" />
           Sign Out

@@ -11,8 +11,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Settings, User, LogOut } from 'lucide-react'
-import { signOut } from 'next-auth/react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { AICreditsWidget } from '@/components/ai/AICreditsWidget'
 import { motion } from 'framer-motion'
 
@@ -26,6 +26,8 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ title, user }: DashboardHeaderProps) {
+  const router = useRouter()
+  
   const getInitials = (name?: string | null) => {
     if (!name) return 'U'
     return name
@@ -34,6 +36,20 @@ export function DashboardHeader({ title, user }: DashboardHeaderProps) {
       .join('')
       .toUpperCase()
       .slice(0, 2)
+  }
+
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth/signout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      router.push('/')
+      router.refresh()
+    } catch (error) {
+      console.error('Sign out error:', error)
+      router.push('/')
+    }
   }
 
   return (
@@ -105,7 +121,7 @@ export function DashboardHeader({ title, user }: DashboardHeaderProps) {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => signOut({ callbackUrl: '/' })}
+              onClick={handleSignOut}
               className="cursor-pointer text-red-600 focus:text-red-600"
             >
               <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />

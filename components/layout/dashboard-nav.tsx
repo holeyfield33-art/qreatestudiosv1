@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 
 interface DashboardNavProps {
@@ -67,6 +67,20 @@ export function DashboardNav({ user }: DashboardNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const userPlan = (user?.plan || user?.organization?.plan || 'FREE') as PlanType
+
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth/signout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      router.push('/')
+      router.refresh()
+    } catch (error) {
+      console.error('Sign out error:', error)
+      router.push('/')
+    }
+  }
 
   const canAccessFeature = (requiredPlans?: string[]): boolean => {
     if (!requiredPlans || requiredPlans.length === 0) return true
@@ -205,7 +219,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
             variant="outline"
             size="sm"
             className="w-full justify-start min-h-[44px]"
-            onClick={() => signOut({ callbackUrl: '/' })}
+            onClick={handleSignOut}
             aria-label="Sign out"
           >
             <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
