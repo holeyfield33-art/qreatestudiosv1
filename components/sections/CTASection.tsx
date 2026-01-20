@@ -158,11 +158,11 @@ CTASection.defaultProps = {
   description: 'Visit us today or order online for pickup and delivery',
   primaryCta: {
     text: 'Order Now',
-    link: '#menu',
+    link: '/auth/signup',
   },
   secondaryCta: {
     text: 'View Menu',
-    link: '#menu',
+    link: '/pricing',
   },
   backgroundColor: '#000000',
   style: 'centered',

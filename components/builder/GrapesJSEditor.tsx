@@ -213,7 +213,7 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
                     <div style="max-width: 800px;">
                       <h1 style="font-size: 56px; margin-bottom: 24px; font-weight: bold;">Welcome to Our Restaurant</h1>
                       <p style="font-size: 20px; margin-bottom: 32px; line-height: 1.6;">Fresh ingredients, unforgettable flavors</p>
-                      <a href="#" style="display: inline-block; padding: 16px 32px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Menu</a>
+                      <a href="/pricing" style="display: inline-block; padding: 16px 32px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">View Menu</a>
                     </div>
                   </section>
                 `,
@@ -249,7 +249,7 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
                   </svg>
                   <div style="font-size: 11px; margin-top: 4px;">Button</div>
                 `,
-                content: '<a href="#" style="display: inline-block; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">Click me</a>',
+                content: '<a href="/auth/signup" style="display: inline-block; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">Click me</a>',
                 category: 'Basic',
               },
               {
@@ -375,8 +375,8 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
                       <h2 style="font-size: 48px; margin-bottom: 24px; font-weight: bold;">Ready to Get Started?</h2>
                       <p style="font-size: 20px; margin-bottom: 40px; line-height: 1.6;">Join thousands of satisfied customers today</p>
                       <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                        <a href="#" style="display: inline-block; padding: 16px 32px; background: white; color: #667eea; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Get Started</a>
-                        <a href="#" style="display: inline-block; padding: 16px 32px; background: transparent; color: white; text-decoration: none; border: 2px solid white; border-radius: 8px; font-weight: 600; font-size: 16px;">Learn More</a>
+                        <a href="/auth/signup" style="display: inline-block; padding: 16px 32px; background: white; color: #667eea; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Get Started</a>
+                        <a href="/pricing" style="display: inline-block; padding: 16px 32px; background: transparent; color: white; text-decoration: none; border: 2px solid white; border-radius: 8px; font-weight: 600; font-size: 16px;">Learn More</a>
                       </div>
                     </div>
                   </section>

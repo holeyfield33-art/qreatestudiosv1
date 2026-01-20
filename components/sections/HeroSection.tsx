@@ -33,14 +33,6 @@ export function HeroSection({
   textAlign = 'center',
   minHeight = '70vh',
 }: HeroSectionProps) {
-  console.log('🎬 HeroSection rendering:', { 
-    headline, 
-    backgroundImage, 
-    backgroundImageType: typeof backgroundImage,
-    hasBackgroundImage: !!backgroundImage,
-    ctaText 
-  });
-  
   const textAlignClass = {
     left: 'text-left items-start',
     center: 'text-center items-center',
@@ -58,8 +50,6 @@ export function HeroSection({
     ? { url: backgroundImage, alt: 'Background' }
     : backgroundImage;
     
-  console.log('🖼️ HeroSection normalized bgImage:', bgImage);
-
   return (
     <section className="relative w-full overflow-hidden" style={{ minHeight }}>
       {/* Background Image */}
@@ -135,7 +125,7 @@ HeroSection.defaultProps = {
   headline: 'Welcome to Our Restaurant',
   subheadline: 'Fresh ingredients, unforgettable flavors',
   ctaText: 'View Our Menu',
-  ctaLink: '#menu',
+  ctaLink: '/pricing',
   ctaStyle: 'primary',
   overlay: true,
   overlayOpacity: 50,

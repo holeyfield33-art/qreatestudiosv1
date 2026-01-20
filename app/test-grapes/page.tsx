@@ -45,7 +45,7 @@ export default function TestGrapesJS() {
             {
               id: 'button',
               label: '<div><svg viewBox="0 0 24 24" width="32" height="32"><rect x="4" y="8" width="16" height="8" rx="2"></rect></svg><div>Button</div></div>',
-              content: '<a href="#" style="display: inline-block; padding: 10px 20px; background: #0066ff; color: white; text-decoration: none; border-radius: 5px;">Click me</a>',
+              content: '<a href="/pricing" style="display: inline-block; padding: 10px 20px; background: #0066ff; color: white; text-decoration: none; border-radius: 5px;">Click me</a>',
               category: 'Basic',
             },
           ],

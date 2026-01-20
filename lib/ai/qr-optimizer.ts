@@ -448,14 +448,12 @@ async function trackAIUsage(
   const completionCost = (completionTokens / 1000) * 0.03;
   const totalCost = promptCost + completionCost;
 
-  // This would be called separately with userId
-  // For now, just log the usage
-  console.log('AI Usage:', {
+  return {
     promptTokens,
     completionTokens,
     totalTokens,
-    cost: totalCost.toFixed(4),
-  });
+    cost: Number(totalCost.toFixed(4)),
+  };
 }
 
 /**
