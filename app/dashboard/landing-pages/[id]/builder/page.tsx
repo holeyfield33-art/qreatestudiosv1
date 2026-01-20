@@ -42,7 +42,7 @@ function convertPuckToHtml(puckData: any): string {
             <div style="max-width: 800px;">
               <h1 style="font-size: 56px; margin-bottom: 24px; font-weight: bold;">${props.headline || 'Welcome'}</h1>
               ${props.subheadline ? `<p style="font-size: 20px; margin-bottom: 32px; line-height: 1.6;">${props.subheadline}</p>` : ''}
-              ${props.ctaText ? `<a href="${props.ctaLink || '#'}" style="display: inline-block; padding: 16px 32px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">${props.ctaText}</a>` : ''}
+              ${props.ctaText ? `<a href="${props.ctaLink || '/auth/signup'}" style="display: inline-block; padding: 16px 32px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">${props.ctaText}</a>` : ''}
             </div>
           </section>
         `;
@@ -92,8 +92,8 @@ function convertPuckToHtml(puckData: any): string {
               ${props.title ? `<h2 style="font-size: 48px; margin-bottom: 24px; font-weight: bold;">${props.title}</h2>` : ''}
               ${props.description ? `<p style="font-size: 20px; margin-bottom: 40px; line-height: 1.6;">${props.description}</p>` : ''}
               <div style="display: flex; gap: 16px; justify-content: center;">
-                ${props.primaryCta ? `<a href="${props.primaryCta.link || '#'}" style="display: inline-block; padding: 16px 32px; background: white; color: #667eea; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">${props.primaryCta.text}</a>` : ''}
-                ${props.secondaryCta ? `<a href="${props.secondaryCta.link || '#'}" style="display: inline-block; padding: 16px 32px; background: transparent; color: white; text-decoration: none; border: 2px solid white; border-radius: 8px; font-weight: 600; font-size: 16px;">${props.secondaryCta.text}</a>` : ''}
+                ${props.primaryCta ? `<a href="${props.primaryCta.link || '/auth/signup'}" style="display: inline-block; padding: 16px 32px; background: white; color: #667eea; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">${props.primaryCta.text}</a>` : ''}
+                ${props.secondaryCta ? `<a href="${props.secondaryCta.link || '/pricing'}" style="display: inline-block; padding: 16px 32px; background: transparent; color: white; text-decoration: none; border: 2px solid white; border-radius: 8px; font-weight: 600; font-size: 16px;">${props.secondaryCta.text}</a>` : ''}
               </div>
             </div>
           </section>
@@ -174,7 +174,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
             <div style="max-width: 800px;">
               <h1 style="font-size: 56px; margin-bottom: 24px; font-weight: bold;">Welcome to Your Landing Page</h1>
               <p style="font-size: 20px; margin-bottom: 32px; line-height: 1.6;">Start building your amazing page</p>
-              <a href="#" style="display: inline-block; padding: 16px 32px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Get Started</a>
+              <a href="/auth/signup" style="display: inline-block; padding: 16px 32px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Get Started</a>
             </div>
           </section>
         `;
@@ -459,7 +459,6 @@ export default function BuilderPage({ params }: BuilderPageProps) {
             ref={editorRef}
             initialData={editorData}
             onChange={handleEditorChange}
-            onLoad={() => console.log('✅ GrapesJS Editor loaded')}
           />
         ) : (
           <div className="flex items-center justify-center h-full">

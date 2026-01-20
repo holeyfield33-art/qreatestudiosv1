@@ -89,7 +89,7 @@ export const puckConfig: Config = {
           alt: 'Restaurant interior',
         },
         ctaText: 'View Our Menu',
-        ctaLink: '#menu',
+        ctaLink: '/pricing',
         ctaStyle: 'primary',
         overlay: true,
         overlayOpacity: 50,
@@ -97,7 +97,6 @@ export const puckConfig: Config = {
         minHeight: '70vh',
       },
       render: ({ id, ...props }) => {
-        console.log('🎯 puckConfig: HeroSection render called with props:', props);
         // Ensure backgroundImage is properly passed and not undefined
         const finalProps = {
           ...props,
@@ -106,7 +105,6 @@ export const puckConfig: Config = {
             alt: 'Restaurant interior',
           },
         };
-        console.log('🖼️ HeroSection final props:', finalProps);
         return <HeroSection {...finalProps} />;
       },
     },
@@ -177,7 +175,6 @@ export const puckConfig: Config = {
         style: 'cards',
       },
       render: ({ id, ...props }) => {
-        console.log('🎯 puckConfig: FeaturesSection render called with props:', props);
         return <FeaturesSection {...props} />;
       },
     },
@@ -330,7 +327,6 @@ export const puckConfig: Config = {
         lightbox: true,
       },
       render: ({ id, ...props }) => {
-        console.log('🎯 puckConfig: GallerySection render called with props:', props);
         // Ensure images array is properly passed
         const finalProps = {
           ...props,
@@ -355,7 +351,6 @@ export const puckConfig: Config = {
             },
           ],
         };
-        console.log('🖼️ GallerySection final props:', finalProps);
         return <GallerySection {...finalProps} />;
       },
     },
@@ -412,11 +407,11 @@ export const puckConfig: Config = {
         description: 'Visit us today or order online for pickup and delivery',
         primaryCta: {
           text: 'Order Now',
-          link: '#menu',
+          link: '/auth/signup',
         },
         secondaryCta: {
           text: 'View Menu',
-          link: '#menu',
+          link: '/pricing',
         },
         backgroundImage: {
           url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920&q=80',

@@ -31,14 +31,6 @@ export function GallerySection({
 }: GallerySectionProps) {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   
-  console.log('🎨 GallerySection rendering:', {
-    title,
-    subtitle,
-    imagesCount: images.length,
-    images: images.map(img => ({ id: img.id, url: img.url, alt: img.alt })),
-    columns,
-  });
-
   const gridColsClass = {
     2: 'md:grid-cols-2',
     3: 'md:grid-cols-3',
