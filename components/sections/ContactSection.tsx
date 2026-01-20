@@ -8,7 +8,7 @@ export interface ContactSectionProps {
   address?: string;
   phone?: string;
   email?: string;
-  hours?: string[];
+  hours?: (string | { text: string })[];
   mapEmbed?: string; // Google Maps or Mapbox embed URL
   showMap?: boolean;
 }
@@ -99,11 +99,14 @@ export function ContactSection({
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Hours</h3>
                   <div className="space-y-1">
-                    {hours.map((hour, index) => (
-                      <p key={index} className="text-gray-600">
-                        {hour}
-                      </p>
-                    ))}
+                    {hours.map((hour, index) => {
+                      const text = typeof hour === 'string' ? hour : hour.text;
+                      return (
+                        <p key={`hour-${index}-${text}`} className="text-gray-600">
+                          {text}
+                        </p>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
