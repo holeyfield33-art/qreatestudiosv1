@@ -50,9 +50,17 @@ export default function TemplateEditorPage() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
+  const normalizeHtml = (rawHtml: string) => {
+    if (!rawHtml) return '';
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(rawHtml, 'text/html');
+    const bodyContent = doc.body?.innerHTML?.trim();
+    return bodyContent || rawHtml;
+  };
+
   useEffect(() => {
     if (previewRef.current && !editMode) {
-      previewRef.current.innerHTML = html;
+      previewRef.current.innerHTML = normalizeHtml(html);
     }
   }, [html, editMode]);
 
@@ -108,13 +116,16 @@ export default function TemplateEditorPage() {
         const foundTemplate = LANDING_PAGE_TEMPLATES.find((t) => t.id === templateId);
         if (foundTemplate) {
           setTemplate(foundTemplate);
-          setHtml(page.content?.html || foundTemplate.html);
+          setHtml(normalizeHtml(page.content?.html || foundTemplate.html));
 
           // Initialize images
           const initialImages: Record<string, string> = {};
           foundTemplate.metadata.imageSlots.forEach((slot) => {
             const parser = new DOMParser();
-            const doc = parser.parseFromString(page.content?.html || foundTemplate.html, 'text/html');
+            const doc = parser.parseFromString(
+              normalizeHtml(page.content?.html || foundTemplate.html),
+              'text/html'
+            );
             const imgElement = doc.querySelector(`[data-slot="${slot.id}"]`) as HTMLImageElement;
             if (imgElement) {
               initialImages[slot.id] = imgElement.src;
@@ -151,7 +162,7 @@ export default function TemplateEditorPage() {
     
     if (imgElement) {
       imgElement.setAttribute('src', newImageUrl);
-      setHtml(doc.documentElement.outerHTML);
+      setHtml(normalizeHtml(doc.body.innerHTML));
       toast.success('Image updated successfully');
     }
     
