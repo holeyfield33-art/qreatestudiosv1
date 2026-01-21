@@ -1,6 +1,7 @@
 import { put } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import { prisma } from '@/lib/prisma';
 import sharp from 'sharp';
 import { encode } from 'blurhash';
 
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const category = (formData.get('category') as string) || 'default';
+    const landingPageId = formData.get('landingPageId') as string | null;
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -118,31 +120,94 @@ export async function POST(request: NextRequest) {
     // Get image dimensions
     const metadata = await sharp(optimizedBuffer).metadata();
 
-    // Upload to Vercel Blob
+    // Upload to Vercel Blob with timeout
     const filename = `${session.user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const blob = await put(filename, optimizedBuffer, {
-      access: 'public',
-      contentType: file.type === 'image/gif' ? 'image/gif' : 'image/webp',
-    });
 
-    // Return image metadata
-    return NextResponse.json({
-      url: blob.url,
-      blurhash,
-      width: metadata.width,
-      height: metadata.height,
-      size: optimizedBuffer.length,
-      category,
-      contentType: blob.contentType,
-    });
+    // Create abort controller for timeout
+    const abortController = new AbortController();
+    const uploadTimeout = setTimeout(() => abortController.abort(), 30000); // 30 second timeout
+
+    try {
+      const blob = await put(filename, optimizedBuffer, {
+        access: 'public',
+        contentType: file.type === 'image/gif' ? 'image/gif' : 'image/webp',
+        abortSignal: abortController.signal,
+      });
+
+      clearTimeout(uploadTimeout);
+
+      // Store media record in database
+      const mediaRecord = await prisma.media.create({
+        data: {
+          userId: session.user.id,
+          landingPageId: landingPageId || null,
+          url: blob.url,
+          blobPath: filename,
+          filename: file.name,
+          contentType: blob.contentType || file.type,
+          size: optimizedBuffer.length,
+          width: metadata.width || null,
+          height: metadata.height || null,
+          blurhash: blurhash || null,
+          category,
+          metadata: {
+            originalSize: file.size,
+            optimized: file.size !== optimizedBuffer.length,
+            format: metadata.format,
+          },
+        },
+      });
+
+      // Return image metadata
+      return NextResponse.json({
+        id: mediaRecord.id,
+        url: blob.url,
+        blurhash,
+        width: metadata.width,
+        height: metadata.height,
+        size: optimizedBuffer.length,
+        category,
+        contentType: blob.contentType,
+      });
+    } catch (uploadError: any) {
+      clearTimeout(uploadTimeout);
+
+      if (uploadError.name === 'AbortError') {
+        return NextResponse.json(
+          { error: 'Upload timeout. Please try again or use a smaller file.' },
+          { status: 408 }
+        );
+      }
+      throw uploadError;
+    }
   } catch (error) {
     console.error('Upload error:', error);
+
+    // Categorize errors
+    if (error instanceof Error) {
+      if (error.message.includes('sharp')) {
+        return NextResponse.json(
+          { error: 'Invalid or corrupted image file. Please try a different image.' },
+          { status: 400 }
+        );
+      }
+      if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+        return NextResponse.json(
+          { error: 'Upload timeout. Please check your connection and try again.' },
+          { status: 408 }
+        );
+      }
+    }
+
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Upload failed' },
       { status: 500 }
     );
   }
 }
+
+// Set route config for longer execution time if needed
+export const maxDuration = 60; // 60 seconds max for image processing + upload
 
 /**
  * DELETE /api/upload?url=...

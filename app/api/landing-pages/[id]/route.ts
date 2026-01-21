@@ -19,10 +19,33 @@ export async function GET(req: Request, context: RouteContext) {
   try {
     const landingPage = await prisma.landingPage.findUnique({
       where: { id },
-      include: { 
-        QRCode: true,
-        Template: true,
-        RestaurantMenu: true,
+      include: {
+        QRCode: {
+          select: {
+            id: true,
+            name: true,
+            shortCode: true,
+            type: true,
+          }
+        },
+        Template: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            thumbnail: true,
+            isPremium: true,
+            // Only fetch defaultSections if we need it
+            defaultSections: true,
+          }
+        },
+        RestaurantMenu: {
+          select: {
+            id: true,
+            name: true,
+            // Don't fetch categories here - let them be fetched separately if needed
+          }
+        },
       },
     });
 
@@ -30,8 +53,8 @@ export async function GET(req: Request, context: RouteContext) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       landingPage: {
         ...landingPage,
         title: landingPage.name,
@@ -79,26 +102,42 @@ export async function PATCH(req: Request, context: RouteContext) {
     if (body.name !== undefined) updateData.name = body.name;
     if (body.isPublished !== undefined) updateData.isPublished = body.isPublished;
     if (body.content !== undefined) updateData.content = body.content;
-    
-    // Validate and sanitize draftContent (Puck JSON format)
+
+    // Validate and sanitize draftContent (supports both GrapesJS and Puck formats)
     if (body.draftContent !== undefined) {
       const draftContent = body.draftContent;
-      
+
       // Ensure it's an object with proper structure
       if (typeof draftContent === 'object' && draftContent !== null) {
-        updateData.draftContent = {
-          content: Array.isArray(draftContent.content) ? draftContent.content : [],
-          root: draftContent.root || { props: {} },
-          zones: draftContent.zones || {}
-        };
+        // GrapesJS format: { html, css, json, timestamp }
+        if (draftContent.html !== undefined || draftContent.css !== undefined) {
+          updateData.draftContent = {
+            html: draftContent.html || '',
+            css: draftContent.css || '',
+            json: draftContent.json || null,
+            timestamp: draftContent.timestamp || new Date().toISOString(),
+          };
+        }
+        // Puck format: { content: [], root: {}, zones: {} }
+        else if (Array.isArray(draftContent.content) || draftContent.root || draftContent.zones) {
+          updateData.draftContent = {
+            content: Array.isArray(draftContent.content) ? draftContent.content : [],
+            root: draftContent.root || { props: {} },
+            zones: draftContent.zones || {}
+          };
+        }
+        // Unknown format - store as-is
+        else {
+          updateData.draftContent = draftContent;
+        }
       } else {
         return NextResponse.json(
-          { error: 'Invalid draftContent format. Expected Puck JSON structure.' },
+          { error: 'Invalid draftContent format. Expected object structure.' },
           { status: 400 }
         );
       }
     }
-    
+
     if (body.publishedContent !== undefined) updateData.publishedContent = body.publishedContent;
     if (body.qrCodeId !== undefined) updateData.qrCodeId = body.qrCodeId;
     if (body.customDomain !== undefined) updateData.customDomain = body.customDomain;

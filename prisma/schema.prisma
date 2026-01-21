@@ -195,6 +195,7 @@ model LandingPage {
   Template             Template?            @relation(fields: [templateId], references: [id])
   User                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   landingPageMenuItems LandingPageMenuItem[]
+  Media                Media[]
   RestaurantMenu       RestaurantMenu?
 
   @@index([slug])
@@ -220,6 +221,31 @@ model LandingPageMenuItem {
 
   @@index([landingPageId])
   @@index([category])
+}
+
+model Media {
+  id            String   @id @default(cuid())
+  userId        String
+  landingPageId String?
+  url           String
+  blobPath      String?  // Vercel Blob path for deletion
+  filename      String
+  contentType   String
+  size          Int      // File size in bytes
+  width         Int?     // Image width in pixels
+  height        Int?     // Image height in pixels
+  blurhash      String?  // Blurhash for placeholder
+  category      String   @default("default")
+  metadata      Json?    // Additional metadata
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  LandingPage   LandingPage? @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([landingPageId])
+  @@index([category])
+  @@index([createdAt])
 }
 
 model Menu {
@@ -503,6 +529,7 @@ model User {
   Client               Client[]
   Contact              Contact[]
   LandingPage          LandingPage[]
+  Media                Media[]
   Menu                 Menu[]
   Note                 Note[]
   OrganizationMember   OrganizationMember[]
