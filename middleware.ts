@@ -1,6 +1,7 @@
 import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { applyRateLimit } from '@/lib/middleware/rate-limit'
 
 // Force Node.js runtime instead of Edge
 export const runtime = 'nodejs'
@@ -22,6 +23,21 @@ const publicApiPaths = [
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  if (pathname === '/api/auth/signin') {
+    const rateLimitResponse = await applyRateLimit(request, 'authSignIn')
+    if (rateLimitResponse) return rateLimitResponse
+  }
+
+  if (pathname === '/api/qr/verify-password') {
+    const rateLimitResponse = await applyRateLimit(request, 'verifyPassword')
+    if (rateLimitResponse) return rateLimitResponse
+  }
+
+  if (pathname.startsWith('/api/ai/')) {
+    const rateLimitResponse = await applyRateLimit(request, 'ai')
+    if (rateLimitResponse) return rateLimitResponse
+  }
 
   // Allow public paths
   if (publicPaths.some(path => pathname === path || pathname.startsWith(path))) {

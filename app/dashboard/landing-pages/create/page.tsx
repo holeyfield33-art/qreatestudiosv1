@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { type PuckTemplate } from '@/lib/templates/puck-templates';
 import { getFeatureAccess, type PlanType } from '@/lib/utils/feature-access';
@@ -40,11 +39,13 @@ export default function CreateLandingPagePage() {
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [lockedTemplateId, setLockedTemplateId] = useState<string | null>(null);
+  const [origin, setOrigin] = useState('');
 
   // Get user's plan and feature access
   const userPlan = (session?.user?.organization?.plan as PlanType) || 'FREE';
   const featureAccess = getFeatureAccess(userPlan);
   const canAccessPremium = featureAccess.canAccessPremiumTemplates;
+  const templateParam = searchParams.get('template');
 
   // Fetch templates from database
   useEffect(() => {
@@ -66,6 +67,16 @@ export default function CreateLandingPagePage() {
     }
     fetchTemplates();
   }, []);
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
+  useEffect(() => {
+    if (!templatesLoading && templateParam && !selectedTemplate) {
+      handleTemplateSelect(templateParam);
+    }
+  }, [templateParam, templatesLoading, selectedTemplate, canAccessPremium, templates]);
 
   // Get unique categories from templates
   const categories = ['all', ...Array.from(new Set(templates.map(t => t.category)))];
@@ -447,7 +458,7 @@ export default function CreateLandingPagePage() {
                     <p className="text-xs text-blue-700 mb-2 font-semibold">Your landing page will be:</p>
                     <div className="flex items-center gap-2 p-2 bg-white rounded-lg">
                       <span className="text-sm font-mono truncate flex-1 text-blue-900 font-medium">
-                        {window.location.origin.replace(/^https?:\/\//, '')}/l/{slug}
+                        {origin ? origin.replace(/^https?:\/\//, '') : 'qreatestudios.com'}/l/{slug}
                       </span>
                     </div>
                   </div>
@@ -576,6 +587,63 @@ export default function CreateLandingPagePage() {
               Upgrade to Business
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Preview Modal */}
+      <Dialog open={!!previewTemplate} onOpenChange={(open) => setPreviewTemplate(open ? previewTemplate : null)}>
+        <DialogContent className="sm:max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">Template Preview</DialogTitle>
+            <DialogDescription className="text-base">
+              Preview the template before selecting it.
+            </DialogDescription>
+          </DialogHeader>
+
+          {previewTemplate && (() => {
+            const template = templates.find(t => t.id === previewTemplate);
+            if (!template) return null;
+
+            const isPremiumLocked = template.isPremium && !canAccessPremium;
+
+            return (
+              <div className="space-y-4">
+                <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
+                  <Image
+                    src={template.previewImage || template.thumbnail}
+                    alt={template.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 800px"
+                  />
+                  {template.isPremium && (
+                    <Badge className="absolute top-3 right-3 bg-yellow-500 text-yellow-950">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Premium
+                    </Badge>
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-1">{template.name}</h3>
+                  <p className="text-sm text-muted-foreground">{template.description}</p>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setPreviewTemplate(null)}>
+                    Close
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setPreviewTemplate(null);
+                      handleTemplateSelect(template.id);
+                    }}
+                    disabled={isPremiumLocked}
+                  >
+                    {isPremiumLocked ? 'Upgrade to Use' : 'Use Template'}
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>

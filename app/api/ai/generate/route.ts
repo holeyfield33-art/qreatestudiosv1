@@ -106,10 +106,10 @@ Format as JSON with keys: hero, valueProps (array), features (array), testimonia
 
       case 'blog-writer':
         prompt = `Write a comprehensive, SEO-optimized blog post about:
-Topic: ${context.topic}
-Target Keywords: ${context.keywords}
-Tone: ${context.tone || 'professional and engaging'}
-Word Count: ${context.wordCount || 1000} words
+Topic: ${sanitizedContext.topic}
+Target Keywords: ${sanitizedContext.keywords}
+Tone: ${sanitizedContext.tone || 'professional and engaging'}
+Word Count: ${sanitizedContext.wordCount || 1000} words
 
 Include:
 - Compelling headline
@@ -123,36 +123,36 @@ Write in markdown format with proper headings (##, ###).`;
         break;
 
       case 'ad-copy':
-        prompt = `Create ${context.variations || 3} high-converting ad copy variations for:
-Platform: ${context.platform || 'Facebook/Instagram'}
-Product/Service: ${context.product}
-Target Audience: ${context.audience}
-Key Benefit: ${context.benefit}
-CTA: ${context.cta || 'Learn More'}
+        prompt = `Create ${sanitizedContext.variations || 3} high-converting ad copy variations for:
+Platform: ${sanitizedContext.platform || 'Facebook/Instagram'}
+Product/Service: ${sanitizedContext.product}
+Target Audience: ${sanitizedContext.audience}
+Key Benefit: ${sanitizedContext.benefit}
+CTA: ${sanitizedContext.cta || 'Learn More'}
 
-For ${context.platform === 'Google' ? 'Google Ads' : 'social media'}, each ad should have:
+For ${sanitizedContext.platform === 'Google' ? 'Google Ads' : 'social media'}, each ad should have:
 - Attention-grabbing hook
 - Clear benefit statement
 - Strong call-to-action
-${context.platform === 'Facebook' ? '- Under 125 characters' : ''}
+${sanitizedContext.platform === 'Facebook' ? '- Under 125 characters' : ''}
 
 Format as JSON with key: ads (array of { headline, body, cta })`;
         useJSON = true;
         break;
 
       case 'social-media':
-        prompt = `Generate ${context.count || 5} social media posts for:
-Platform: ${context.platform}
-Topic: ${context.topic}
-Brand Voice: ${context.voice || 'professional yet approachable'}
-Include Hashtags: ${context.includeHashtags !== false ? 'yes' : 'no'}
+        prompt = `Generate ${sanitizedContext.count || 5} social media posts for:
+Platform: ${sanitizedContext.platform}
+Topic: ${sanitizedContext.topic}
+Brand Voice: ${sanitizedContext.voice || 'professional yet approachable'}
+Include Hashtags: ${sanitizedContext.includeHashtags !== false ? 'yes' : 'no'}
 
 Each post should:
 - Hook readers in first line
 - Provide value or insight
 - Include a CTA or question
 - Be platform-appropriate length
-${context.includeHashtags !== false ? '- Include 3-5 relevant hashtags' : ''}
+${sanitizedContext.includeHashtags !== false ? '- Include 3-5 relevant hashtags' : ''}
 
 Format as JSON with key: posts (array of strings)`;
         useJSON = true;
@@ -160,9 +160,9 @@ Format as JSON with key: posts (array of strings)`;
 
       case 'email-template':
         prompt = `Create a professional email template for:
-Purpose: ${context.purpose}
-Audience: ${context.audience}
-Tone: ${context.tone || 'professional'}
+Purpose: ${sanitizedContext.purpose}
+Audience: ${sanitizedContext.audience}
+Tone: ${sanitizedContext.tone || 'professional'}
 
 Generate:
 - Subject line (attention-grabbing, under 50 characters)
@@ -177,10 +177,10 @@ Format as JSON with keys: subject, preview, body, cta, ps`;
 
       case 'menu-description':
         prompt = `Write appetizing menu item descriptions for:
-${context.items.map((item: any, i: number) => `${i + 1}. ${item.name} - ${item.ingredients || 'no ingredients listed'}`).join('\n')}
+${sanitizedContext.items.map((item: any, i: number) => `${i + 1}. ${item.name} - ${item.ingredients || 'no ingredients listed'}`).join('\n')}
 
-Style: ${context.style || 'upscale casual'}
-Cuisine: ${context.cuisine || 'contemporary'}
+Style: ${sanitizedContext.style || 'upscale casual'}
+Cuisine: ${sanitizedContext.cuisine || 'contemporary'}
 
 For each item, write 2-3 sentences that:
 - Use sensory language
@@ -194,10 +194,10 @@ Format as JSON with key: descriptions (array matching input order)`;
 
       case 'business-proposal':
         prompt = `Generate a professional business proposal for:
-Client: ${context.clientName}
-Services: ${context.services}
-Project Timeline: ${context.timeline}
-Budget Range: ${context.budget}
+Client: ${sanitizedContext.clientName}
+Services: ${sanitizedContext.services}
+Project Timeline: ${sanitizedContext.timeline}
+Budget Range: ${sanitizedContext.budget}
 
 Include:
 1. Executive Summary

@@ -154,11 +154,11 @@ export async function GET(req: Request) {
 }
 ```
 
-**TODO:** Update all other admin routes to use this helper:
+**Completed:** Updated all admin routes to use `requireAdmin()` helper:
 - `/app/api/admin/print-orders/route.ts`
 - `/app/api/admin/orders/[orderId]/status/route.ts`
 - `/app/api/admin/orders/[orderId]/ship/route.ts`
-- Any other admin routes
+- `/app/api/admin/orders/nfc/route.ts`
 
 ---
 
@@ -169,32 +169,16 @@ export async function GET(req: Request) {
 1. **Update All AI Prompt Cases**
    - File: `app/api/ai/generate/route.ts`
    - Action: Replace all `context.X` with `sanitizedContext.X` in all switch cases
-   - Currently updated: `design-assistant`, `webpage-designer`
-   - TODO: `blog-writer`, `ad-copy`, `social-media`, `email-template`, `menu-description`, `business-proposal`
+   - Completed: `blog-writer`, `ad-copy`, `social-media`, `email-template`, `menu-description`, `business-proposal`
 
 2. **Migrate Existing QR Passwords**
    - Existing QR codes with plain text passwords need migration
-   - Create migration script:
-     ```typescript
-     // scripts/migrate-qr-passwords.ts
-     const qrCodes = await prisma.qRCode.findMany({
-       where: { isSecure: true, password: { not: null } }
-     });
-
-     for (const qr of qrCodes) {
-       if (qr.password && !qr.password.startsWith('$2')) { // Not hashed
-         const hashed = await hashQRPassword(qr.password);
-         await prisma.qRCode.update({
-           where: { id: qr.id },
-           data: { password: hashed }
-         });
-       }
-     }
-     ```
+    - Migration script created: `scripts/migrate-qr-passwords.ts`
 
 3. **Update Remaining Admin Routes**
    - Search for all routes with admin checks
    - Replace inline checks with `requireAdmin()` helper
+   - Completed for all current admin routes
 
 ### Medium Priority
 
@@ -202,10 +186,12 @@ export async function GET(req: Request) {
    - File: `app/api/qr-codes/[id]/route.ts`
    - Add Zod schemas for validation
    - Validate URL formats, lengths, types
+   - Completed with Zod validation and structured error responses
 
 5. **Verify Landing Page Ownership**
    - File: `app/api/qr-codes/[id]/route.ts:81-86`
    - Add ownership check before updating landingPageId relation
+   - Completed with ownership and conflict checks
 
 6. **Implement Rate Limiting**
    - Install: `npm install @upstash/ratelimit @upstash/redis`
@@ -214,6 +200,7 @@ export async function GET(req: Request) {
      - `/api/auth/signin`
      - `/api/qr/verify-password`
      - `/api/ai/*`
+   - Completed (requires `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`)
 
 ### Low Priority
 
@@ -393,11 +380,11 @@ If critical issues arise post-deployment:
 - [x] Medium-priority vulnerabilities addressed
 - [x] New utility functions created
 - [x] Security documentation written
-- [ ] All AI prompt cases updated (partial)
-- [ ] Admin routes migrated to requireAdmin (partial)
-- [ ] Tests written and passing (TODO)
-- [ ] QR password migration script created (TODO)
-- [ ] Rate limiting implemented (TODO)
+- [x] All AI prompt cases updated
+- [x] Admin routes migrated to requireAdmin
+- [ ] Tests written and passing
+- [x] QR password migration script created
+- [x] Rate limiting implemented
 
 ---
 

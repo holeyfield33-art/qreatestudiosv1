@@ -3,26 +3,32 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { LANDING_PAGE_TEMPLATES } from '@/lib/templates/landing-page-templates';
+import { type PuckTemplate } from '@/lib/templates/puck-templates';
+import { getFeatureAccess, type PlanType } from '@/lib/utils/feature-access';
 import { Search, Sparkles, Plus, Eye, Package, Calendar, Home, Palette, FileText, ShoppingBag, Dumbbell, Scissors, Wrench, Building, Scale } from 'lucide-react';
 import Image from 'next/image';
 
 export default function LandingPagesPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [landingPages, setLandingPages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
+  const [templates, setTemplates] = useState<PuckTemplate[]>([]);
   const [activeTab, setActiveTab] = useState<'my-pages' | 'templates'>('templates');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   useEffect(() => {
     fetchLandingPages();
+    fetchTemplates();
   }, []);
 
   async function fetchLandingPages() {
@@ -62,10 +68,28 @@ export default function LandingPagesPage() {
     }
   }
 
+  async function fetchTemplates() {
+    try {
+      const res = await fetch('/api/templates');
+      const data = await res.json();
+      if (data.success) {
+        setTemplates(data.templates);
+      } else {
+        toast.error('Failed to load templates');
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to load templates:', error);
+      }
+    } finally {
+      setTemplatesLoading(false);
+    }
+  }
+
   // Filter templates by search and category
-  const categories = ['all', ...Array.from(new Set(LANDING_PAGE_TEMPLATES.map(t => t.category)))];
+  const categories = ['all', ...Array.from(new Set(templates.map(t => t.category)))];
   
-  const filteredTemplates = LANDING_PAGE_TEMPLATES.filter((template) => {
+  const filteredTemplates = templates.filter((template) => {
     const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
     const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -73,7 +97,16 @@ export default function LandingPagesPage() {
     return matchesCategory && matchesSearch;
   });
 
+  const userPlan = (session?.user?.organization?.plan as PlanType) || 'FREE';
+  const featureAccess = getFeatureAccess(userPlan);
+  const canAccessPremium = featureAccess.canAccessPremiumTemplates;
+
   function handleTemplateSelect(templateId: string) {
+    const template = templates.find(t => t.id === templateId);
+    if (template?.isPremium && !canAccessPremium) {
+      toast.error('Upgrade to access premium templates');
+      return;
+    }
     router.push(`/dashboard/landing-pages/create?template=${templateId}`);
   }
 
@@ -168,58 +201,79 @@ export default function LandingPagesPage() {
           </Card>
 
           {/* Template Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6" role="list" aria-label="Template library">
-            {filteredTemplates.map((template) => (
-              <Card 
-                key={template.id} 
-                className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group"
-                onClick={() => handleTemplateSelect(template.id)}
-                role="listitem"
-              >
-                {/* Preview Image */}
-                <div className="relative aspect-video bg-muted overflow-hidden">
-                  <Image
-                    src={template.previewImage}
-                    alt={template.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                  {template.isPremium && (
-                    <Badge className="absolute top-3 right-3 bg-yellow-500 text-yellow-950">
-                      <Sparkles className="mr-1 h-3 w-3" />
-                      Premium
-                    </Badge>
-                  )}
-                </div>
+          {templatesLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Card key={i} className="overflow-hidden animate-pulse">
+                  <div className="aspect-video bg-gray-200" />
+                  <CardContent className="p-4">
+                    <div className="h-5 bg-gray-200 rounded mb-2" />
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6" role="list" aria-label="Template library">
+              {filteredTemplates.map((template) => {
+                const isPremiumLocked = template.isPremium && !canAccessPremium;
 
-                {/* Content */}
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg mb-1">{template.name}</CardTitle>
-                      <Badge variant="secondary" className="text-xs">
-                        {getTemplateIcon(template.id)} {template.category}
-                      </Badge>
-                    </div>
-                  </div>
-                  <CardDescription className="mt-2">{template.description}</CardDescription>
-                </CardHeader>
-
-                <CardContent>
-                  <Button 
-                    className="w-full min-h-[44px]"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleTemplateSelect(template.id);
-                    }}
+                return (
+                  <Card 
+                    key={template.id} 
+                    className={`overflow-hidden transition-all duration-200 cursor-pointer group ${
+                      isPremiumLocked ? 'opacity-60 hover:opacity-80' : 'hover:shadow-lg'
+                    }`}
+                    onClick={() => handleTemplateSelect(template.id)}
+                    role="listitem"
                   >
-                    Use Template
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    {/* Preview Image */}
+                    <div className="relative aspect-video bg-muted overflow-hidden">
+                      <Image
+                        src={template.previewImage || template.thumbnail}
+                        alt={template.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                      {template.isPremium && (
+                        <Badge className="absolute top-3 right-3 bg-yellow-500 text-yellow-950">
+                          <Sparkles className="mr-1 h-3 w-3" />
+                          Premium
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg mb-1">{template.name}</CardTitle>
+                          <Badge variant="secondary" className="text-xs">
+                            {getTemplateIcon(template.id)} {template.category}
+                          </Badge>
+                        </div>
+                      </div>
+                      <CardDescription className="mt-2">{template.description}</CardDescription>
+                    </CardHeader>
+
+                    <CardContent>
+                      <Button 
+                        className="w-full min-h-[44px]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTemplateSelect(template.id);
+                        }}
+                        disabled={isPremiumLocked}
+                      >
+                        {isPremiumLocked ? 'Upgrade to Use' : 'Use Template'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
 
           {filteredTemplates.length === 0 && (
             <Card className="p-12">
@@ -251,25 +305,25 @@ export default function LandingPagesPage() {
                 <Card key={page.id} className="p-6 hover:shadow-lg transition-shadow" role="listitem">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="font-semibold text-lg mb-1">{page.title}</h3>
+                      <h3 className="font-semibold text-lg mb-1">{page.name}</h3>
                       <p className="text-sm text-muted-foreground">
                         /{page.slug}
                       </p>
                     </div>
-                    <Badge variant={page.published ? 'default' : 'secondary'}>
-                      {page.published ? 'Published' : 'Draft'}
+                    <Badge variant={page.isPublished ? 'default' : 'secondary'}>
+                      {page.isPublished ? 'Published' : 'Draft'}
                     </Badge>
                   </div>
 
-                  {page.qrCode && (
+                  {page.QRCode && (
                     <div className="mb-4 text-sm">
                       <span className="text-muted-foreground">Linked QR: </span>
-                      <span className="font-medium">{page.qrCode.name}</span>
+                      <span className="font-medium">{page.QRCode.name}</span>
                     </div>
                   )}
 
                   <div className="mb-4 text-sm text-muted-foreground">
-                    {page.views} views • Created {new Date(page.createdAt).toLocaleDateString()}
+                    {page.views ?? 0} views • Created {new Date(page.createdAt).toLocaleDateString()}
                   </div>
 
                   <div className="flex gap-2" role="group" aria-label="Landing page actions">
@@ -278,7 +332,7 @@ export default function LandingPagesPage() {
                         Visual Editor
                       </Button>
                     </Link>
-                    {page.published && (
+                    {page.isPublished && (
                       <Link href={`/l/${page.slug}`} target="_blank" className="flex-1">
                         <Button variant="outline" className="w-full min-h-[44px]">
                           View

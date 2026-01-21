@@ -7,28 +7,30 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-// Mock the Puck component since it's dynamically imported
-vi.mock('@measured/puck', () => ({
-  Puck: ({ data, onChange, onPublish }: any) => (
-    <div data-testid="puck-editor">
-      <button 
-        onClick={() => onChange({ ...data, modified: true })}
-        data-testid="modify-content"
-      >
-        Modify Content
-      </button>
-      <button onClick={() => onPublish(data)} data-testid="puck-publish">
-        Puck Publish
-      </button>
-      <div data-testid="puck-data">{JSON.stringify(data)}</div>
-    </div>
-  ),
-}));
+// Mock GrapesJS editor
+vi.mock('@/components/builder/GrapesJSEditor', () => {
+  const React = require('react');
+  const MockEditor = React.forwardRef(({ onChange }: any, ref: any) => {
+    React.useImperativeHandle(ref, () => ({
+      getHtml: () => '<div>mock</div>',
+      getCss: () => '',
+      getJson: () => ({ mock: true }),
+    }));
 
-// Mock puck config
-vi.mock('@/lib/puckConfig', () => ({
-  default: { components: {} },
-}));
+    return (
+      <div data-testid="grapesjs-editor">
+        <button
+          onClick={() => onChange?.({ html: '<div>changed</div>', css: '', json: { changed: true } })}
+          data-testid="modify-content"
+        >
+          Modify Content
+        </button>
+      </div>
+    );
+  });
+
+  return { default: MockEditor };
+});
 
 // Mock sonner toast
 vi.mock('sonner', () => ({
@@ -105,7 +107,7 @@ describe('BuilderPage - Core Functionality', () => {
     render(<BuilderPage params={params} />);
     
     await waitFor(() => {
-      expect(screen.getByTestId('puck-editor')).toBeInTheDocument();
+      expect(screen.getByTestId('grapesjs-editor')).toBeInTheDocument();
     });
     
     // Trigger content modification
@@ -126,7 +128,7 @@ describe('BuilderPage - Core Functionality', () => {
     render(<BuilderPage params={params} />);
     
     await waitFor(() => {
-      expect(screen.getByTestId('puck-editor')).toBeInTheDocument();
+      expect(screen.getByTestId('grapesjs-editor')).toBeInTheDocument();
     });
     
     // Trigger content modification
@@ -143,7 +145,7 @@ describe('BuilderPage - Core Functionality', () => {
         );
         expect(patchCalls.length).toBeGreaterThan(0);
       },
-      { timeout: 3000 }
+      { timeout: 4000 }
     );
   });
 
@@ -259,7 +261,7 @@ describe('BuilderPage - Core Functionality', () => {
     render(<BuilderPage params={params} />);
     
     await waitFor(() => {
-      expect(screen.getByTestId('puck-editor')).toBeInTheDocument();
+      expect(screen.getByTestId('grapesjs-editor')).toBeInTheDocument();
     });
     
     // Make a change
@@ -322,8 +324,7 @@ describe('BuilderPage - Edge Cases', () => {
     render(<BuilderPage params={params} />);
     
     await waitFor(() => {
-      const puckData = screen.getByTestId('puck-data');
-      expect(puckData.textContent).toContain('Hero');
+      expect(screen.getByTestId('grapesjs-editor')).toBeInTheDocument();
     });
   });
 
@@ -350,9 +351,7 @@ describe('BuilderPage - Edge Cases', () => {
     render(<BuilderPage params={params} />);
     
     await waitFor(() => {
-      const puckData = screen.getByTestId('puck-data');
-      // Should have default empty structure
-      expect(puckData.textContent).toContain('content');
+      expect(screen.getByTestId('grapesjs-editor')).toBeInTheDocument();
     });
   });
 

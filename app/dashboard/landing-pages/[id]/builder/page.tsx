@@ -8,13 +8,14 @@ import { Loader2, ArrowLeft, Eye, Save, Sparkles, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import './builder.css';
 
-// Lazy load GrapesJS editor to avoid SSR issues
-const GrapesJSEditor = dynamic(
-  () => import('@/components/builder/GrapesJSEditor'),
-  {
-    ssr: false,
-  }
-);
+const GrapesJSEditor = dynamic(() => import('@/components/builder/GrapesJSEditor'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full flex items-center justify-center text-muted-foreground">
+      Loading editor...
+    </div>
+  ),
+});
 
 interface BuilderPageProps {
   params: Promise<{ id: string }>;
@@ -99,6 +100,106 @@ function convertPuckToHtml(puckData: any): string {
           </section>
         `;
         break;
+
+      case 'MenuSection':
+        html += `
+          <section style="padding: 80px 20px; background: #ffffff;">
+            <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+              <h2 style="font-size: 42px; margin-bottom: 16px; font-weight: bold;">${props.menu?.name || 'Our Menu'}</h2>
+              ${props.menu?.description ? `<p style="font-size: 18px; color: #6b7280; margin-bottom: 48px;">${props.menu.description}</p>` : ''}
+            </div>
+            <div style="max-width: 900px; margin: 0 auto;">
+              ${(Array.isArray(props.menu?.categories) && props.menu.categories.length > 0)
+                ? props.menu.categories.map((category: any) => `
+                  <div style="margin-bottom: 40px;">
+                    <h3 style="font-size: 28px; font-weight: 600; margin-bottom: 16px;">${category.name || 'Category'}</h3>
+                    <div style="display: grid; gap: 12px;">
+                      ${(Array.isArray(category.items) ? category.items : []).map((item: any) => `
+                        <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #ffffff;">
+                          <div>
+                            <div style="font-weight: 600;">${item.name || 'Menu Item'}</div>
+                            ${item.description ? `<div style="color: #6b7280; font-size: 14px;">${item.description}</div>` : ''}
+                          </div>
+                          ${typeof item.price === 'number' ? `<div style="font-weight: 600;">${props.menu?.currencySymbol || '$'}${item.price.toFixed(2)}</div>` : ''}
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                `).join('')
+                : `
+                  <div style="text-align: center; color: #6b7280; padding: 20px;">
+                    Menu data will appear here once available.
+                  </div>
+                `}
+            </div>
+          </section>
+        `;
+        break;
+
+      case 'QRCodeSection':
+        html += `
+          <section style="padding: 80px 20px; background: #f9fafb; text-align: center;">
+            <div style="max-width: 800px; margin: 0 auto;">
+              ${props.title ? `<h2 style="font-size: 42px; margin-bottom: 16px; font-weight: bold;">${props.title}</h2>` : ''}
+              ${props.subtitle ? `<p style="font-size: 18px; color: #6b7280; margin-bottom: 32px;">${props.subtitle}</p>` : ''}
+              <div style="display: inline-block; padding: 20px; background: white; border-radius: 16px; box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);">
+                ${props.qrCodeUrl ? `<img src="${props.qrCodeUrl}" alt="QR code" style="width: 220px; height: 220px; object-fit: contain;" />` : `
+                  <div style="width: 220px; height: 220px; border: 2px dashed #cbd5f5; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                    QR Code Preview
+                  </div>
+                `}
+              </div>
+              ${props.destinationUrl ? `<p style="margin-top: 16px; color: #6b7280;">${props.destinationUrl}</p>` : ''}
+            </div>
+          </section>
+        `;
+        break;
+
+      case 'ContactSection':
+        html += `
+          <section style="padding: 80px 20px; background: #f9fafb;">
+            <div style="max-width: 1100px; margin: 0 auto;">
+              ${props.title ? `<h2 style="text-align: center; font-size: 40px; margin-bottom: 16px; font-weight: bold;">${props.title}</h2>` : ''}
+              ${props.subtitle ? `<p style="text-align: center; color: #6b7280; margin-bottom: 48px;">${props.subtitle}</p>` : ''}
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px;">
+                ${props.address ? `<div><strong>Address</strong><p style="color: #6b7280; white-space: pre-line;">${props.address}</p></div>` : ''}
+                ${props.phone ? `<div><strong>Phone</strong><p style="color: #6b7280;">${props.phone}</p></div>` : ''}
+                ${props.email ? `<div><strong>Email</strong><p style="color: #6b7280;">${props.email}</p></div>` : ''}
+                ${(Array.isArray(props.hours) && props.hours.length > 0) ? `
+                  <div>
+                    <strong>Hours</strong>
+                    ${(props.hours || []).map((hour: any) => {
+                      const text = typeof hour === 'string' ? hour : hour?.text;
+                      return text ? `<p style=\"color: #6b7280;\">${text}</p>` : '';
+                    }).join('')}
+                  </div>
+                ` : ''}
+              </div>
+              ${props.mapEmbed ? `
+                <div style="margin-top: 32px; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);">
+                  <iframe src="${props.mapEmbed}" style="border: 0; width: 100%; height: 360px;" loading="lazy" allowfullscreen></iframe>
+                </div>
+              ` : ''}
+            </div>
+          </section>
+        `;
+        break;
+
+      case 'LegacyHTML':
+        html += props.html || '';
+        break;
+
+      case 'GrapesJSSection':
+        html += props.html || '';
+        break;
+
+      default:
+        html += `
+          <section style="padding: 40px 20px; border: 1px dashed #cbd5f5; margin: 20px 0; text-align: center; color: #64748b;">
+            Unsupported section: ${component.type}
+          </section>
+        `;
+        break;
     }
   }
   
@@ -117,7 +218,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const router = useRouter();
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const editorRef = useRef<any>(null);
+  const editorDataRef = useRef<{ html: string; css: string; json: any } | null>(null);
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -159,14 +260,24 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       if (content && content.content && Array.isArray(content.content)) {
         // This is Puck format, convert to GrapesJS HTML
         const html = convertPuckToHtml(content);
-        setEditorData({ html, css: '', json: null });
+        const nextData = { html, css: '', json: null };
+        setEditorData(nextData);
+        editorDataRef.current = nextData;
       } else if (content && typeof content === 'object' && (content.html || content.json)) {
         // Already in GrapesJS format
-        setEditorData(content);
+        const nextData = {
+          html: content.html || '',
+          css: content.css || '',
+          json: content.json ?? null,
+        };
+        setEditorData(nextData);
+        editorDataRef.current = nextData;
       } else if (page.Template && page.Template.defaultSections) {
         // Load from template
         const html = convertPuckToHtml(page.Template.defaultSections);
-        setEditorData({ html, css: '', json: null });
+        const nextData = { html, css: '', json: null };
+        setEditorData(nextData);
+        editorDataRef.current = nextData;
       } else {
         // Empty page - load default hero
         const defaultHtml = `
@@ -178,7 +289,9 @@ export default function BuilderPage({ params }: BuilderPageProps) {
             </div>
           </section>
         `;
-        setEditorData({ html: defaultHtml, css: '', json: null });
+        const nextData = { html: defaultHtml, css: '', json: null };
+        setEditorData(nextData);
+        editorDataRef.current = nextData;
       }
       
       setLastSaved(page.updatedAt ? new Date(page.updatedAt) : null);
@@ -194,14 +307,11 @@ export default function BuilderPage({ params }: BuilderPageProps) {
 
   const saveToAPI = async (showToast = true) => {
     try {
-      if (!editorRef.current) {
+      if (!editorDataRef.current) {
         throw new Error('Editor not initialized');
       }
 
-      // Get HTML, CSS, and JSON from GrapesJS
-      const html = editorRef.current.getHtml();
-      const css = editorRef.current.getCss();
-      const json = editorRef.current.getJson();
+      const { html, css, json } = editorDataRef.current;
 
       const contentToSave = {
         html,
@@ -266,12 +376,15 @@ export default function BuilderPage({ params }: BuilderPageProps) {
   }, [pageId]);
 
   // Handle editor changes
-  const handleEditorChange = useCallback(() => {
+  const handleEditorChange = useCallback((data?: { html: string; css: string; json: any }) => {
+    if (data) {
+      editorDataRef.current = data;
+    }
     scheduleAutoSave();
   }, [scheduleAutoSave]);
 
   const handleManualSave = async () => {
-    if (!editorRef.current || saving) return;
+    if (!editorDataRef.current || saving) return;
 
     setSaving(true);
     const success = await saveToAPI(true);
@@ -279,7 +392,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
   };
 
   const handlePublish = async () => {
-    if (!editorRef.current) return;
+    if (!editorDataRef.current) return;
 
     setSaving(true);
     try {
@@ -455,11 +568,10 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       {/* GrapesJS Editor */}
       <div className="flex-1 overflow-hidden">
         {editorData ? (
-          <GrapesJSEditor
-            ref={editorRef}
-            initialData={editorData}
-            onChange={handleEditorChange}
-          />
+              <GrapesJSEditor
+                initialData={editorData}
+                onChange={handleEditorChange}
+              />
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
