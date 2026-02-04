@@ -2,7 +2,6 @@
 'use client';
 
 import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
-import 'grapesjs/dist/css/grapes.min.css';
 
 interface GrapesJSEditorProps {
   initialData?: any;
