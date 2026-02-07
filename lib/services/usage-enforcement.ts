@@ -42,7 +42,7 @@ export async function canUseAI(userId: string): Promise<{
     where: { userId },
   });
 
-  const plan = subscription?.plan || 'FREE';
+  const _plan = subscription?.plan || 'FREE';
   
   // Check if plan includes AI (Free plan has limited AI, Pro+ has more)
   // Token limits are checked in ai-usage-service

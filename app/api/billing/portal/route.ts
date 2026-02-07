@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { createBillingPortalSession } from '@/lib/services/stripe-service';
 import { getBaseUrl } from '@/lib/utils/urls';
 
-export async function POST(req: Request) {
+export async function POST(_req: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {

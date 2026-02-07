@@ -59,7 +59,7 @@ export async function deployLandingPage(
 
   const now = new Date();
 
-  const updated = await prisma.landingPage.update({
+  const _updated = await prisma.landingPage.update({
     where: { id: pageId },
     data: {
       publishedContent: page.draftContent as any,
@@ -177,7 +177,7 @@ export async function unpublishLandingPage(
  */
 export async function getHostingStatus(
   pageId: string,
-  userId: string
+  _userId: string
 ): Promise<HostingConfig | null> {
   const page = await prisma.landingPage.findUnique({
     where: { id: pageId },

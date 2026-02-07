@@ -1,6 +1,9 @@
 /**
  * Example usage of the plan-based feature access system
  * These examples demonstrate how to use feature access in various scenarios
+ * 
+ * NOTE: This is a documentation/example file showing usage patterns.
+ * Components referenced here are placeholders for illustration.
  */
 
 // ===================================
@@ -8,6 +11,11 @@
 // ===================================
 
 import { getServerFeatureAccess } from '@/lib/utils/feature-access-server';
+import Link from 'next/link';
+
+// Placeholder components used in examples below
+function AdvancedAnalyticsSection() { return <div>Advanced Analytics</div>; }
+function ExportButton() { return <button>Export</button>; }
 
 /**
  * Example: Conditional rendering in Server Component
@@ -48,7 +56,7 @@ import { Badge } from '@/components/ui/badge';
  * Example: Feature-gated button
  */
 export function AIOptimizeButton({ qrCodeId }: { qrCodeId: string }) {
-  const { features, plan } = useFeatureAccess();
+  const { features, plan: _plan } = useFeatureAccess();
   
   if (!features.canUseAIOptimization) {
     return (
@@ -84,7 +92,7 @@ export function ExportReportButton() {
  */
 export function CreateQRCodeForm() {
   const { features, isLoading } = useFeatureAccess();
-  const [qrCount, setQrCount] = useState(0);
+  const [qrCount, _setQrCount] = useState(0);
   
   const canCreateMore = features.maxQRCodes === -1 || qrCount < features.maxQRCodes;
   
@@ -118,7 +126,7 @@ import { enforceFeatureAccess, checkFeatureAccess } from '@/lib/utils/feature-ac
 /**
  * Example: Protected API route with enforceFeatureAccess
  */
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   const session = await auth();
   if (!session) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
@@ -143,7 +151,7 @@ export async function POST(req: NextRequest) {
 /**
  * Example: Optional feature with graceful fallback
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   const session = await auth();
   if (!session) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
@@ -173,7 +181,7 @@ import { revalidatePath } from 'next/cache';
 /**
  * Example: Server action with feature check
  */
-export async function createQRCode(formData: FormData) {
+export async function createQRCode(_formData: FormData) {
   const { features, plan } = await getServerFeatureAccess();
   
   // Check limit

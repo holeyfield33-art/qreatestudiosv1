@@ -9,7 +9,6 @@ import {
   type NFCOrderItem,
   calculateOrderTotal,
   getProductById,
-  formatPrice,
 } from '@/lib/types/nfc-products';
 
 export async function POST(req: Request) {
@@ -76,7 +75,7 @@ export async function POST(req: Request) {
     }
 
     // Calculate totals
-    const { subtotal, shipping, total } = calculateOrderTotal(items);
+    const { subtotal: _subtotal, shipping, total } = calculateOrderTotal(items);
 
     // Generate unique order number
     const orderNumber = `NFC-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;

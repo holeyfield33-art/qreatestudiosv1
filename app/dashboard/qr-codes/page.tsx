@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { QrCode, Plus, Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { QRCardSkeleton } from '@/components/loading/qr-card-skeleton';
 import { EmptyQRCodes } from '@/components/empty-states/empty-qr-codes';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,6 +19,7 @@ export default function QRCodesPage() {
 
   useEffect(() => {
     fetchQRCodes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   async function fetchQRCodes() {
@@ -32,7 +33,7 @@ export default function QRCodesPage() {
       if (data.qrCodes) {
         setQrCodes(data.qrCodes);
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to load QR codes');
     } finally {
       setLoading(false);

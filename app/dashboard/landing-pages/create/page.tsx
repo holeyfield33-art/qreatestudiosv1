@@ -76,6 +76,7 @@ export default function CreateLandingPagePage() {
     if (!templatesLoading && templateParam && !selectedTemplate) {
       handleTemplateSelect(templateParam);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [templateParam, templatesLoading, selectedTemplate, canAccessPremium, templates]);
 
   // Get unique categories from templates

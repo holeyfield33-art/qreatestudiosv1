@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getFeatureAccess, hasFeatureAccess, getFeatureLimit, isWithinLimit } from '@/lib/utils/feature-access';
+import { getFeatureAccess, hasFeatureAccess, isWithinLimit } from '@/lib/utils/feature-access';
 
 describe('Feature Access', () => {
   describe('getFeatureAccess', () => {

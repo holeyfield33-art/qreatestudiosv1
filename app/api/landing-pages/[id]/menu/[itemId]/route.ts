@@ -16,7 +16,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id, itemId } = await params;
+  const { id: _id, itemId } = await params;
 
   try {
     const body = await req.json();
@@ -74,7 +74,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id, itemId } = await params;
+  const { id: _id, itemId } = await params;
 
   try {
     // Verify ownership: check if menu item belongs to user's landing page

@@ -96,7 +96,7 @@ export const puckConfig: Config = {
         textAlign: 'center',
         minHeight: '70vh',
       },
-      render: ({ id, ...props }) => {
+      render: ({ _id, ...props }) => {
         // Ensure backgroundImage is properly passed and not undefined
         const finalProps = {
           ...props,
@@ -174,7 +174,7 @@ export const puckConfig: Config = {
         columns: 3,
         style: 'cards',
       },
-      render: ({ id, ...props }) => {
+      render: ({ _id, ...props }) => {
         return <FeaturesSection {...props} />;
       },
     },
@@ -194,7 +194,7 @@ export const puckConfig: Config = {
       defaultProps: {
         displayStyle: 'tabs',
       },
-      render: ({ id, ...props }) => <MenuSection {...props} />,
+      render: ({ _id, ...props }) => <MenuSection {...props} />,
     },
 
     QRCodeSection: {
@@ -247,7 +247,7 @@ export const puckConfig: Config = {
         instructions: ['Point your camera to scan', 'No app required'],
         showDeviceIcons: true,
       },
-      render: ({ id, ...props }) => <QRCodeSection {...props} />,
+      render: ({ _id, ...props }) => <QRCodeSection {...props} />,
     },
 
     GallerySection: {
@@ -321,7 +321,7 @@ export const puckConfig: Config = {
         aspectRatio: 'square',
         lightbox: true,
       },
-      render: ({ id, ...props }) => {
+      render: ({ _id, ...props }) => {
         // Ensure images array is properly passed
         const finalProps = {
           ...props,
@@ -415,7 +415,7 @@ export const puckConfig: Config = {
         backgroundColor: '#000000',
         style: 'centered',
       },
-      render: ({ id, ...props }) => <CTASection {...props} />,
+      render: ({ _id, ...props }) => <CTASection {...props} />,
     },
 
     ContactSection: {
@@ -469,7 +469,7 @@ export const puckConfig: Config = {
         ],
         showMap: true,
       },
-      render: ({ id, ...props }) => <ContactSection {...props} />,
+      render: ({ _id, ...props }) => <ContactSection {...props} />,
     },
     LegacyHTML: {
       fields: {},

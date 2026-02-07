@@ -95,7 +95,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(_req: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -128,7 +128,7 @@ export async function DELETE(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {

@@ -40,6 +40,7 @@ export function ImageField({ value, onChange, category = 'restaurant' }: ImageFi
     <div className="space-y-2">
       {value?.url ? (
         <div className="relative group">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={value.url}
             alt={value.alt || 'Selected image'}

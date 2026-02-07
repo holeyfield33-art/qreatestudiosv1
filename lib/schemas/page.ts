@@ -174,7 +174,7 @@ export const PAGE_MIGRATIONS: Migration[] = [
  */
 export function migratePageSchema(doc: Record<string, unknown>): Record<string, unknown> {
   let current = doc;
-  const currentVersion = current.schemaVersion || '1.0.0';
+  const _currentVersion = current.schemaVersion || '1.0.0';
   
   for (const migration of PAGE_MIGRATIONS) {
     if (current.schemaVersion === migration.from) {

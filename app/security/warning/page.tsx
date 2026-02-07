@@ -21,6 +21,7 @@ function SecurityWarningContent() {
     } else {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
   async function performScan() {
@@ -80,7 +81,7 @@ function SecurityWarningContent() {
     );
   }
 
-  const riskColor = scanResult?.risk === 'high' ? 'red' : scanResult?.risk === 'medium' ? 'orange' : 'yellow';
+  const _riskColor = scanResult?.risk === 'high' ? 'red' : scanResult?.risk === 'medium' ? 'orange' : 'yellow';
   const riskBg = scanResult?.risk === 'high' ? 'bg-red-50' : scanResult?.risk === 'medium' ? 'bg-orange-50' : 'bg-yellow-50';
 
   return (

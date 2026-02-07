@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     name,
     description,
     type,
-    data,
+    data: _data,
     redirectUrl,
     clientId,
     style,

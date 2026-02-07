@@ -9,9 +9,9 @@ import { prisma } from '@/lib/prisma';
  * Fetch all active templates from database
  * Returns templates with proper structure for Puck builder
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const { session, error } = await requireAuth();
+    const { session: _session, error } = await requireAuth();
     
     if (error) {
       return error;

@@ -75,7 +75,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   const { session, error } = await requireAuth();
   if (error) return error;
   if (!session?.user?.id) {

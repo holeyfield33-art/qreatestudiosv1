@@ -49,6 +49,7 @@ export default function AdvancedAnalyticsPage() {
 
   useEffect(() => {
     fetchAnalytics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qrCodeId]);
 
   async function fetchAnalytics() {

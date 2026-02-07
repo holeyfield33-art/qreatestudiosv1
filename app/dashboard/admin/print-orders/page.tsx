@@ -13,6 +13,7 @@ export default function AdminPrintQueuePage() {
 
   useEffect(() => {
     fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   async function fetchOrders() {
@@ -21,7 +22,7 @@ export default function AdminPrintQueuePage() {
       const res = await fetch(`/api/admin/print-orders?status=${filter}`);
       const data = await res.json();
       setOrders(data.orders || []);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to load orders');
     } finally {
       setLoading(false);
@@ -42,7 +43,7 @@ export default function AdminPrintQueuePage() {
       } else {
         toast.error('Failed to update order');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Error updating order');
     }
   }

@@ -180,6 +180,7 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
                   }`}
                   onClick={() => onSelect(image.url)}
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={image.url}
                     alt={image.alt}
@@ -235,6 +236,7 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
                     }`}
                     onClick={() => onSelect(image.url)}
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={image.url}
                       alt={image.alt}
@@ -307,6 +309,7 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
                 }`}
                 onClick={() => onSelect(uploadedImage)}
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={uploadedImage}
                   alt="Uploaded"

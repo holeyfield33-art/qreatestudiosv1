@@ -14,12 +14,10 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { 
-  Download, 
   Save, 
   Trash2, 
   Send, 
   Plus,
-  Loader2,
 } from 'lucide-react';
 
 /**

@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       style,
       description,
       maxScans,
-      content,
+      content: _content,
     } = body;
 
     // Validate required fields
@@ -113,7 +113,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {

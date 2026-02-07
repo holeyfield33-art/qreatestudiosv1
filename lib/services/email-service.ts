@@ -64,7 +64,7 @@ export async function sendEmail(
   }
 }
 
-export async function sendPrintOrderAdminEmail(order: PrintOrder, qrCode: QRCodeData, customer: CustomerData) {
+export async function sendPrintOrderAdminEmail(order: PrintOrder, qrCode: QRCodeData, _customer: CustomerData) {
   const html = `
     <!DOCTYPE html>
     <html>

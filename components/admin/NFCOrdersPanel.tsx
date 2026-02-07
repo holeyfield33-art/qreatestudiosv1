@@ -30,7 +30,7 @@ import {
   Search,
   Filter,
 } from 'lucide-react';
-import { formatPrice, getProductById } from '@/lib/types/nfc-products';
+import { getProductById } from '@/lib/types/nfc-products';
 
 interface NFCOrder {
   id: string;
@@ -80,7 +80,7 @@ export function NFCOrdersPanel() {
       } else {
         toast.error('Failed to load NFC orders');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Error loading orders');
     } finally {
       setLoading(false);
@@ -102,7 +102,7 @@ export function NFCOrdersPanel() {
       } else {
         toast.error('Failed to update status');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Error updating order');
     } finally {
       setUpdating(false);
@@ -132,7 +132,7 @@ export function NFCOrdersPanel() {
       } else {
         toast.error('Failed to mark as shipped');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Error marking as shipped');
     } finally {
       setUpdating(false);

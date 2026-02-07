@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FileText, Sparkles, Copy, Check, Download } from 'lucide-react';
+import { FileText, Copy, Check, Download } from 'lucide-react';
 import { AI_FEATURES } from '@/lib/ai/ai-service';
 import { AIFeatureButton } from '@/components/ai/AIFeatureButton';
 import { toast } from 'sonner';

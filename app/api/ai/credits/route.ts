@@ -8,7 +8,7 @@ import { checkAICredits } from '@/lib/ai/qr-optimizer';
  * GET /api/ai/credits
  * Get AI optimization credits for current user
  */
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   try {
     const session = await auth();
 

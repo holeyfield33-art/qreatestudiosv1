@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { trackScan } from '@/lib/services/analytics-service';
 import { getBaseUrl } from '@/lib/utils/urls';

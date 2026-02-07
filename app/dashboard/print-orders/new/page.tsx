@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { ArrowLeft, Check, CreditCard, Package, Truck, ShoppingCart, Smartphone, Sticker, Triangle, FileText, Contact } from 'lucide-react';
-import Image from 'next/image';
 
 const PRINT_PRODUCTS = [
   {

@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Upload, Sparkles, Zap, Download, Globe, Printer, Eye, Check, ExternalLink, Copy, Package, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Sparkles, Download, Globe, Printer, Eye, Check, ExternalLink, Copy } from 'lucide-react';
 import Link from 'next/link';
 import { downloadQRCode } from '@/lib/utils/qr-download';
 import { getDisplayUrl } from '@/lib/utils/domains';
@@ -154,6 +154,7 @@ export default function CreateQRCodePage() {
   useEffect(() => {
     const newQrValue = generateQRValueFromData(formData);
     setQrValue(newQrValue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData, qrType]);
 
   function handleInputChange(field: string, value: string) {
@@ -1138,6 +1139,7 @@ export default function CreateQRCodePage() {
                     {logo && (
                       <>
                         <div className="mt-4">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={logo.url} alt="Logo preview" className="w-20 h-20 object-contain border rounded" />
                         </div>
                         <div className="mt-4">
@@ -1366,7 +1368,7 @@ export default function CreateQRCodePage() {
                       try {
                         await downloadQRCode('.qr-code-container', `qr-${createdQR.id}`, 'png', 2048);
                         toast.success('Downloaded PNG (2048x2048)');
-                      } catch (error) {
+                      } catch (_error) {
                         toast.error('Download failed. Please try again.');
                       }
                     }}
@@ -1388,7 +1390,7 @@ export default function CreateQRCodePage() {
                       try {
                         await downloadQRCode('.qr-code-container', `qr-${createdQR.id}`, 'svg');
                         toast.success('Downloaded SVG (Vector)');
-                      } catch (error) {
+                      } catch (_error) {
                         toast.error('Download failed. Please try again.');
                       }
                     }}

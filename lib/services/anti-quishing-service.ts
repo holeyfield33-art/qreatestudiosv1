@@ -89,7 +89,7 @@ export async function scanUrl(url: string): Promise<UrlScanResult> {
       result.risk = 'medium';
     }
 
-  } catch (error) {
+  } catch (_error) {
     result.warnings.push('Invalid URL format');
     result.risk = 'high';
     result.safe = false;

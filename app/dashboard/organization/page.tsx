@@ -64,7 +64,7 @@ export default function OrganizationPage() {
       }
       const json = await res.json();
       setData(json);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to load organization data');
     } finally {
       setLoading(false);

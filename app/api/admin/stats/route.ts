@@ -4,8 +4,8 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: Request) {
-  const { session, error } = await requireAdmin();
+export async function GET(_req: Request) {
+  const { session: _session, error } = await requireAdmin();
   if (error) return error;
 
   try {

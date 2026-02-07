@@ -43,7 +43,7 @@ function SignInForm() {
         router.push(callbackUrl)
         router.refresh()
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Something went wrong. Please try again.')
       toast.error('Something went wrong')
     } finally {
@@ -55,7 +55,7 @@ function SignInForm() {
     setIsLoading(true)
     try {
       await signIn('github', { callbackUrl })
-    } catch (err) {
+    } catch (_err) {
       setError('GitHub sign in failed')
       toast.error('GitHub sign in failed')
       setIsLoading(false)

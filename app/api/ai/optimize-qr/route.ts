@@ -132,7 +132,7 @@ export async function POST(req: Request) {
 }
 
 // Get AI credits for current user
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   try {
     const session = await auth();
 

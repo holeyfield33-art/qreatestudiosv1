@@ -84,6 +84,7 @@ export default function WhiteLabelPage() {
       .catch(() => {
         setPlanLoading(false)
       })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchBranding = async () => {
@@ -157,7 +158,7 @@ export default function WhiteLabelPage() {
       } else {
         toast.error(data.error || 'Failed to update branding');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to update branding');
     } finally {
       setLoading(false);
@@ -179,7 +180,7 @@ export default function WhiteLabelPage() {
       } else {
         toast.error(data.error || 'Failed to configure domain');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to configure domain');
     } finally {
       setLoading(false);
@@ -200,7 +201,7 @@ export default function WhiteLabelPage() {
       } else {
         toast.error(data.error || 'Failed to remove domain');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to remove domain');
     } finally {
       setLoading(false);
@@ -231,7 +232,7 @@ export default function WhiteLabelPage() {
       } else {
         toast.error(data.error || 'Failed to create sub-account');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to create sub-account');
     } finally {
       setLoading(false);
@@ -254,7 +255,7 @@ export default function WhiteLabelPage() {
       } else {
         toast.error(data.error || 'Failed to delete sub-account');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to delete sub-account');
     } finally {
       setLoading(false);
@@ -419,6 +420,7 @@ export default function WhiteLabelPage() {
                   <div className="mt-4">
                     <Label>Logo Preview</Label>
                     <div className="mt-2 p-4 border rounded-lg bg-muted">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={branding.logo.url}
                         alt="Logo preview"

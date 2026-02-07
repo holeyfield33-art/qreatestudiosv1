@@ -17,14 +17,14 @@ export async function POST(req: Request) {
   let body;
   try {
     body = await req.json();
-  } catch (e) {
+  } catch (_e) {
     return NextResponse.json(
       { error: 'Invalid JSON in request body' },
       { status: 400 }
     );
   }
 
-  const { title, slug, content, theme, qrCodeId, clientId, templateId, draftContent, metadata } = body;
+  const { title, slug, content, theme, qrCodeId, clientId: _clientId, templateId, draftContent, metadata } = body;
 
   if (!title || !slug) {
     return NextResponse.json(
@@ -179,7 +179,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   const { session, error } = await requireAuth();
   if (error) return error;
   if (!session?.user?.id) {

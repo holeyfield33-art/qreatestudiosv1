@@ -412,7 +412,7 @@ export async function checkAICredits(userId: string) {
 /**
  * Track AI optimization usage
  */
-export async function trackOptimizationUsage(userId: string, qrCodeId: string) {
+export async function trackOptimizationUsage(userId: string, _qrCodeId: string) {
   try {
     await prisma.aIUsage.create({
       data: {

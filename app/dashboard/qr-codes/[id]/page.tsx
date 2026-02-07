@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,14 +11,7 @@ import { AIOptimizationDialog } from '@/components/qr/AIOptimizationDialog';
 import QRCodeDisplay from '@/components/qr/QRCodeDisplay';
 import { downloadQRCode } from '@/lib/utils/qr-download';
 import { motion } from 'framer-motion';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useFeatureAccess } from '@/lib/hooks/use-feature-access';
 import { 
@@ -67,9 +59,9 @@ export default function QRDetailPage() {
   const { features, isLoading: featuresLoading } = useFeatureAccess();
   const [qrCode, setQrCode] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
+  const [_editing, _setEditing] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [qrDataUrl, setQrDataUrl] = useState<string>('');
+  const [_qrDataUrl, setQrDataUrl] = useState<string>('');
   const [aiCredits, setAiCredits] = useState({ remaining: 0, plan: 'free' });
 
   useEffect(() => {
@@ -77,6 +69,7 @@ export default function QRDetailPage() {
       fetchQRCode();
       fetchAICredits();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qrId]);
 
   async function fetchAICredits() {
@@ -106,7 +99,7 @@ export default function QRDetailPage() {
         toast.error('QR code not found');
         router.push('/dashboard/qr-codes');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to load QR code');
     } finally {
       setLoading(false);
@@ -158,7 +151,7 @@ export default function QRDetailPage() {
       } else {
         toast.error('Failed to delete QR code');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('An error occurred');
     }
   }

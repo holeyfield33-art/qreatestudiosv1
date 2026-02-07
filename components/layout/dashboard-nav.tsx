@@ -3,13 +3,12 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { getFeatureAccess, type PlanType } from '@/lib/utils/feature-access'
+import { type PlanType } from '@/lib/utils/feature-access'
 import {
   LayoutDashboard,
   QrCode,
   BarChart3,
   Users,
-  Printer,
   Palette,
   Settings,
   LogOut,

@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { startOfDay, endOfDay, subDays, format } from 'date-fns';
+import { subDays, format } from 'date-fns';
 
 export async function getAdvancedAnalytics(
   qrCodeId: string,

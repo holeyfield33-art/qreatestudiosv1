@@ -94,7 +94,7 @@ export async function generateStyledQRCode(
     try {
       const qrImage = sharp(qr.buffer);
       const metadata = await qrImage.metadata();
-      const logoSize = Math.floor((metadata.width || 400) * 0.2);
+      const _logoSize = Math.floor((metadata.width || 400) * 0.2);
 
       // Download and resize logo
       // For now, return base QR - logo embedding can be enhanced later

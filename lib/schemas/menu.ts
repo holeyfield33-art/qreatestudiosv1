@@ -160,7 +160,7 @@ export const SPICE_LEVELS: Record<SpiceLevelType, { emoji: string; label: string
 /**
  * Helper function to create a new empty menu item
  */
-export function createEmptyMenuItem(categoryId: string): Partial<MenuItem> {
+export function createEmptyMenuItem(_categoryId: string): Partial<MenuItem> {
   return {
     id: crypto.randomUUID(),
     name: '',

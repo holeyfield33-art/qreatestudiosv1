@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ImageBrowser } from '@/components/ImageBrowser';
 import { Image as ImageIcon, X, Plus } from 'lucide-react';
 
@@ -83,6 +83,7 @@ export function ImageArrayField({ value = [], onChange, category = 'restaurant' 
         {value.map((image, index) => (
           <div key={image.id} className="space-y-2">
             <div className="relative group">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={image.url}
                 alt={image.alt || `Image ${index + 1}`}

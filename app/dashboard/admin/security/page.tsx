@@ -13,6 +13,7 @@ export default function SecurityReportsPage() {
 
   useEffect(() => {
     fetchReports();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   async function fetchReports() {

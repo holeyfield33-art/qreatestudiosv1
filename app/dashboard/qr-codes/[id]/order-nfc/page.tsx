@@ -15,7 +15,6 @@ import {
   ShoppingCart,
   Plus,
   Minus,
-  Upload,
   Check,
   ExternalLink,
   Truck,
@@ -24,7 +23,6 @@ import {
   Copy,
 } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   NFC_PRODUCTS,
   type NFCProduct,
@@ -50,6 +48,7 @@ export default function OrderNFCPage() {
 
   useEffect(() => {
     fetchQRCode();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qrId]);
 
   async function fetchQRCode() {
@@ -63,7 +62,7 @@ export default function OrderNFCPage() {
         toast.error('QR code not found');
         router.push('/dashboard/qr-codes');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to load QR code');
     } finally {
       setLoading(false);
@@ -142,7 +141,7 @@ export default function OrderNFCPage() {
       ));
 
       toast.success('Design uploaded!');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to upload design');
     } finally {
       setUploadingDesign(null);
@@ -320,6 +319,7 @@ export default function OrderNFCPage() {
                 <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   {/* Product Image */}
                   <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={product.image}
                       alt={product.name}

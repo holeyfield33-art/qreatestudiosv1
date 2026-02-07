@@ -332,7 +332,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
         try {
           const errorData = await res.json();
           errorMessage = errorData.error || errorMessage;
-        } catch (e) {
+        } catch (_e) {
           errorMessage = res.statusText || errorMessage;
         }
         throw new Error(errorMessage);
@@ -373,6 +373,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       await saveToAPI(false);
       setAutoSaving(false);
     }, 3000); // Auto-save after 3 seconds of no changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageId]);
 
   // Handle editor changes
@@ -387,7 +388,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
     if (!editorDataRef.current || saving) return;
 
     setSaving(true);
-    const success = await saveToAPI(true);
+    const _success = await saveToAPI(true);
     setSaving(false);
   };
 

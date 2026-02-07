@@ -128,10 +128,13 @@ export default function QRCodeDisplay({
   }, [mounted, validationError, value, size, fgColor, bgColor, level, includeMargin, dotStyle, cornerStyle, imageSettings]);
 
   useEffect(() => {
+    // Capture ref values for cleanup
+    const qrCodeInstance = qrCodeRef.current;
+    const qrElement = qrRef.current;
     // Cleanup on unmount
     return () => {
-      if (qrCodeRef.current && qrRef.current) {
-        qrRef.current.innerHTML = '';
+      if (qrCodeInstance && qrElement) {
+        qrElement.innerHTML = '';
       }
     };
   }, []);

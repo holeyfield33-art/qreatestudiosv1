@@ -70,6 +70,7 @@ export default function OptimizeQRPage() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qrCodeId]);
 
   async function loadData() {

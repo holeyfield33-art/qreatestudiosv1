@@ -94,7 +94,7 @@ export default function AIStudioPage() {
     limit: number;
     unlimited: boolean;
   } | null>(null);
-  const [recentUsage, setRecentUsage] = useState<any[]>([]);
+  const [_recentUsage, setRecentUsage] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchCredits() {

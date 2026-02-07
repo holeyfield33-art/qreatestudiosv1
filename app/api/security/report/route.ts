@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const code = searchParams.get('code');
+    const _code = searchParams.get('code');
     const body = await req.json();
     const { reportType, description, qrCodeId } = body;
 

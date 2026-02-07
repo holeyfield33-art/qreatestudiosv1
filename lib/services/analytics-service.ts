@@ -15,7 +15,7 @@ interface GeoIPModule {
 let geoip: GeoIPModule | null = null;
 try {
   geoip = require('geoip-lite') as GeoIPModule;
-} catch (error) {
+} catch (_error) {
   console.warn('geoip-lite not available, geolocation features will be limited');
 }
 
@@ -356,7 +356,7 @@ function getCountryCoordinates(countryCode: string): { lat: number; lng: number 
 }
 
 // Helper function to get city coordinates (simplified - in production, use a proper geocoding service)
-function getCityCoordinates(city: string, countryCode: string): { lat: number; lng: number } | null {
+function getCityCoordinates(city: string, _countryCode: string): { lat: number; lng: number } | null {
   // Major cities coordinates
   const cityCoords: Record<string, { lat: number; lng: number }> = {
     'New York': { lat: 40.7128, lng: -74.0060 },

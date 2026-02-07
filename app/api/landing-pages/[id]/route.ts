@@ -90,7 +90,7 @@ export async function PATCH(req: Request, context: RouteContext) {
   let body;
   try {
     body = await req.json();
-  } catch (e) {
+  } catch (_e) {
     return NextResponse.json(
       { success: false, error: 'Invalid JSON in request body' },
       { status: 400 }

@@ -5,7 +5,7 @@ import { auth } from '@/auth';
 import { getUserTokenUsage, checkTokenLimit } from '@/lib/services/ai-usage-service';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

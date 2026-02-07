@@ -39,6 +39,7 @@ export default function MenuManager({ landingPageId }: MenuManagerProps) {
 
   useEffect(() => {
     fetchMenuItems();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [landingPageId]);
 
   async function fetchMenuItems() {
@@ -46,7 +47,7 @@ export default function MenuManager({ landingPageId }: MenuManagerProps) {
       const response = await fetch(`/api/landing-pages/${landingPageId}/menu`);
       const data = await response.json();
       setItems(data.menuItems || []);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to fetch menu items');
     }
   }
@@ -75,7 +76,7 @@ export default function MenuManager({ landingPageId }: MenuManagerProps) {
       setEditing(null);
       setFormData({ name: '', description: '', price: '', category: 'Appetizers', available: true });
       fetchMenuItems();
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to save menu item');
     }
   }
@@ -89,7 +90,7 @@ export default function MenuManager({ landingPageId }: MenuManagerProps) {
       });
       toast.success('Item deleted');
       fetchMenuItems();
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to delete');
     }
   }

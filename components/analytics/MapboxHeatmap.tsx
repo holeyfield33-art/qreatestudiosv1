@@ -217,7 +217,7 @@ export function MapboxHeatmap({ data, isLoading = false }: MapboxHeatmapProps) {
     }, new Map<string, any>());
 
     // Create markers for each country
-    countryData.forEach((countryInfo, countryCode) => {
+    countryData.forEach((countryInfo, _countryCode) => {
       const color = getColorForScans(countryInfo.scans);
       
       // Create marker element with pulse animation for high-scan locations

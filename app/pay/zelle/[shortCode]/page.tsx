@@ -29,7 +29,7 @@ export default async function ZellePaymentPage({ params }: ZellePaymentPageProps
     },
   }).catch(() => {}); // Ignore errors
 
-  const isEmail = qrCode.paymentHandle?.includes('@');
+  const _isEmail = qrCode.paymentHandle?.includes('@');
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4">

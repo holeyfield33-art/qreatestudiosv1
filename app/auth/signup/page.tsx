@@ -77,7 +77,7 @@ export default function SignUpPage() {
 
       toast.success('Account created successfully! Please sign in.')
       router.push('/auth/signin')
-    } catch (err) {
+    } catch (_err) {
       setErrors({ submit: 'Something went wrong. Please try again.' })
       toast.error('Something went wrong')
     } finally {

@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Sparkles, Loader2, Check, ArrowRight, TrendingUp, X, Crown } from 'lucide-react';
+import { Sparkles, Check, ArrowRight, TrendingUp, Crown } from 'lucide-react';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 interface QRCodeData {

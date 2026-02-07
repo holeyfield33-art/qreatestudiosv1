@@ -5,7 +5,7 @@ import { auth } from '@/auth';
 import { getWhiteLabelStats } from '@/lib/services/white-label-service';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {

@@ -27,7 +27,7 @@ export default function BillingPage() {
     // Check for success/cancel params
     const success = searchParams.get('success');
     const canceled = searchParams.get('canceled');
-    const plan = searchParams.get('plan');
+    const _plan = searchParams.get('plan');
 
     if (success === 'true') {
       toast.success('Subscription activated successfully!');
@@ -38,6 +38,7 @@ export default function BillingPage() {
     }
 
     fetchBillingInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchBillingInfo() {

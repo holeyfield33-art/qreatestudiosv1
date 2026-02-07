@@ -39,7 +39,7 @@ function PasswordForm() {
       } else {
         setError(data.error || 'Invalid password. Please try again.');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('An error occurred. Please try again.');
     } finally {
       setIsVerifying(false);

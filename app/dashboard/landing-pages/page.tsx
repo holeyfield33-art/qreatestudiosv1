@@ -63,7 +63,7 @@ export default function LandingPagesPage() {
       } else {
         toast.error(result.error || 'Failed to delete');
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error('An error occurred');
     }
   }

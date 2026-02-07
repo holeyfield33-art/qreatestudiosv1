@@ -145,7 +145,7 @@ QRCodeSection.defaultProps = {
 export function TableQRCodeSection({
   tableNumber,
   qrCodeUrl,
-  destinationUrl,
+  destinationUrl: _destinationUrl,
   restaurantName,
 }: {
   tableNumber: string;

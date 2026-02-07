@@ -9,7 +9,7 @@
  */
 
 import { PrismaClient, Prisma } from '@prisma/client';
-import { PUCK_TEMPLATES, getTemplateById } from '../lib/templates/puck-templates';
+import { getTemplateById } from '../lib/templates/puck-templates';
 
 const prisma = new PrismaClient();
 

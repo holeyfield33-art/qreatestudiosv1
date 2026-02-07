@@ -314,7 +314,7 @@ export async function checkLinkHealth(url: string): Promise<{
   }
 }
 
-function getSuggestions(statusCode: number, url: string): string[] {
+function getSuggestions(statusCode: number, _url: string): string[] {
   const suggestions: string[] = [];
 
   if (statusCode === 404) {
@@ -487,7 +487,7 @@ export async function predictScanRate(
 // Personalization recommendations
 export async function getPersonalizationRecommendations(
   qrCodeId: string,
-  userId: string
+  _userId: string
 ): Promise<{
   isReturningUser: boolean;
   recommendations: string[];

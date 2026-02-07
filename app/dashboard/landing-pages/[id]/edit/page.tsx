@@ -66,6 +66,7 @@ export default function TemplateEditorPage() {
 
   useEffect(() => {
     loadLandingPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [landingPageId]);
 
   // Keyboard shortcuts for undo/redo
@@ -92,6 +93,7 @@ export default function TemplateEditorPage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editMode, historyIndex, htmlHistory]);
 
   async function loadLandingPage() {
@@ -335,7 +337,7 @@ export default function TemplateEditorPage() {
     return null;
   }
 
-  const currentSlot = selectedSlot 
+  const _currentSlot = selectedSlot 
     ? template.metadata.imageSlots.find((s) => s.id === selectedSlot)
     : null;
 
@@ -547,6 +549,7 @@ export default function TemplateEditorPage() {
                               <div className="flex items-center gap-3">
                                 <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 flex-shrink-0 shadow-sm">
                                   {images[slot.id] ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
                                     <img
                                       src={images[slot.id]}
                                       alt={slot.label}
