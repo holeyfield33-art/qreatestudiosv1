@@ -6,6 +6,13 @@ import { usePathname } from 'next/navigation';
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
+  // Skip animation for builder routes to prevent opacity: 0 on fixed overlays
+  const isBuilderRoute = pathname?.includes('/builder');
+
+  if (isBuilderRoute) {
+    return <>{children}</>;
+  }
+
   return (
     <AnimatePresence mode="wait">
       <motion.div

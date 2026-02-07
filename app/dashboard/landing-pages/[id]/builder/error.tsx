@@ -16,7 +16,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="max-w-lg text-center p-8 bg-white rounded-xl shadow-lg border border-slate-200">
         <div className="mb-6">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">

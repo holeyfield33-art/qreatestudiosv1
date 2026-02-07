@@ -472,7 +472,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
         <div className="text-center">
           <div className="relative mb-6">
             <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
@@ -486,7 +486,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50 builder-container">
+    <div className="h-full flex flex-col bg-slate-50 builder-container">
       {/* Premium Custom Header */}
       <div className="border-b bg-white/80 backdrop-blur-sm px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">

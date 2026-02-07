@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +23,21 @@ import {
 } from '@/components/ui/dialog';
 
 export default function CreateLandingPagePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 py-4 px-4 lg:py-8 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 animate-spin mx-auto text-primary mb-4" />
+          <p className="text-muted-foreground">Loading templates...</p>
+        </div>
+      </div>
+    }>
+      <CreateLandingPageContent />
+    </Suspense>
+  );
+}
+
+function CreateLandingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const qrId = searchParams.get('qrId');
@@ -91,18 +106,30 @@ export default function CreateLandingPagePage() {
   }
 
   function handleTemplateSelect(templateId: string) {
-    const template = templates.find(t => t.id === templateId);
+    // Match by ID first, then by slug/name pattern
+    const template = templates.find(t => t.id === templateId)
+      || templates.find(t => t.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === templateId.toLowerCase())
+      || templates.find(t => t.category.toLowerCase() === templateId.split('-')[0]?.toLowerCase());
+    
+    // Template not found - stay on step 1
+    if (!template) {
+      console.warn(`Template "${templateId}" not found in available templates`);
+      toast.error('Template not found', {
+        description: 'This template may no longer be available. Please choose another.'
+      });
+      return;
+    }
     
     // Check if template is premium and user doesn't have access
-    if (template?.isPremium && !canAccessPremium) {
+    if (template.isPremium && !canAccessPremium) {
       setLockedTemplateId(templateId);
       setShowUpgradeModal(true);
       return;
     }
     
     setSelectedTemplate(templateId);
-    setPageName(template?.name || '');
-    setSlug(generateSlug(template?.name || ''));
+    setPageName(template.name || '');
+    setSlug(generateSlug(template.name || ''));
     setStep(2);
   }
 
