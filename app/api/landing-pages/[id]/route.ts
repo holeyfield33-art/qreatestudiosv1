@@ -19,10 +19,33 @@ export async function GET(req: Request, context: RouteContext) {
   try {
     const landingPage = await prisma.landingPage.findUnique({
       where: { id },
-      include: { 
-        QRCode: true,
-        Template: true,
-        RestaurantMenu: true,
+      include: {
+        QRCode: {
+          select: {
+            id: true,
+            name: true,
+            shortCode: true,
+            type: true,
+          }
+        },
+        Template: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            thumbnail: true,
+            isPremium: true,
+            // Only fetch defaultSections if we need it
+            defaultSections: true,
+          }
+        },
+        RestaurantMenu: {
+          select: {
+            id: true,
+            name: true,
+            // Don't fetch categories here - let them be fetched separately if needed
+          }
+        },
       },
     });
 
@@ -30,8 +53,8 @@ export async function GET(req: Request, context: RouteContext) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       landingPage: {
         ...landingPage,
         title: landingPage.name,
@@ -120,7 +143,7 @@ export async function PATCH(req: Request, context: RouteContext) {
         );
       }
     }
-    
+
     if (body.publishedContent !== undefined) updateData.publishedContent = body.publishedContent;
     if (body.qrCodeId !== undefined) updateData.qrCodeId = body.qrCodeId;
     if (body.customDomain !== undefined) updateData.customDomain = body.customDomain;
