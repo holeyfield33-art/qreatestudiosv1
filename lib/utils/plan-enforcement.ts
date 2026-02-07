@@ -70,16 +70,21 @@ export async function canAccessLandingPage(
 ): Promise<boolean> {
   const page = await prisma.landingPage.findUnique({
     where: { id: pageId },
-    select: { userId: true, organizationId: true },
+    select: { userId: true },
   });
 
   if (!page) return false;
   if (page.userId === userId) return true;
 
-  // Check org membership if page belongs to an org
-  if (page.organizationId) {
+  // Check if both users are in the same organization
+  const pageOwner = await prisma.user.findUnique({
+    where: { id: page.userId },
+    select: { parentOrganizationId: true },
+  });
+
+  if (pageOwner?.parentOrganizationId) {
     const membership = await prisma.organizationMember.findFirst({
-      where: { organizationId: page.organizationId, userId },
+      where: { organizationId: pageOwner.parentOrganizationId, userId },
     });
     return !!membership;
   }

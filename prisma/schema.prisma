@@ -175,7 +175,6 @@ model RestaurantMenu {
 model LandingPage {
   id                   String               @id @default(cuid())
   userId               String
-  organizationId       String?
   qrCodeId             String?              @unique
   name                 String               @default("Untitled Landing Page")
   slug                 String               @unique
@@ -201,7 +200,6 @@ model LandingPage {
 
   @@index([slug])
   @@index([userId])
-  @@index([organizationId])
   @@index([customDomain])
   @@index([templateId])
   @@index([isPublished])
