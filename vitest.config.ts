@@ -9,15 +9,17 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
     exclude: ['**/node_modules/**', '**/e2e/**', '**/dist/**'],
-    css: {
-      modules: {
-        classNameStrategy: 'non-scoped',
-      },
-    },
+    css: false,
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './'),
+    },
+  },
+  // Handle CSS imports that Vite tries to process through PostCSS
+  css: {
+    postcss: {
+      plugins: [],
     },
   },
 });

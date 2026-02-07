@@ -1,10 +1,15 @@
 import { auth } from '@/auth'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { QrCode, Globe, Package, Sparkles, Zap, TrendingUp } from 'lucide-react'
 import { AnimatedHeader } from '@/components/landing/animated-header'
 import { AnimatedHero } from '@/components/landing/animated-hero'
 import { AnimatedFeatures } from '@/components/landing/animated-features'
+import { HowItWorks } from '@/components/landing/how-it-works'
+import { InteractiveDemo } from '@/components/landing/interactive-demo'
+import { Testimonials } from '@/components/landing/testimonials'
+import { PricingPreview } from '@/components/landing/pricing-preview'
+import { FAQ } from '@/components/landing/faq'
+import { EnhancedFooter } from '@/components/landing/enhanced-footer'
 
 export default async function Home() {
   const session = await auth()
@@ -31,6 +36,21 @@ export default async function Home() {
         {/* Features */}
         <AnimatedFeatures />
 
+        {/* How It Works */}
+        <HowItWorks />
+
+        {/* Interactive Demo */}
+        <InteractiveDemo />
+
+        {/* Testimonials */}
+        <Testimonials />
+
+        {/* Pricing Preview */}
+        <PricingPreview />
+
+        {/* FAQ */}
+        <FAQ />
+
         {/* CTA */}
         <section className="relative py-20 px-4 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 opacity-90"></div>
@@ -38,50 +58,29 @@ export default async function Home() {
           <div className="relative max-w-4xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Ready to Get Started?</h2>
             <p className="text-xl mb-8 text-white/90">
-              Join thousands of businesses using Qreate Studios
+              Join thousands of businesses using Qreate Studios to power their QR campaigns
             </p>
-            <Link href={ctaLink}>
-              <Button size="lg" variant="secondary" className="text-lg px-8 py-6 shadow-2xl hover:scale-105 transition-transform">
-                Start Free Today
-              </Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href={ctaLink}>
+                <Button size="lg" variant="secondary" className="text-lg px-8 py-6 shadow-2xl hover:scale-105 transition-transform">
+                  Start Free Today
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-white/30 text-white hover:bg-white/10 transition-all">
+                  Compare Plans
+                </Button>
+              </Link>
+            </div>
+            <p className="text-sm text-white/60 mt-6">
+              No credit card required &bull; Free plan available &bull; Cancel anytime
+            </p>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-950 py-12 px-4" role="contentinfo">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-8">
-          <div>
-            <h4 className="font-semibold mb-4 text-white">Product</h4>
-            <ul className="space-y-2" role="list">
-              <li><Link href="/pricing" className="text-sm text-slate-400 hover:text-blue-400 transition-colors">Pricing</Link></li>
-              <li><Link href="/auth/signup" className="text-sm text-slate-400 hover:text-blue-400 transition-colors">Sign Up</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4 text-white">Company</h4>
-            <ul className="space-y-2" role="list">
-              <li><Link href="/legal/terms" className="text-sm text-slate-400 hover:text-blue-400 transition-colors">Terms</Link></li>
-              <li><Link href="/legal/privacy" className="text-sm text-slate-400 hover:text-blue-400 transition-colors">Privacy</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4 text-white">Support</h4>
-            <ul className="space-y-2" role="list">
-              <li><a href="mailto:support@qreatestudios.com" className="text-sm text-slate-400 hover:text-blue-400 transition-colors">Contact</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4 text-white">Qreate Studios</h4>
-            <p className="text-sm text-slate-400">
-              © 2025 Qreate Studios LLC
-              <br />
-              All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <EnhancedFooter />
     </div>
   );
 }

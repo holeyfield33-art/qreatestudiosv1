@@ -1,6 +1,7 @@
 import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { applySecurityHeaders } from '@/lib/security-headers'
 
 // Force Node.js runtime instead of Edge
 export const runtime = 'nodejs'
@@ -25,23 +26,23 @@ export async function middleware(request: NextRequest) {
 
   // Allow public paths
   if (publicPaths.some(path => pathname === path || pathname.startsWith(path))) {
-    return NextResponse.next()
+    return applySecurityHeaders(NextResponse.next())
   }
 
   // Allow public API paths
   if (publicApiPaths.some(path => pathname.startsWith(path))) {
-    return NextResponse.next()
+    return applySecurityHeaders(NextResponse.next())
   }
 
   // Allow short code redirects (single path segment)
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length === 1 && !pathname.startsWith('/dashboard') && !pathname.startsWith('/api')) {
-    return NextResponse.next()
+    return applySecurityHeaders(NextResponse.next())
   }
 
   // Allow menu, payment, and landing page routes
   if (pathname.startsWith('/menu/') || pathname.startsWith('/pay/') || pathname.startsWith('/l/')) {
-    return NextResponse.next()
+    return applySecurityHeaders(NextResponse.next())
   }
 
   // Check authentication for protected routes
@@ -50,13 +51,13 @@ export async function middleware(request: NextRequest) {
   if (!session?.user) {
     const signInUrl = new URL('/auth/signin', request.url)
     signInUrl.searchParams.set('callbackUrl', pathname)
-    return NextResponse.redirect(signInUrl)
+    return applySecurityHeaders(NextResponse.redirect(signInUrl))
   }
 
   // Note: Ban checking should be done in API routes or page components, not middleware
   // Middleware should be lightweight and not make database calls
 
-  return NextResponse.next()
+  return applySecurityHeaders(NextResponse.next())
 }
 
 export const config = {

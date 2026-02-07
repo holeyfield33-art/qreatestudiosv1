@@ -80,20 +80,37 @@ export async function PATCH(req: Request, context: RouteContext) {
     if (body.isPublished !== undefined) updateData.isPublished = body.isPublished;
     if (body.content !== undefined) updateData.content = body.content;
     
-    // Validate and sanitize draftContent (Puck JSON format)
+    // Validate and sanitize draftContent (supports both Puck and GrapesJS formats)
     if (body.draftContent !== undefined) {
       const draftContent = body.draftContent;
-      
-      // Ensure it's an object with proper structure
-      if (typeof draftContent === 'object' && draftContent !== null) {
+
+      // Ensure it's an object
+      if (typeof draftContent !== 'object' || draftContent === null) {
+        return NextResponse.json(
+          { error: 'Invalid draftContent format. Expected an object.' },
+          { status: 400 }
+        );
+      }
+
+      // Detect format: GrapesJS sends html/css/json, Puck sends content array
+      if ('html' in draftContent || 'json' in draftContent) {
+        // GrapesJS format - save as-is with timestamp
         updateData.draftContent = {
-          content: Array.isArray(draftContent.content) ? draftContent.content : [],
+          html: draftContent.html || '',
+          css: draftContent.css || '',
+          json: draftContent.json || null,
+          timestamp: draftContent.timestamp || new Date().toISOString(),
+        };
+      } else if (Array.isArray(draftContent.content)) {
+        // Puck format - validate and sanitize
+        updateData.draftContent = {
+          content: draftContent.content,
           root: draftContent.root || { props: {} },
-          zones: draftContent.zones || {}
+          zones: draftContent.zones || {},
         };
       } else {
         return NextResponse.json(
-          { error: 'Invalid draftContent format. Expected Puck JSON structure.' },
+          { error: 'Invalid draftContent format. Expected GrapesJS (html/css/json) or Puck (content array) structure.' },
           { status: 400 }
         );
       }
