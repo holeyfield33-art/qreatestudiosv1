@@ -259,7 +259,9 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
 
         <TabsContent value="upload" className="flex-1 mt-4">
           <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
+            className={`border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-colors ${
+              isSearching ? 'cursor-not-allowed opacity-50' : 'hover:border-blue-400 cursor-pointer'
+            }`}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
@@ -269,16 +271,28 @@ export function ImageBrowser({ category, onSelect, currentImage }: ImageBrowserP
               onChange={handleFileUpload}
               className="hidden"
               id="image-upload"
+              disabled={isSearching}
             />
-            <label htmlFor="image-upload" className="cursor-pointer">
-              <UploadIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-lg font-medium text-gray-700 mb-2">
-                Drag and drop your image here
-              </p>
-              <p className="text-sm text-gray-500 mb-4">or click to browse</p>
-              <p className="text-xs text-gray-400">
-                Supports: JPG, PNG, GIF (Max 5MB)
-              </p>
+            <label htmlFor="image-upload" className={isSearching ? 'cursor-not-allowed' : 'cursor-pointer'}>
+              {isSearching ? (
+                <>
+                  <Loader2 className="w-12 h-12 mx-auto mb-4 text-blue-500 animate-spin" />
+                  <p className="text-lg font-medium text-gray-700 mb-2">
+                    Uploading your image...
+                  </p>
+                </>
+              ) : (
+                <>
+                  <UploadIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-lg font-medium text-gray-700 mb-2">
+                    Drag and drop your image here
+                  </p>
+                  <p className="text-sm text-gray-500 mb-4">or click to browse</p>
+                  <p className="text-xs text-gray-400">
+                    Supports: JPG, PNG, GIF (Max 5MB)
+                  </p>
+                </>
+              )}
             </label>
           </div>
 

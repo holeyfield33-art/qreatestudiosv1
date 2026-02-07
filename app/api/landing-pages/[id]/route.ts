@@ -143,13 +143,12 @@ export async function PATCH(req: Request, context: RouteContext) {
         );
       }
     }
-
     if (body.publishedContent !== undefined) updateData.publishedContent = body.publishedContent;
     if (body.qrCodeId !== undefined) updateData.qrCodeId = body.qrCodeId;
     if (body.customDomain !== undefined) updateData.customDomain = body.customDomain;
     if (body.metadata !== undefined) updateData.metadata = body.metadata;
     if (body.seo !== undefined) updateData.seo = body.seo;
-    
+
     // If publishing, set publishedAt timestamp
     if (body.isPublished === true && !landingPage.isPublished) {
       updateData.publishedAt = new Date();
@@ -160,13 +159,9 @@ export async function PATCH(req: Request, context: RouteContext) {
       data: updateData,
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      landingPage: {
-        ...updated,
-        title: updated.name,
-        published: updated.isPublished
-      }
+    return NextResponse.json({
+      success: true,
+      landingPage: updated
     });
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {

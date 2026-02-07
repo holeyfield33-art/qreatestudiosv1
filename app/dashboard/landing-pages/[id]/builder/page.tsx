@@ -568,10 +568,10 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       {/* GrapesJS Editor */}
       <div className="flex-1 overflow-hidden">
         {editorData ? (
-              <GrapesJSEditor
-                initialData={editorData}
-                onChange={handleEditorChange}
-              />
+          <GrapesJSEditor
+            initialData={editorData}
+            onChange={handleEditorChange}
+          />
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
