@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import 'grapesjs/dist/css/grapes.min.css';
 
 export default function TestGrapesJS() {
   const editorRef = useRef<any>(null);

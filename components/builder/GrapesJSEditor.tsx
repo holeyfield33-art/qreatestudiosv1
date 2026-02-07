@@ -2,7 +2,6 @@
 'use client';
 
 import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
-import 'grapesjs/dist/css/grapes.min.css';
 
 interface GrapesJSEditorProps {
   initialData?: any;
@@ -797,7 +796,9 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
 
         // Load initial data if provided
         if (initialData) {
-          if (initialData.html) {
+          if (initialData.json) {
+            editorRef.current.loadProjectData(initialData.json);
+          } else if (initialData.html) {
             editorRef.current.setComponents(initialData.html);
           }
           if (initialData.css) {
@@ -848,6 +849,20 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
         }
       };
     }, []);
+
+    useEffect(() => {
+      if (!editorRef.current || !initialData) return;
+
+      if (initialData.json) {
+        editorRef.current.loadProjectData(initialData.json);
+      } else if (initialData.html) {
+        editorRef.current.setComponents(initialData.html);
+      }
+
+      if (initialData.css) {
+        editorRef.current.setStyle(initialData.css);
+      }
+    }, [initialData]);
 
     return (
       <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
