@@ -551,3 +551,272 @@ section[style*="background"] {
   outline: 2px solid var(--puck-color-primary, #3b82f6) !important;
   outline-offset: 2px !important;
 }
+
+/* ========================================
+   GrapesJS Container & Full-Height Sizing
+   ======================================== */
+
+/* Ensure the GrapesJS editor fills its parent container */
+.builder-container .flex-1 {
+  min-height: 0;
+}
+
+#gjs-editor .gjs-editor {
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+#gjs-editor .gjs-cv-canvas {
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#gjs-editor .gjs-cv-canvas .gjs-cv-canvas__frames {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* ========================================
+   Panel Styling Overrides for Cleaner Look
+   ======================================== */
+
+/* Remove default GrapesJS panel backgrounds */
+.gjs-one-bg {
+  background-color: #f8f9fa !important;
+}
+
+.gjs-two-color {
+  color: #1f2937 !important;
+}
+
+.gjs-three-bg {
+  background-color: #fff !important;
+}
+
+.gjs-four-color,
+.gjs-four-color-h:hover {
+  color: #3b82f6 !important;
+}
+
+/* Clean up panel borders and spacing */
+.gjs-pn-panel {
+  padding: 0 !important;
+}
+
+.gjs-pn-views-container {
+  padding: 0 !important;
+  border: none !important;
+}
+
+.gjs-pn-views {
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+/* Panel tab buttons */
+.gjs-pn-btn {
+  margin: 2px !important;
+  border-radius: 4px !important;
+  transition: all 0.15s ease !important;
+}
+
+.gjs-pn-btn:hover {
+  background-color: #e5e7eb !important;
+}
+
+.gjs-pn-btn.gjs-pn-active {
+  background-color: hsl(221.2 83.2% 53.3% / 0.12) !important;
+  box-shadow: none !important;
+}
+
+/* ========================================
+   Block Manager Styling Enhancements
+   ======================================== */
+
+/* Block categories */
+#blocks .gjs-block-category {
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+#blocks .gjs-block-category .gjs-title {
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: #6b7280 !important;
+  padding: 10px 12px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Block grid layout within categories */
+#blocks .gjs-blocks-c {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 6px !important;
+  padding: 8px !important;
+}
+
+#blocks .gjs-block {
+  width: auto !important;
+  min-height: 70px !important;
+  margin: 0 !important;
+  padding: 10px 8px !important;
+  font-size: 11px !important;
+  border-radius: 6px !important;
+}
+
+/* Full-width blocks for larger items like sections */
+#blocks .gjs-block[title="Section"],
+#blocks .gjs-block[title="Hero"],
+#blocks .gjs-block[title="Features"],
+#blocks .gjs-block[title="Gallery"],
+#blocks .gjs-block[title="Call to Action"] {
+  grid-column: 1 / -1 !important;
+  min-height: 60px !important;
+}
+
+/* Block drag ghost styling */
+.gjs-block.gjs-bdrag {
+  opacity: 0.7 !important;
+  box-shadow: 0 8px 25px -5px rgb(0 0 0 / 0.2) !important;
+}
+
+/* ========================================
+   Responsive Fixes
+   ======================================== */
+
+/* Device switcher bar styling */
+.gjs-devices-c {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.gjs-devices-c .gjs-device-label {
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+}
+
+/* Canvas responsiveness when switching devices */
+.gjs-frame-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  padding: 10px !important;
+}
+
+/* Responsive sidebar collapse */
+@media (max-width: 1200px) {
+  #blocks {
+    width: 200px !important;
+  }
+
+  #blocks .gjs-blocks-c {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 900px) {
+  #blocks {
+    width: 180px !important;
+  }
+
+  /* Stack right sidebar panels */
+  #styles-container,
+  #traits-container,
+  #layers-container {
+    max-height: 200px !important;
+  }
+}
+
+/* ========================================
+   Component Toolbar Styling
+   ======================================== */
+
+.gjs-toolbar {
+  background: #1f2937 !important;
+  border-radius: 6px !important;
+  padding: 2px !important;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15) !important;
+}
+
+.gjs-toolbar-item {
+  width: 28px !important;
+  height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 4px !important;
+  transition: background 0.15s ease !important;
+  color: #e5e7eb !important;
+}
+
+.gjs-toolbar-item:hover {
+  background: #374151 !important;
+  color: white !important;
+}
+
+/* ========================================
+   Rich Text Editor (RTE) Toolbar
+   ======================================== */
+
+.gjs-rte-toolbar {
+  background: white !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.1) !important;
+  padding: 4px !important;
+}
+
+.gjs-rte-actionbar .gjs-rte-action {
+  border: none !important;
+  border-radius: 4px !important;
+  margin: 1px !important;
+  transition: background 0.15s ease !important;
+}
+
+.gjs-rte-actionbar .gjs-rte-action:hover {
+  background: #f3f4f6 !important;
+}
+
+.gjs-rte-actionbar .gjs-rte-active {
+  background: hsl(221.2 83.2% 53.3% / 0.12) !important;
+  color: #3b82f6 !important;
+}
+
+/* ========================================
+   Modal / Dialog Styling
+   ======================================== */
+
+.gjs-mdl-dialog {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25) !important;
+}
+
+.gjs-mdl-header {
+  background: #f9fafb !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 16px 20px !important;
+}
+
+.gjs-mdl-title {
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+}
+
+.gjs-mdl-content {
+  padding: 20px !important;
+}
+
+.gjs-mdl-btn-close {
+  font-size: 22px !important;
+  opacity: 0.5 !important;
+  transition: opacity 0.15s ease !important;
+}
+
+.gjs-mdl-btn-close:hover {
+  opacity: 1 !important;
+}

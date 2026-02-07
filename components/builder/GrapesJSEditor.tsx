@@ -58,11 +58,16 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
           height: '100%',
           width: 'auto',
           storageManager: false,
+          noticeOnUnload: 0,
           // Make components immediately selectable with single click
           canvas: {
             scripts: [],
             styles: [],
           },
+          canvasCss: `
+            .gjs-selected { outline: 2px solid #3b82f6 !important; outline-offset: -2px; }
+            .gjs-hovered { outline: 1px dashed #93c5fd !important; }
+          `,
           // Enable protectedCss to ensure images and styles work properly
           protectedCss: '',
           // Allow all tags and attributes for proper rendering

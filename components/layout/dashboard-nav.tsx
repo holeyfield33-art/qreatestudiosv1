@@ -17,6 +17,7 @@ import {
   CreditCard,
   Crown,
   ShoppingBag,
+  Building2,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -54,6 +55,9 @@ const navigation: NavItem[] = [
   // Business+ features
   { name: 'Team & CRM', href: '/dashboard/crm', icon: Users, badge: 'BUSINESS', requiresPlan: ['BUSINESS', 'AGENCY'] },
   
+  // Business+ features
+  { name: 'Organization', href: '/dashboard/organization', icon: Building2, badge: 'BUSINESS', requiresPlan: ['BUSINESS', 'AGENCY'] },
+
   // Agency features
   { name: 'White Label', href: '/dashboard/white-label', icon: Palette, badge: 'AGENCY', requiresPlan: ['AGENCY'] },
   

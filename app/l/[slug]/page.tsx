@@ -2,18 +2,13 @@ import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { resolvePageContent } from '@/lib/resolvePageContent';
-import dynamic from 'next/dynamic';
+import PublicLandingPageRender from '@/components/landing/PublicLandingPageRender';
 import '@measured/puck/puck.css';
 
 interface RouteContext {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ table?: string; preview?: string }>;
 }
-
-const PublicLandingPageRender = dynamic(
-  () => import('@/components/landing/PublicLandingPageRender'),
-  { ssr: false }
-);
 
 export default async function PublicLandingPage({ params, searchParams }: RouteContext) {
   const { slug } = await params;

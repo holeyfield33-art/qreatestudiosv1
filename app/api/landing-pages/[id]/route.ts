@@ -80,34 +80,42 @@ export async function PATCH(req: Request, context: RouteContext) {
     if (body.isPublished !== undefined) updateData.isPublished = body.isPublished;
     if (body.content !== undefined) updateData.content = body.content;
     
-    // Validate and sanitize draftContent (Puck JSON or GrapesJS format)
+    // Validate and sanitize draftContent (supports both Puck and GrapesJS formats)
     if (body.draftContent !== undefined) {
       const draftContent = body.draftContent;
 
-      if (typeof draftContent === 'object' && draftContent !== null) {
-        const isGrapesJSFormat =
-          'html' in draftContent || 'css' in draftContent || 'json' in draftContent;
+      if (typeof draftContent !== 'object' || draftContent === null) {
+        return NextResponse.json(
+          { error: 'Invalid draftContent format. Expected an object.' },
+          { status: 400 }
+        );
+      }
 
-        if (isGrapesJSFormat) {
-          updateData.draftContent = {
-            html: typeof draftContent.html === 'string' ? draftContent.html : '',
-            css: typeof draftContent.css === 'string' ? draftContent.css : '',
-            json: draftContent.json ?? null,
-            timestamp:
-              typeof draftContent.timestamp === 'string'
-                ? draftContent.timestamp
-                : new Date().toISOString(),
-          };
-        } else {
-          updateData.draftContent = {
-            content: Array.isArray(draftContent.content) ? draftContent.content : [],
-            root: draftContent.root || { props: {} },
-            zones: draftContent.zones || {},
-          };
-        }
+      const isGrapesJSFormat =
+        'html' in draftContent || 'css' in draftContent || 'json' in draftContent;
+
+      if (isGrapesJSFormat) {
+        updateData.draftContent = {
+          html: typeof draftContent.html === 'string' ? draftContent.html : '',
+          css: typeof draftContent.css === 'string' ? draftContent.css : '',
+          json: draftContent.json ?? null,
+          timestamp:
+            typeof draftContent.timestamp === 'string'
+              ? draftContent.timestamp
+              : new Date().toISOString(),
+        };
+      } else if (Array.isArray(draftContent.content)) {
+        updateData.draftContent = {
+          content: draftContent.content,
+          root: draftContent.root || { props: {} },
+          zones: draftContent.zones || {},
+        };
       } else {
         return NextResponse.json(
-          { error: 'Invalid draftContent format. Expected Puck JSON or GrapesJS structure.' },
+          {
+            error:
+              'Invalid draftContent format. Expected GrapesJS (html/css/json) or Puck (content array) structure.',
+          },
           { status: 400 }
         );
       }
