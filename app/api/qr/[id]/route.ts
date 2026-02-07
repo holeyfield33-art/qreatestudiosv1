@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-helpers';
 import { auth } from '@/auth';

@@ -105,7 +105,7 @@ function PasswordForm() {
           </form>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Don't have the password?</p>
+            <p>Don&apos;t have the password?</p>
             <p>Contact the QR code owner for access.</p>
           </div>
         </CardContent>

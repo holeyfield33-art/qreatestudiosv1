@@ -179,8 +179,8 @@ export default async function PricingPage() {
             <div role="listitem">
               <h3 className="font-semibold mb-2">What happens when I hit my limits?</h3>
               <p className="text-muted-foreground">
-                You'll be notified when approaching limits. You can upgrade anytime
-                or wait until next month's reset for continued access.
+                You&apos;ll be notified when approaching limits. You can upgrade anytime
+                or wait until next month&apos;s reset for continued access.
               </p>
             </div>
 
@@ -204,7 +204,7 @@ export default async function PricingPage() {
               <h3 className="font-semibold mb-2">Can I cancel anytime?</h3>
               <p className="text-muted-foreground">
                 Absolutely. Cancel your subscription at any time with no cancellation
-                fees. You'll have access until the end of your billing period.
+                fees. You&apos;ll have access until the end of your billing period.
               </p>
             </div>
           </div>

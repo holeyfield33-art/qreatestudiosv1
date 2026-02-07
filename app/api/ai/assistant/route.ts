@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { callAI, AI_FEATURES, getRemainingCredits, type AIFeature } from '@/lib/ai/ai-service';

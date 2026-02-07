@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && next build --webpack",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
@@ -43,10 +43,10 @@
     "framer-motion": "^12.23.26",
     "geoip-lite": "^1.4.10",
     "grapesjs": "^0.22.14",
+    "isomorphic-dompurify": "^2.36.0",
     "jspdf": "^4.0.0",
     "jspdf-autotable": "^5.0.2",
     "lightningcss": "^1.31.0",
-    "lightningcss-linux-x64-gnu": "^1.31.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.562.0",
     "mapbox-gl": "^3.17.0",
@@ -94,5 +94,8 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.0.17"
+  },
+  "optionalDependencies": {
+    "lightningcss-linux-x64-gnu": "^1.30.2"
   }
 }

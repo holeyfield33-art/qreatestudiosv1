@@ -1,8 +1,11 @@
+export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { hash } from 'bcryptjs'
 import { z } from 'zod'
 import { randomUUID } from 'crypto'
+import { applyRateLimit } from '@/lib/middleware/rate-limit'
 
 const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -11,6 +14,10 @@ const signupSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
+  // Rate limit signup to prevent abuse
+  const rateLimitResponse = await applyRateLimit(req, 'authSignIn')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const body = await req.json()
     const validation = signupSchema.safeParse(body)

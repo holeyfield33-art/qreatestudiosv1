@@ -1406,7 +1406,7 @@ export default function CreateQRCodePage() {
 
               {/* Primary Actions */}
               <div className="space-y-3 pt-2">
-                <h3 className="font-bold text-base lg:text-lg">What's Next?</h3>
+                <h3 className="font-bold text-base lg:text-lg">What&apos;s Next?</h3>
                 
                 <Button
                   size="lg"

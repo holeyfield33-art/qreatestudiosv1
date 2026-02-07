@@ -22,6 +22,17 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60,
   },
+  // Externalize native modules that Turbopack can't bundle
+  serverExternalPackages: [
+    'lightningcss',
+    'lightningcss-linux-x64-gnu',
+    '@tailwindcss/node',
+    'sharp',
+    'bcryptjs',
+    'geoip-lite',
+    'isomorphic-dompurify',
+    'jsdom',
+  ],
   // Performance optimizations
   compress: true,
   poweredByHeader: false,

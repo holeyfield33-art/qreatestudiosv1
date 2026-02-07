@@ -68,9 +68,9 @@ export function PaymentExamples() {
       
       <div className="mt-4 p-3 bg-amber-50 rounded border border-amber-200">
         <p className="text-xs text-amber-900">
-          <strong>💡 Tip:</strong> Most payment apps must be installed on the user's device. 
+          <strong>💡 Tip:</strong> Most payment apps must be installed on the user&apos;s device. 
           For Venmo and Cash App, the QR code will open the app directly. For Zelle, it opens 
-          email/SMS since Zelle doesn't have a direct URL scheme.
+          email/SMS since Zelle doesn&apos;t have a direct URL scheme.
         </p>
       </div>
     </div>

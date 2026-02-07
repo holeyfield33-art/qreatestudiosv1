@@ -21,7 +21,7 @@ export default function NotFound() {
         </h2>
         
         <p className="text-gray-600 mb-8">
-          The landing page you're looking for doesn't exist or has been removed.
+          The landing page you&apos;re looking for doesn&apos;t exist or has been removed.
         </p>
         
         <div className="flex gap-3 justify-center">

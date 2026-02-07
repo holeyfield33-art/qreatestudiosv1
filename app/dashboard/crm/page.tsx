@@ -195,7 +195,7 @@ export default function CRMPage() {
             <Users className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
             <h3 className="font-semibold mb-2">CRM Dashboard In Progress</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              We're building a powerful CRM system with:
+              We&apos;re building a powerful CRM system with:
             </p>
             <ul className="text-sm text-left max-w-md mx-auto space-y-2">
               <li className="flex items-start gap-2">

@@ -29,6 +29,8 @@ vi.mock('@/components/builder/GrapesJSEditor', () => {
     );
   });
 
+  MockEditor.displayName = 'MockEditor';
+
   return { default: MockEditor };
 });
 

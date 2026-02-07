@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-helpers';
+import { canAccessLandingPage } from '@/lib/utils/plan-enforcement';
 import { deployLandingPage, rollbackDeployment, unpublishLandingPage, getHostingStatus, getDeploymentHistory } from '@/lib/services/hosting-service';
 
 export const runtime = 'nodejs';
@@ -8,7 +9,7 @@ interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
-// Deploy (publish) a landing page
+// Deploy (publish) a landing page with versioning
 export async function POST(req: Request, context: RouteContext) {
   const { id } = await context.params;
   const { session, error } = await requireAuth();
@@ -18,6 +19,12 @@ export async function POST(req: Request, context: RouteContext) {
   }
 
   try {
+    // Check access (owner or org member)
+    const hasAccess = await canAccessLandingPage(session.user.id, id);
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Page not found' }, { status: 404 });
+    }
+
     const body = await req.json().catch(() => ({}));
     const action = body.action || 'deploy';
 

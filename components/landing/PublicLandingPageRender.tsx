@@ -1,6 +1,7 @@
 'use client';
 
 import { Render } from '@measured/puck';
+import '@measured/puck/puck.css';
 import { puckRenderConfig } from '@/lib/puckConfig';
 
 interface PublicLandingPageRenderProps {

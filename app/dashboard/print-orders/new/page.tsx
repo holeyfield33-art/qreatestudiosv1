@@ -479,7 +479,7 @@ export default function NewPrintOrderPage() {
 
                 {/* What's Included */}
                 <div className="space-y-2">
-                  <h3 className="font-semibold">What's Included:</h3>
+                  <h3 className="font-semibold">What&apos;s Included:</h3>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
                       <Check className="w-4 h-4 text-green-600" />

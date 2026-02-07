@@ -1,8 +1,15 @@
-import { NextResponse } from 'next/server';
+export const runtime = 'nodejs';
+
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyQRPassword } from '@/lib/utils/qr-password';
+import { applyRateLimit } from '@/lib/middleware/rate-limit';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // Rate limit password verification to prevent brute-force
+  const rateLimitResponse = await applyRateLimit(req, 'verifyPassword')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const body = await req.json();
     const { shortCode, password } = body;

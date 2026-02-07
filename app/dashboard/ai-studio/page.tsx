@@ -97,29 +97,29 @@ export default function AIStudioPage() {
   const [recentUsage, setRecentUsage] = useState<any[]>([]);
 
   useEffect(() => {
+    async function fetchCredits() {
+      try {
+        const res = await fetch('/api/ai/credits');
+        if (res.ok) {
+          const data = await res.json();
+          setCredits(data);
+        }
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to fetch credits:', error);
+        }
+      }
+    }
+
+    async function fetchRecentUsage() {
+      // This would fetch recent AI generations
+      // For now, we'll leave it empty
+      setRecentUsage([]);
+    }
+
     fetchCredits();
     fetchRecentUsage();
   }, []);
-
-  async function fetchCredits() {
-    try {
-      const res = await fetch('/api/ai/credits');
-      if (res.ok) {
-        const data = await res.json();
-        setCredits(data);
-      }
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to fetch credits:', error);
-      }
-    }
-  }
-
-  async function fetchRecentUsage() {
-    // This would fetch recent AI generations
-    // For now, we'll leave it empty
-    setRecentUsage([]);
-  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -233,7 +233,7 @@ export default function AIStudioPage() {
           <div>
             <p className="font-medium mb-1">🔄 Iterate</p>
             <p className="text-muted-foreground">
-              Don't like the first result? Try again with different wording.
+              Don&apos;t like the first result? Try again with different wording.
             </p>
           </div>
           <div>

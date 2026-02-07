@@ -245,7 +245,7 @@ export function AIOptimizationDialog({
         ) : !result && !isAnalyzing ? (
           <div className="space-y-6 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">What's your goal for this QR code?</label>
+              <label className="text-sm font-medium">What&apos;s your goal for this QR code?</label>
               <Textarea
                 placeholder="Example: I want more scans from mobile users at my restaurant"
                 value={userGoal}

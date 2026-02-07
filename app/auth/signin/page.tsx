@@ -161,7 +161,7 @@ function SignInForm() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-muted-foreground">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link
               href="/auth/signup"
               className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-ring rounded"

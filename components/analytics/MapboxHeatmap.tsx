@@ -108,7 +108,10 @@ export function MapboxHeatmap({ data, isLoading = false }: MapboxHeatmapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [mapError, setMapError] = useState<string | null>(null);
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  const [mapError, setMapError] = useState<string | null>(
+    !mapboxToken ? 'Mapbox token not configured' : null
+  );
   const markers = useRef<mapboxgl.Marker[]>([]);
 
   // Export map as PNG
@@ -139,15 +142,9 @@ export function MapboxHeatmap({ data, isLoading = false }: MapboxHeatmapProps) {
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    if (!mapContainer.current || map.current || !mapboxToken) return;
 
-    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-    if (!token) {
-      setMapError('Mapbox token not configured');
-      return;
-    }
-
-    mapboxgl.accessToken = token;
+    mapboxgl.accessToken = mapboxToken;
 
     try {
       const mapInstance = new mapboxgl.Map({
@@ -177,7 +174,7 @@ export function MapboxHeatmap({ data, isLoading = false }: MapboxHeatmapProps) {
       map.current = mapInstance;
     } catch (error) {
       console.error('Map initialization error:', error);
-      setMapError('Failed to initialize map');
+      queueMicrotask(() => setMapError('Failed to initialize map'));
     }
 
     return () => {
@@ -186,7 +183,7 @@ export function MapboxHeatmap({ data, isLoading = false }: MapboxHeatmapProps) {
         map.current = null;
       }
     };
-  }, []);
+  }, [mapboxToken]);
 
   // Update markers when data changes
   useEffect(() => {

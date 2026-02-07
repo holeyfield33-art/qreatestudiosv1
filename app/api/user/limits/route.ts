@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getUserLimits } from '@/lib/services/usage-enforcement';

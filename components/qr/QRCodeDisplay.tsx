@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useSyncExternalStore } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 
 interface QRCodeDisplayProps {
@@ -33,27 +33,25 @@ export default function QRCodeDisplay({
   imageSettings,
   className = '',
 }: QRCodeDisplayProps) {
-  const [mounted, setMounted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+  const [generationError, setGenerationError] = useState<string | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
   const qrCodeRef = useRef<QRCodeStyling | null>(null);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Compute validation error during render (avoids setState in effect)
+  const validationError = !value || value.trim() === ''
+    ? 'QR code value is required'
+    : value.length > 2953
+    ? 'QR code data is too long (max 2953 characters)'
+    : null;
+  const error = validationError || generationError;
 
   useEffect(() => {
-    // Validate value
-    if (!value || value.trim() === '') {
-      setError('QR code value is required');
-      return;
-    } else if (value.length > 2953) {
-      setError('QR code data is too long (max 2953 characters)');
-      return;
-    } else {
-      setError(null);
-    }
-
+    if (validationError) return;
     if (!mounted || !qrRef.current) return;
 
     try {
@@ -125,9 +123,9 @@ export default function QRCodeDisplay({
       }
     } catch (err) {
       console.error('QR Generation Error:', err);
-      setError('Failed to generate QR code');
+      queueMicrotask(() => setGenerationError('Failed to generate QR code'));
     }
-  }, [mounted, value, size, fgColor, bgColor, level, includeMargin, dotStyle, cornerStyle, imageSettings]);
+  }, [mounted, validationError, value, size, fgColor, bgColor, level, includeMargin, dotStyle, cornerStyle, imageSettings]);
 
   useEffect(() => {
     // Cleanup on unmount
@@ -184,27 +182,9 @@ export default function QRCodeDisplay({
     );
   }
 
-  try {
-    return (
-      <div className={`qr-code-container bg-white p-4 rounded-lg shadow-sm ${className}`}>
-        <div ref={qrRef} className="flex items-center justify-center" />
-      </div>
-    );
-  } catch (error) {
-    console.error('QR Generation Error:', error);
-    return (
-      <div
-        className={`flex items-center justify-center bg-red-50 rounded-lg border-2 border-red-300 ${className}`}
-        style={{ width: size, height: size }}
-      >
-        <div className="text-center px-4">
-          <svg className="w-12 h-12 text-red-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          <p className="text-red-600 text-sm font-medium">Failed to generate QR code</p>
-          <p className="text-red-500 text-xs mt-1">Please check your input</p>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <div className={`qr-code-container bg-white p-4 rounded-lg shadow-sm ${className}`}>
+      <div ref={qrRef} className="flex items-center justify-center" />
+    </div>
+  );
 }

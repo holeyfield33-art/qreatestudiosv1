@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/services/stripe-service';
@@ -274,7 +276,9 @@ async function handleNFCOrderPayment(session: any) {
       }
     }
 
-    console.log(`NFC order ${order.orderNumber} payment processed successfully`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`NFC order ${order.orderNumber} payment processed successfully`);
+    }
   } catch (error) {
     console.error('Error handling NFC order payment:', error);
     throw error;

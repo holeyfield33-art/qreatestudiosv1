@@ -16,10 +16,10 @@ export interface FeatureAccess {
 export function getFeatureAccess(plan: PlanType): FeatureAccess {
   const features: Record<PlanType, FeatureAccess> = {
     FREE: {
-      canAccessAdvancedAnalytics: true,
-      canExportReports: true,
+      canAccessAdvancedAnalytics: false,
+      canExportReports: false,
       canAccessTemplates: true,
-      canAccessPremiumTemplates: true,
+      canAccessPremiumTemplates: false,
       canAccessWhiteLabel: false,
       canUseCustomDomain: false,
       canManageSubAccounts: false,
@@ -37,7 +37,7 @@ export function getFeatureAccess(plan: PlanType): FeatureAccess {
       canManageSubAccounts: false,
       canUseAIOptimization: true,
       maxQRCodes: 50,
-      maxTeamSeats: 1,
+      maxTeamSeats: 3,
     },
     BUSINESS: {
       canAccessAdvancedAnalytics: true,
@@ -45,11 +45,11 @@ export function getFeatureAccess(plan: PlanType): FeatureAccess {
       canAccessTemplates: true,
       canAccessPremiumTemplates: true,
       canAccessWhiteLabel: false,
-      canUseCustomDomain: false,
+      canUseCustomDomain: true,
       canManageSubAccounts: false,
       canUseAIOptimization: true,
       maxQRCodes: -1, // unlimited
-      maxTeamSeats: 5,
+      maxTeamSeats: 10,
     },
     AGENCY: {
       canAccessAdvancedAnalytics: true,

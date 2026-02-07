@@ -399,17 +399,30 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       // First save current data as draft
       await saveToAPI(false);
 
-      // Then publish
-      const res = await fetch(`/api/landing-pages/${pageId}/publish`, {
+      // Use versioned deploy endpoint (with rollback support)
+      const res = await fetch(`/api/landing-pages/${pageId}/deploy`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'deploy' }),
         credentials: 'include',
       });
 
-      if (!res.ok) throw new Error('Failed to publish');
+      if (!res.ok) {
+        // Fallback to simple publish if deploy endpoint fails
+        const fallbackRes = await fetch(`/api/landing-pages/${pageId}/publish`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+        if (!fallbackRes.ok) throw new Error('Failed to publish');
+      }
+
+      const data = await res.json().catch(() => ({}));
 
       toast.success('Page published!', {
-        description: 'Your landing page is now live and visible to visitors.',
-        duration: 3000
+        description: data.deployment?.url 
+          ? `Live at ${data.deployment.url} (v${data.deployment?.version || 1})`
+          : 'Your landing page is now live and visible to visitors.',
+        duration: 4000
       });
 
       setHasUnsavedChanges(false);

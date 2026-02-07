@@ -1,11 +1,6 @@
 import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { applyRateLimit } from '@/lib/middleware/rate-limit'
-import { applySecurityHeaders } from '@/lib/security-headers'
-
-// Force Node.js runtime instead of Edge
-export const runtime = 'nodejs'
 
 const publicPaths = [
   '/',
@@ -22,43 +17,45 @@ const publicApiPaths = [
   '/api/security/report',
 ]
 
+/** Inline security headers — must be Edge-compatible (no Node.js imports) */
+function withSecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  response.headers.set(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https: http:; connect-src 'self' https://api.stripe.com https://*.upstash.io https://*.vercel-storage.com; frame-src 'self' https://js.stripe.com https://www.youtube.com https://player.vimeo.com https://www.google.com; object-src 'none'; base-uri 'self'"
+  );
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+  return response;
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  if (pathname === '/api/auth/signin') {
-    const rateLimitResponse = await applyRateLimit(request, 'authSignIn')
-    if (rateLimitResponse) return rateLimitResponse
-  }
-
-  if (pathname === '/api/qr/verify-password') {
-    const rateLimitResponse = await applyRateLimit(request, 'verifyPassword')
-    if (rateLimitResponse) return rateLimitResponse
-  }
-
-  if (pathname.startsWith('/api/ai/')) {
-    const rateLimitResponse = await applyRateLimit(request, 'ai')
-    if (rateLimitResponse) return rateLimitResponse
-  }
-
   // Allow public paths
-  if (publicPaths.some(path => pathname === path || pathname.startsWith(path))) {
-    return applySecurityHeaders(NextResponse.next())
+  if (publicPaths.some(path => pathname === path || pathname.startsWith(path + '/'))) {
+    return withSecurityHeaders(NextResponse.next())
   }
 
   // Allow public API paths
   if (publicApiPaths.some(path => pathname.startsWith(path))) {
-    return applySecurityHeaders(NextResponse.next())
+    return withSecurityHeaders(NextResponse.next())
   }
 
-  // Allow short code redirects (single path segment)
+  // Allow short code redirects (single path segment, not dashboard or API)
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length === 1 && !pathname.startsWith('/dashboard') && !pathname.startsWith('/api')) {
-    return applySecurityHeaders(NextResponse.next())
+    return withSecurityHeaders(NextResponse.next())
   }
 
-  // Allow menu, payment, and landing page routes
+  // Allow menu, payment, and landing page routes (public)
   if (pathname.startsWith('/menu/') || pathname.startsWith('/pay/') || pathname.startsWith('/l/')) {
-    return applySecurityHeaders(NextResponse.next())
+    return withSecurityHeaders(NextResponse.next())
   }
 
   // Check authentication for protected routes
@@ -67,13 +64,10 @@ export async function middleware(request: NextRequest) {
   if (!session?.user) {
     const signInUrl = new URL('/auth/signin', request.url)
     signInUrl.searchParams.set('callbackUrl', pathname)
-    return applySecurityHeaders(NextResponse.redirect(signInUrl))
+    return withSecurityHeaders(NextResponse.redirect(signInUrl))
   }
 
-  // Note: Ban checking should be done in API routes or page components, not middleware
-  // Middleware should be lightweight and not make database calls
-
-  return applySecurityHeaders(NextResponse.next())
+  return withSecurityHeaders(NextResponse.next())
 }
 
 export const config = {

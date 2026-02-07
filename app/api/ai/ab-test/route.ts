@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { generateABTestSuggestions } from '@/lib/services/ai-optimization-service';

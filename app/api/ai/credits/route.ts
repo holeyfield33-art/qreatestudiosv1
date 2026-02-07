@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { checkAICredits } from '@/lib/ai/qr-optimizer';

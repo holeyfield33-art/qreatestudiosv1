@@ -38,7 +38,7 @@ export class BuilderErrorBoundary extends Component<Props, State> {
                 Something went wrong
               </h1>
               <p className="text-gray-600 mb-4">
-                The page builder encountered an error. This has been logged and we'll look into it.
+                The page builder encountered an error. This has been logged and we&apos;ll look into it.
               </p>
               {this.state.error && (
                 <details className="text-left bg-red-50 p-4 rounded-md mb-4">

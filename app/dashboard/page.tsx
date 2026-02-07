@@ -19,16 +19,10 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    fetchStats();
-  }, []);
-
-  async function fetchStats() {
-    try {
-      const [qrRes, lpRes] = await Promise.all([
-        fetch('/api/qr-codes'),
-        fetch('/api/landing-pages'),
-      ]);
-
+    Promise.all([
+      fetch('/api/qr-codes'),
+      fetch('/api/landing-pages'),
+    ]).then(async ([qrRes, lpRes]) => {
       const qrData = await qrRes.json();
       const lpData = await lpRes.json();
 
@@ -38,12 +32,12 @@ export default function DashboardPage() {
         totalScans: qrData.qrCodes?.reduce((sum: number, qr: any) => sum + (qr.scanCount || 0), 0) || 0,
         printOrders: 0,
       });
-    } catch (error) {
+    }).catch((error) => {
       if (process.env.NODE_ENV === 'development') {
         console.error('Failed to fetch stats:', error);
       }
-    }
-  }
+    });
+  }, []);
 
   const statsCards = [
     { title: 'QR Codes', value: stats.qrCodes, subtitle: 'Active codes', icon: QrCode, gradient: 'from-blue-500 to-purple-500' },
@@ -65,7 +59,7 @@ export default function DashboardPage() {
           Welcome back, {session?.user?.name || 'User'}!
         </h1>
         <p className="text-sm text-slate-400">
-          Here's what's happening with your QR codes and landing pages
+          Here&apos;s what&apos;s happening with your QR codes and landing pages
         </p>
       </motion.div>
 

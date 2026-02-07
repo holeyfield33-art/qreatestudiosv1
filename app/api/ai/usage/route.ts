@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getUserTokenUsage, checkTokenLimit } from '@/lib/services/ai-usage-service';

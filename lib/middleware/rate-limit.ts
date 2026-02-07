@@ -41,7 +41,8 @@ const rateLimiters: Record<RateLimitName, Ratelimit | null> = {
 function getClientIp(request: NextRequest): string {
   const forwardedFor = request.headers.get('x-forwarded-for');
   const ip = forwardedFor?.split(',')[0]?.trim();
-  return ip || request.ip || 'unknown';
+  const realIp = request.headers.get('x-real-ip');
+  return ip || realIp || 'unknown';
 }
 
 export async function applyRateLimit(

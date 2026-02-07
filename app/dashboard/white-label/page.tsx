@@ -618,7 +618,7 @@ export default function WhiteLabelPage() {
                   <div className="p-4 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900 rounded-lg">
                     <p className="text-sm text-yellow-800 dark:text-yellow-200">
                       <strong>Note:</strong> DNS changes can take up to 48 hours to propagate.
-                      After configuring DNS, verify your domain in Vercel's dashboard.
+                      After configuring DNS, verify your domain in Vercel&apos;s dashboard.
                     </p>
                   </div>
                 </div>

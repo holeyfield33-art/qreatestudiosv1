@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
+import { canAccessLandingPage } from '@/lib/utils/plan-enforcement';
 
 export const runtime = 'nodejs';
 
@@ -17,12 +18,18 @@ export async function POST(req: Request, context: RouteContext) {
   }
 
   try {
+    // Check access (owner or org member)
+    const hasAccess = await canAccessLandingPage(session.user.id, id);
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
     const landingPage = await prisma.landingPage.findUnique({
       where: { id },
-      select: { userId: true, draftContent: true },
+      select: { draftContent: true },
     });
 
-    if (!landingPage || landingPage.userId !== session.user.id) {
+    if (!landingPage) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
+import { canAccessLandingPage } from '@/lib/utils/plan-enforcement';
 
 export const runtime = 'nodejs';
 
@@ -49,7 +50,13 @@ export async function GET(req: Request, context: RouteContext) {
       },
     });
 
-    if (!landingPage || landingPage.userId !== session.user.id) {
+    if (!landingPage) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
+    // Check org-based or owner access
+    const hasAccess = await canAccessLandingPage(session.user.id, id);
+    if (!hasAccess) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
@@ -93,7 +100,12 @@ export async function PATCH(req: Request, context: RouteContext) {
   try {
     const landingPage = await prisma.landingPage.findUnique({ where: { id } });
 
-    if (!landingPage || landingPage.userId !== session.user.id) {
+    if (!landingPage) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
+    const hasAccess = await canAccessLandingPage(session.user.id, id);
+    if (!hasAccess) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
@@ -183,9 +195,8 @@ export async function DELETE(req: Request, context: RouteContext) {
   }
 
   try {
-    const landingPage = await prisma.landingPage.findUnique({ where: { id } });
-
-    if (!landingPage || landingPage.userId !== session.user.id) {
+    const hasAccess = await canAccessLandingPage(session.user.id, id);
+    if (!hasAccess) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 

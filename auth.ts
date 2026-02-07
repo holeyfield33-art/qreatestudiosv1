@@ -3,7 +3,6 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import Credentials from 'next-auth/providers/credentials'
 import GitHub from 'next-auth/providers/github'
 import { prisma } from '@/lib/prisma'
-import { compare } from 'bcryptjs'
 import { z } from 'zod'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -42,6 +41,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!user || !user.password) return null
 
+        const { compare } = await import('bcryptjs')
         const passwordMatch = await compare(password, user.password)
 
         if (!passwordMatch) return null

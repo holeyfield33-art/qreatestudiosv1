@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
@@ -26,13 +28,13 @@ export async function PATCH(
     const menuItem = await prisma.landingPageMenuItem.findUnique({
       where: { id: itemId },
       include: {
-        LandingPage: {
+        landingPage: {
           select: { userId: true },
         },
       },
     });
 
-    if (!menuItem || menuItem.LandingPage.userId !== session.user.id) {
+    if (!menuItem || menuItem.landingPage.userId !== session.user.id) {
       return NextResponse.json({ error: 'Menu item not found' }, { status: 404 });
     }
 
@@ -79,13 +81,13 @@ export async function DELETE(
     const menuItem = await prisma.landingPageMenuItem.findUnique({
       where: { id: itemId },
       include: {
-        LandingPage: {
+        landingPage: {
           select: { userId: true },
         },
       },
     });
 
-    if (!menuItem || menuItem.LandingPage.userId !== session.user.id) {
+    if (!menuItem || menuItem.landingPage.userId !== session.user.id) {
       return NextResponse.json({ error: 'Menu item not found' }, { status: 404 });
     }
 
