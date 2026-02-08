@@ -2,6 +2,7 @@ export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth-helpers';
+import { handleApiError } from '@/lib/api-helpers';
 import { prisma } from '@/lib/prisma';
 import { Resend } from 'resend';
 import { requireCapability } from '@/lib/env.server';
@@ -110,11 +111,7 @@ export async function POST(
     }
 
     return NextResponse.json({ order });
-  } catch (error) {
-    console.error('Error marking order as shipped:', error);
-    return NextResponse.json(
-      { error: 'Failed to mark order as shipped' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleApiError(error, 'admin/orders/ship');
   }
 }

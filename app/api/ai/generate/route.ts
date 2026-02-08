@@ -1,17 +1,23 @@
 export const runtime = 'nodejs';
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import { handleApiError } from '@/lib/api-helpers';
+import { applyRateLimit } from '@/lib/middleware/rate-limit';
 import { prisma } from '@/lib/prisma';
 import { generateText, generateJSON } from '@/lib/services/ai-adapter';
 import { trackAIUsage, checkTokenLimit } from '@/lib/services/ai-usage-service';
 import { sanitizeAIContext, containsExecutableCode } from '@/lib/utils/ai-sanitization';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  // Rate limit AI requests
+  const rateLimited = await applyRateLimit(req, 'ai');
+  if (rateLimited) return rateLimited;
 
   if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json(
@@ -250,13 +256,7 @@ Write in markdown format with clear sections.`;
         remaining: tokenCheck.remaining - tokensUsed.total,
       },
     });
-  } catch (error: any) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('AI generation error:', error);
-    }
-    return NextResponse.json(
-      { error: error.message || 'Failed to generate content' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleApiError(error, 'ai/generate');
   }
 }

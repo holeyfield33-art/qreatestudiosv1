@@ -1,7 +1,9 @@
 export const runtime = 'nodejs';
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import { handleApiError } from '@/lib/api-helpers';
+import { applyRateLimit } from '@/lib/middleware/rate-limit';
 import { prisma } from '@/lib/prisma';
 import {
   analyzeQRPerformance,
@@ -10,7 +12,7 @@ import {
   trackOptimizationUsage,
 } from '@/lib/ai/qr-optimizer';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const session = await auth();
 
@@ -20,6 +22,10 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
+
+    // Rate limit AI requests
+    const rateLimited = await applyRateLimit(req, 'ai');
+    if (rateLimited) return rateLimited;
 
     const { qrCodeId, userGoal } = await req.json();
 
@@ -104,30 +110,8 @@ export async function POST(req: Request) {
         plan: updatedCredits.plan,
       },
     });
-  } catch (error) {
-    console.error('AI optimization error:', error);
-    
-    // Check if it's an OpenAI API error
-    if (error instanceof Error) {
-      if (error.message.includes('API key')) {
-        return NextResponse.json(
-          { error: 'AI service configuration error. Please contact support.' },
-          { status: 500 }
-        );
-      }
-      
-      if (error.message.includes('rate limit')) {
-        return NextResponse.json(
-          { error: 'AI service is temporarily busy. Please try again in a moment.' },
-          { status: 429 }
-        );
-      }
-    }
-
-    return NextResponse.json(
-      { error: 'Failed to generate optimization suggestions. Please try again.' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleApiError(error, 'ai/optimize-qr');
   }
 }
 

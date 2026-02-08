@@ -18,8 +18,14 @@ vi.mock('@/lib/auth-helpers', () => ({
   requireAuth: vi.fn(),
 }));
 
+// Mock plan enforcement
+vi.mock('@/lib/utils/plan-enforcement', () => ({
+  canAccessLandingPage: vi.fn(),
+}));
+
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-helpers';
+import { canAccessLandingPage } from '@/lib/utils/plan-enforcement';
 
 describe('Landing Pages API', () => {
   beforeEach(() => {
@@ -68,6 +74,7 @@ describe('Landing Pages API', () => {
         userId: 'user-2', // Different user
         name: 'Test Page',
       });
+      (canAccessLandingPage as any).mockResolvedValue(false);
 
       const { GET } = await import('@/app/api/landing-pages/[id]/route');
       const response = await GET(
@@ -90,6 +97,7 @@ describe('Landing Pages API', () => {
         slug: 'test-page',
         isPublished: false,
       });
+      (canAccessLandingPage as any).mockResolvedValue(true);
 
       const { GET } = await import('@/app/api/landing-pages/[id]/route');
       const response = await GET(

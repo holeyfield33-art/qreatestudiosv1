@@ -1,15 +1,21 @@
 export const runtime = 'nodejs';
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import { handleApiError } from '@/lib/api-helpers';
+import { applyRateLimit } from '@/lib/middleware/rate-limit';
 import { translateContent, detectLanguage } from '@/lib/services/ai-optimization-service';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Rate limit AI requests
+    const rateLimited = await applyRateLimit(req, 'ai');
+    if (rateLimited) return rateLimited;
 
     const { content, targetLanguage, autoDetect } = await req.json();
 
@@ -39,13 +45,7 @@ export async function POST(req: Request) {
       sourceLanguage: detectedLanguage,
       targetLanguage: target,
     });
-  } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Translation error:', error);
-    }
-    return NextResponse.json(
-      { error: 'Failed to translate content' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleApiError(error, 'ai/translate');
   }
 }

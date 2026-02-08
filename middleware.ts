@@ -20,8 +20,26 @@ const publicApiPaths = [
   '/api/ready',
 ]
 
+/** Edge-compatible UUID v4 generator (crypto.randomUUID is available in Edge Runtime) */
+function generateRequestId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    // Fallback for environments without crypto.randomUUID
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+}
+
 /** Inline security headers — must be Edge-compatible (no Node.js imports) */
-function withSecurityHeaders(response: NextResponse): NextResponse {
+function withSecurityHeaders(response: NextResponse, requestId?: string): NextResponse {
+  // Request tracing
+  const id = requestId || generateRequestId();
+  response.headers.set('X-Request-Id', id);
+
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-Frame-Options', 'SAMEORIGIN');
   response.headers.set('X-XSS-Protection', '1; mode=block');
@@ -39,26 +57,27 @@ function withSecurityHeaders(response: NextResponse): NextResponse {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const requestId = request.headers.get('x-request-id') || generateRequestId()
 
   // Allow public paths
   if (publicPaths.some(path => pathname === path || pathname.startsWith(path + '/'))) {
-    return withSecurityHeaders(NextResponse.next())
+    return withSecurityHeaders(NextResponse.next(), requestId)
   }
 
   // Allow public API paths
   if (publicApiPaths.some(path => pathname.startsWith(path))) {
-    return withSecurityHeaders(NextResponse.next())
+    return withSecurityHeaders(NextResponse.next(), requestId)
   }
 
   // Allow short code redirects (single path segment, not dashboard or API)
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length === 1 && !pathname.startsWith('/dashboard') && !pathname.startsWith('/api')) {
-    return withSecurityHeaders(NextResponse.next())
+    return withSecurityHeaders(NextResponse.next(), requestId)
   }
 
   // Allow menu, payment, and landing page routes (public)
   if (pathname.startsWith('/menu/') || pathname.startsWith('/pay/') || pathname.startsWith('/l/')) {
-    return withSecurityHeaders(NextResponse.next())
+    return withSecurityHeaders(NextResponse.next(), requestId)
   }
 
   // Check authentication for protected routes
@@ -67,10 +86,10 @@ export async function middleware(request: NextRequest) {
   if (!session?.user) {
     const signInUrl = new URL('/auth/signin', request.url)
     signInUrl.searchParams.set('callbackUrl', pathname)
-    return withSecurityHeaders(NextResponse.redirect(signInUrl))
+    return withSecurityHeaders(NextResponse.redirect(signInUrl), requestId)
   }
 
-  return withSecurityHeaders(NextResponse.next())
+  return withSecurityHeaders(NextResponse.next(), requestId)
 }
 
 export const config = {

@@ -2,6 +2,8 @@ export const runtime = 'nodejs';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import { handleApiError } from '@/lib/api-helpers';
+import { applyRateLimit } from '@/lib/middleware/rate-limit';
 import { callAI, AI_FEATURES, getRemainingCredits, type AIFeature } from '@/lib/ai/ai-service';
 import { executeAIAction } from '@/lib/ai/ai-action-handler';
 
@@ -12,6 +14,10 @@ export async function POST(req: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Rate limit AI requests
+    const rateLimited = await applyRateLimit(req, 'ai');
+    if (rateLimited) return rateLimited;
 
     const body = await req.json();
     const { feature, prompt, context, model } = body;
@@ -60,35 +66,14 @@ export async function POST(req: NextRequest) {
       creditsLimit: credits.limit,
       resetDate: credits.resetDate,
     });
-  } catch (error: any) {
-    console.error('AI Assistant Error:', error);
-
-    // Handle specific errors
-    if (error.message && error.message.includes('limit')) {
+  } catch (error: unknown) {
+    // Handle credit limit errors specifically
+    if (error instanceof Error && error.message.includes('limit')) {
       return NextResponse.json(
-        {
-          error: error.message,
-          message: error.message,
-          upgradeRequired: true,
-        },
+        { error: { code: 'LIMIT_REACHED', message: error.message }, upgradeRequired: true },
         { status: 403 }
       );
     }
-
-    if (error.message && error.message.includes('not available')) {
-      return NextResponse.json(
-        {
-          error: error.message,
-          message: error.message,
-          upgradeRequired: true,
-        },
-        { status: 403 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: 'AI request failed. Please try again.' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'ai/assistant');
   }
 }

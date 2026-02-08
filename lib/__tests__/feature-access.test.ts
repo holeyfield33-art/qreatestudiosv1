@@ -21,7 +21,7 @@ describe('Feature Access', () => {
     it('BUSINESS plan has unlimited QR codes', () => {
       const access = getFeatureAccess('BUSINESS');
       expect(access.maxQRCodes).toBe(-1);
-      expect(access.maxTeamSeats).toBe(5);
+      expect(access.maxTeamSeats).toBe(10);
       expect(access.canAccessPremiumTemplates).toBe(true);
     });
 

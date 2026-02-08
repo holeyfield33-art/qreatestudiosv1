@@ -2,6 +2,7 @@ export const runtime = 'nodejs';
 
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import { handleApiError } from '@/lib/api-helpers';
 import { createCheckoutSession } from '@/lib/services/stripe-service';
 import { getBaseUrl } from '@/lib/utils/urls';
 
@@ -39,13 +40,7 @@ export async function POST(req: Request) {
     );
 
     return NextResponse.json({ success: true, url: checkoutSession.url });
-  } catch (error: any) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Checkout error:', error);
-    }
-    return NextResponse.json(
-      { success: false, error: error.message || 'Failed to create checkout session' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleApiError(error, 'billing/checkout');
   }
 }
