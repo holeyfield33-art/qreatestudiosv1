@@ -50,6 +50,8 @@ async function walk(dir, cb) {
 
 async function scanFile(filePath) {
   const rel = relative(ROOT, filePath);
+  // Skip audit/verification scripts themselves (they contain search patterns)
+  if (rel.startsWith('scripts/')) return;
   const content = await readFile(filePath, 'utf-8');
   const lines = content.split('\n');
 

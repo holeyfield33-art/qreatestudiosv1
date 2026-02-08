@@ -70,3 +70,52 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
       - run: npx tsc --noEmit
+
+  no-placeholders:
+    name: No Placeholder Credentials
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for placeholder API keys
+        run: |
+          echo "Scanning for placeholder credentials..."
+          FOUND=0
+          for pattern in "sk-placeholder" "re_placeholder" "sk_test_placeholder"; do
+            MATCHES=$(grep -rn "$pattern" --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' . || true)
+            if [ -n "$MATCHES" ]; then
+              echo "❌ Found '$pattern':"
+              echo "$MATCHES"
+              FOUND=1
+            fi
+          done
+          if [ "$FOUND" -eq 1 ]; then
+            echo ""
+            echo "❌ Placeholder credentials detected! Replace with env validation."
+            exit 1
+          fi
+          echo "✅ No placeholder credentials found."
+
+  audit:
+    name: Launch Audit
+    runs-on: ubuntu-latest
+    needs: [lint, test, typecheck, no-placeholders, build]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npx prisma generate
+      - name: Run repo audit
+        run: node scripts/repo-audit.mjs
+      - name: Check for critical findings
+        run: |
+          CRITICAL=$(grep -c '| CRITICAL |' LAUNCH_READINESS.md || true)
+          if [ "$CRITICAL" -gt 0 ]; then
+            echo "⚠️ $CRITICAL critical findings remain (informational, not blocking)"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: launch-readiness-report
+          path: LAUNCH_READINESS.md
