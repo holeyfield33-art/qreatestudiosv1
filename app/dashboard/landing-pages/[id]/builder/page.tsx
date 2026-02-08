@@ -4,18 +4,32 @@ import dynamic from 'next/dynamic';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowLeft, Eye, Save, Sparkles, Clock } from 'lucide-react';
+import { Loader2, ArrowLeft, Eye, Save, Sparkles, Clock, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import './builder.css';
 
-const GrapesJSEditor = dynamic(() => import('@/components/builder/GrapesJSEditor'), {
-  ssr: false,
-  loading: () => (
-    <div className="h-full flex items-center justify-center text-muted-foreground">
-      Loading editor...
-    </div>
-  ),
-});
+// Retry helper for dynamic imports — handles Codespaces proxy timeouts / chunk load failures
+function retryImport<T>(importFn: () => Promise<T>, retries = 3, delay = 1500): Promise<T> {
+  return importFn().catch((err) => {
+    if (retries <= 0) throw err;
+    return new Promise<T>((resolve) =>
+      setTimeout(() => resolve(retryImport(importFn, retries - 1, delay * 1.5)), delay),
+    );
+  });
+}
+
+const GrapesJSEditor = dynamic(
+  () => retryImport(() => import('@/components/builder/GrapesJSEditor')),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-full flex items-center justify-center text-muted-foreground">
+        <Loader2 className="w-6 h-6 animate-spin mr-2" />
+        Loading editor — this may take a moment on first load...
+      </div>
+    ),
+  },
+);
 
 interface BuilderPageProps {
   params: Promise<{ id: string }>;
@@ -210,6 +224,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
   const [pageId, setPageId] = useState<string>('');
   const [editorData, setEditorData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -240,12 +255,19 @@ export default function BuilderPage({ params }: BuilderPageProps) {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
-  const loadPageData = async (id: string) => {
+  const loadPageData = async (id: string, attempt = 1) => {
+    const MAX_RETRIES = 3;
     try {
+      setLoadError(null);
       const res = await fetch(`/api/landing-pages/${id}`, {
         credentials: 'include',
       });
       if (!res.ok) {
+        // Retry on 502/503/504 (proxy timeout / cold start)
+        if ((res.status === 502 || res.status === 503 || res.status === 504) && attempt < MAX_RETRIES) {
+          await new Promise((r) => setTimeout(r, 1500 * attempt));
+          return loadPageData(id, attempt + 1);
+        }
         const errorText = await res.text().catch(() => '');
         throw new Error(`Failed to load page (${res.status}): ${errorText}`);
       }
@@ -299,8 +321,10 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       setLastSaved(page.updatedAt ? new Date(page.updatedAt) : null);
     } catch (error) {
       console.error('Error loading page:', error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      setLoadError(message);
       toast.error('Failed to load page', {
-        description: 'Please refresh the page or contact support if the issue persists.'
+        description: 'Click "Retry" or refresh the page.'
       });
       // Set a default editor data so the editor still loads even on error
       const fallbackData = {
@@ -583,6 +607,24 @@ export default function BuilderPage({ params }: BuilderPageProps) {
 
       {/* GrapesJS Editor */}
       <div className="flex-1 overflow-hidden relative">
+        {loadError && (
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-lg text-sm flex items-center gap-2 shadow-sm">
+            <span>Page data failed to load.</span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 text-xs"
+              onClick={() => {
+                setLoading(true);
+                setLoadError(null);
+                loadPageData(pageId);
+              }}
+            >
+              <RefreshCw className="w-3 h-3 mr-1" />
+              Retry
+            </Button>
+          </div>
+        )}
         {editorData ? (
           <GrapesJSEditor
             initialData={editorData}

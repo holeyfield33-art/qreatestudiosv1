@@ -23,12 +23,12 @@ export default function DashboardPage() {
       fetch('/api/qr-codes'),
       fetch('/api/landing-pages'),
     ]).then(async ([qrRes, lpRes]) => {
-      const qrData = await qrRes.json();
-      const lpData = await lpRes.json();
+      const qrData = qrRes.ok ? await qrRes.json() : {};
+      const lpData = lpRes.ok ? await lpRes.json() : {};
 
       setStats({
         qrCodes: qrData.qrCodes?.length || 0,
-        landingPages: lpData.pages?.length || 0,
+        landingPages: lpData.landingPages?.length || 0,
         totalScans: qrData.qrCodes?.reduce((sum: number, qr: any) => sum + (qr.scanCount || 0), 0) || 0,
         printOrders: 0,
       });

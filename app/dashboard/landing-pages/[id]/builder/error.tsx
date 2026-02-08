@@ -15,6 +15,8 @@ export default function Error({
     console.error('Builder page error:', error);
   }, [error]);
 
+  const isChunkError = error.name === 'ChunkLoadError' || error.message?.includes('Loading chunk');
+
   return (
     <div className="h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="max-w-lg text-center p-8 bg-white rounded-xl shadow-lg border border-slate-200">
@@ -23,10 +25,12 @@ export default function Error({
             <AlertCircle className="w-8 h-8 text-red-600" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Unable to load the editor
+            {isChunkError ? 'Editor is loading — please retry' : 'Unable to load the editor'}
           </h1>
           <p className="text-gray-600 mb-4">
-            We encountered an issue loading your landing page builder. This might be a temporary problem.
+            {isChunkError
+              ? 'The visual editor bundle is being compiled for the first time. This is normal — click "Try Again" and it should load within a few seconds.'
+              : 'We encountered an issue loading your landing page builder. This might be a temporary problem.'}
           </p>
           {error.digest && (
             <p className="text-xs text-gray-500 font-mono mb-4">
