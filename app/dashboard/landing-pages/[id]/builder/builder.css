@@ -332,8 +332,17 @@
 
 /* GrapesJS Editor Enhancements */
 #gjs-editor {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 1;
+}
+
+#gjs-editor .gjs-editor {
+  height: 100% !important;
+  width: 100% !important;
 }
 
 /* GrapesJS Canvas Styling */
@@ -559,10 +568,12 @@ section[style*="background"] {
 /* Ensure the GrapesJS editor fills its parent container */
 .builder-container .flex-1 {
   min-height: 0;
+  position: relative;
 }
 
 #gjs-editor .gjs-editor {
   height: 100% !important;
+  width: 100% !important;
   overflow: hidden !important;
 }
 
@@ -570,11 +581,13 @@ section[style*="background"] {
   top: 0 !important;
   width: 100% !important;
   height: 100% !important;
+  position: absolute !important;
 }
 
 #gjs-editor .gjs-cv-canvas .gjs-cv-canvas__frames {
   height: 100% !important;
   width: 100% !important;
+  position: relative !important;
 }
 
 /* ========================================

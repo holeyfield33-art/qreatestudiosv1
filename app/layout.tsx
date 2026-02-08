@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { CapabilitiesProvider } from "@/hooks/use-capabilities";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./globals.css";
 
@@ -38,7 +39,9 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ErrorBoundary>
           <AuthProvider>
-            {children}
+            <CapabilitiesProvider>
+              {children}
+            </CapabilitiesProvider>
           </AuthProvider>
           <Toaster />
         </ErrorBoundary>

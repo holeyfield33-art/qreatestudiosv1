@@ -15,6 +15,9 @@ const publicPaths = [
 const publicApiPaths = [
   '/api/auth',
   '/api/security/report',
+  '/api/capabilities',
+  '/api/health',
+  '/api/ready',
 ]
 
 /** Inline security headers — must be Edge-compatible (no Node.js imports) */

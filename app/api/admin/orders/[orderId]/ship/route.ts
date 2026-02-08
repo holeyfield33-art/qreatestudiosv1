@@ -4,13 +4,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 import { Resend } from 'resend';
+import { requireCapability } from '@/lib/env.server';
 
-// Lazy initialization to avoid build-time errors
+// Lazy initialization — throws ProviderNotConfiguredError if RESEND_API_KEY is missing
 let resend: Resend | null = null;
 
 function getResend(): Resend {
+  requireCapability('email');
   if (!resend) {
-    resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder');
+    resend = new Resend(process.env.RESEND_API_KEY!);
   }
   return resend;
 }

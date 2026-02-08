@@ -245,42 +245,43 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       const res = await fetch(`/api/landing-pages/${id}`, {
         credentials: 'include',
       });
-      if (!res.ok) throw new Error('Failed to load page');
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => '');
+        throw new Error(`Failed to load page (${res.status}): ${errorText}`);
+      }
       
       const response = await res.json();
       const page = response.landingPage || response;
 
-      setPageName(page.title || page.name);
-      setPageSlug(page.slug);
+      setPageName(page.title || page.name || 'Untitled');
+      setPageSlug(page.slug || '');
       
-      // Load content - prioritize draft, then published
-      let content = page.draftContent || page.publishedContent;
+      // Load content - prioritize draft, then published, then template
+      const content = page.draftContent || page.publishedContent || page.content;
       
-      // Convert template data to GrapesJS format if needed
+      let html = '';
+      let css = '';
+      let json: any = null;
+      
       if (content && content.content && Array.isArray(content.content)) {
-        // This is Puck format, convert to GrapesJS HTML
-        const html = convertPuckToHtml(content);
-        const nextData = { html, css: '', json: null };
-        setEditorData(nextData);
-        editorDataRef.current = nextData;
+        // Puck format - convert to GrapesJS HTML
+        html = convertPuckToHtml(content);
       } else if (content && typeof content === 'object' && (content.html || content.json)) {
         // Already in GrapesJS format
-        const nextData = {
-          html: content.html || '',
-          css: content.css || '',
-          json: content.json ?? null,
-        };
-        setEditorData(nextData);
-        editorDataRef.current = nextData;
+        html = content.html || '';
+        css = content.css || '';
+        json = content.json ?? null;
       } else if (page.Template && page.Template.defaultSections) {
-        // Load from template
-        const html = convertPuckToHtml(page.Template.defaultSections);
-        const nextData = { html, css: '', json: null };
-        setEditorData(nextData);
-        editorDataRef.current = nextData;
-      } else {
-        // Empty page - load default hero
-        const defaultHtml = `
+        // Load from template defaults
+        const templateData = page.Template.defaultSections;
+        if (templateData && templateData.content && Array.isArray(templateData.content)) {
+          html = convertPuckToHtml(templateData);
+        }
+      }
+      
+      // Fallback to default hero if no content found
+      if (!html && !json) {
+        html = `
           <section style="min-height: 70vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920') center/cover; color: white; text-align: center; padding: 40px 20px;">
             <div style="max-width: 800px;">
               <h1 style="font-size: 56px; margin-bottom: 24px; font-weight: bold;">Welcome to Your Landing Page</h1>
@@ -289,10 +290,11 @@ export default function BuilderPage({ params }: BuilderPageProps) {
             </div>
           </section>
         `;
-        const nextData = { html: defaultHtml, css: '', json: null };
-        setEditorData(nextData);
-        editorDataRef.current = nextData;
       }
+      
+      const nextData = { html, css, json };
+      setEditorData(nextData);
+      editorDataRef.current = nextData;
       
       setLastSaved(page.updatedAt ? new Date(page.updatedAt) : null);
     } catch (error) {
@@ -300,6 +302,14 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       toast.error('Failed to load page', {
         description: 'Please refresh the page or contact support if the issue persists.'
       });
+      // Set a default editor data so the editor still loads even on error
+      const fallbackData = {
+        html: '<section style="padding:80px 20px;text-align:center;"><h1 style="font-size:48px;font-weight:bold;margin-bottom:20px;">Page Editor</h1><p style="font-size:18px;color:#6b7280;">Start adding content by dragging blocks from the left panel.</p></section>',
+        css: '',
+        json: null,
+      };
+      setEditorData(fallbackData);
+      editorDataRef.current = fallbackData;
     } finally {
       setLoading(false);
     }
@@ -400,29 +410,21 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       // First save current data as draft
       await saveToAPI(false);
 
-      // Use versioned deploy endpoint (with rollback support)
-      const res = await fetch(`/api/landing-pages/${pageId}/deploy`, {
+      // Publish the page
+      const res = await fetch(`/api/landing-pages/${pageId}/publish`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'deploy' }),
         credentials: 'include',
       });
 
       if (!res.ok) {
-        // Fallback to simple publish if deploy endpoint fails
-        const fallbackRes = await fetch(`/api/landing-pages/${pageId}/publish`, {
-          method: 'POST',
-          credentials: 'include',
-        });
-        if (!fallbackRes.ok) throw new Error('Failed to publish');
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to publish');
       }
 
       const data = await res.json().catch(() => ({}));
 
       toast.success('Page published!', {
-        description: data.deployment?.url 
-          ? `Live at ${data.deployment.url} (v${data.deployment?.version || 1})`
-          : 'Your landing page is now live and visible to visitors.',
+        description: `Your landing page is now live at /l/${pageSlug}`,
         duration: 4000
       });
 
@@ -435,7 +437,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
     } catch (error) {
       console.error('Error publishing:', error);
       toast.error('Failed to publish', {
-        description: 'Please try again or contact support if the issue persists.',
+        description: error instanceof Error ? error.message : 'Please try again or contact support.',
       });
     } finally {
       setSaving(false);
@@ -486,7 +488,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 builder-container">
+    <div className="h-full flex flex-col bg-slate-50 builder-container" style={{ minHeight: 0 }}>
       {/* Premium Custom Header */}
       <div className="border-b bg-white/80 backdrop-blur-sm px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
@@ -580,7 +582,7 @@ export default function BuilderPage({ params }: BuilderPageProps) {
       </div>
 
       {/* GrapesJS Editor */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         {editorData ? (
           <GrapesJSEditor
             initialData={editorData}

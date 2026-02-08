@@ -1,14 +1,16 @@
 import { prisma } from '@/lib/prisma';
 import { getQRAnalytics } from '@/lib/services/analytics-service';
 import OpenAI from 'openai';
+import { requireCapability } from '@/lib/env.server';
 
-// Lazy initialization to avoid build-time errors
+// Lazy initialization — throws ProviderNotConfiguredError if OPENAI_API_KEY is missing
 let openai: OpenAI | null = null;
 
 function getOpenAI(): OpenAI {
+  requireCapability('ai');
   if (!openai) {
     openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY || 'sk-placeholder',
+      apiKey: process.env.OPENAI_API_KEY!,
     });
   }
   return openai;

@@ -58,12 +58,20 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
 
       import('grapesjs').then((grapesjs) => {
         if (destroyed || editorRef.current) return;
+
+        // Ensure container exists in DOM before init
+        const container = document.getElementById('gjs-editor');
+        if (!container) {
+          console.error('GrapesJS: #gjs-editor container not found in DOM');
+          return;
+        }
+
         isInitializedRef.current = true;
 
         const editor = grapesjs.default.init({
           container: '#gjs-editor',
           height: '100%',
-          width: 'auto',
+          width: '100%',
           storageManager: false,
           noticeOnUnload: false,
           canvas: { scripts: [], styles: [] },
@@ -203,6 +211,8 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
         editor.on('style:change', dbc);
 
         if (onLoad) onLoad();
+      }).catch((err) => {
+        console.error('GrapesJS: Failed to load module', err);
       });
 
       return () => {
@@ -213,14 +223,14 @@ const GrapesJSEditor = forwardRef<GrapesJSEditorRef, GrapesJSEditorProps>(
     }, [emitChange, onLoad]);
 
     return (
-      <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
-        <div className="panel__basic-actions" style={{ padding: '10px', borderBottom: '1px solid #ddd', background: '#fff', display: 'flex', gap: '8px', alignItems: 'center', minHeight: '48px' }} />
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          <div id="blocks" style={{ width: '250px', borderRight: '1px solid #ddd', overflowY: 'auto', background: '#f8f9fa', padding: '10px' }} />
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px', background: 'linear-gradient(to bottom, hsl(210 40% 98%), hsl(214.3 31.8% 96%))' }}>
-            <div id="gjs-editor" style={{ width: '100%', maxWidth: '1400px', height: '100%', overflow: 'auto' }} />
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column' }}>
+        <div className="panel__basic-actions" style={{ padding: '10px', borderBottom: '1px solid #ddd', background: '#fff', display: 'flex', gap: '8px', alignItems: 'center', minHeight: '48px', flexShrink: 0 }} />
+        <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+          <div id="blocks" style={{ width: '250px', borderRight: '1px solid #ddd', overflowY: 'auto', background: '#f8f9fa', padding: '10px', flexShrink: 0 }} />
+          <div style={{ flex: 1, minHeight: 0, minWidth: 0, position: 'relative', background: 'linear-gradient(to bottom, hsl(210 40% 98%), hsl(214.3 31.8% 96%))' }}>
+            <div id="gjs-editor" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
           </div>
-          <div style={{ width: '300px', borderLeft: '1px solid #ddd', background: '#fff', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ width: '300px', borderLeft: '1px solid #ddd', background: '#fff', overflowY: 'auto', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
             <div style={{ borderBottom: '1px solid #ddd', padding: '10px', background: '#f8f9fa' }}><h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>Layers</h3></div>
             <div id="layers-container" style={{ flex: '0 0 150px', overflowY: 'auto', padding: '10px' }} />
             <div style={{ borderTop: '1px solid #ddd', borderBottom: '1px solid #ddd', padding: '10px', background: '#f8f9fa' }}><h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>Settings</h3></div>

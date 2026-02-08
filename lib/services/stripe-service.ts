@@ -1,12 +1,14 @@
 import Stripe from 'stripe';
+import { requireCapability } from '@/lib/env.server';
 
-// Lazy initialization to avoid build-time errors
+// Lazy initialization — throws ProviderNotConfiguredError if STRIPE_SECRET_KEY is missing
 export const stripe = (() => {
   let instance: Stripe | null = null;
   return new Proxy({} as Stripe, {
     get(_, prop) {
+      requireCapability('billing');
       if (!instance) {
-        instance = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
+        instance = new Stripe(process.env.STRIPE_SECRET_KEY!, {
           apiVersion: '2025-12-15.clover',
         });
       }
